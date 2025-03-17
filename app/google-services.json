@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "128887566458",
+    "project_id": "capstone-27c33",
+    "storage_bucket": "capstone-27c33.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:128887566458:android:bb108a547d2a8bd6240bc3",
+        "android_client_info": {
+          "package_name": "com.labactivity.lala"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAc05s0STDW8CCdypHYRU5fATj5eQWUmls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

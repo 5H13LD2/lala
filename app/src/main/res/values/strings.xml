@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">capstone1</string>
+    <string name="heading">Please proceed and get the new experience of TechLaunch</string>
+    <string name="username">Email Address</string>
+    <string name="text4">Enter your TechLauncher email to login</string>
+    <string name="text6">Dont have an account?</string>
+    <string name="password">Password</string>
+    <string name="Conpass">Confirm Password</string>
+    <string name="email">Email Address</string>
+    <string name="text8">Have an Account?</string>
+    <string name="text12">Recent Learning</string>
+    <string name="text13">My Library</string>
+    <string name="text14">Part of course learning</string>
+    <string name="leaderboard_button">Open Leaderboard</string>
+</resources>

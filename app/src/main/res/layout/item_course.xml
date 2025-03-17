@@ -1,0 +1,137 @@
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="242dp"
+        android:padding="16dp">
+
+        <!-- Course Image -->
+        <ImageView
+            android:id="@+id/courseImage"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/logo2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Course Title -->
+        <TextView
+            android:id="@+id/courseTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Course Name"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/courseImage"
+            app:layout_constraintTop_toTopOf="@+id/courseImage" />
+
+        <!-- Continue Learning Button -->
+        <Button
+            android:id="@+id/btnContinueLearning"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/rectangle_background"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:text="Continue Learning"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/courseImage" />
+
+        <!-- Flashcard & Practice Buttons -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/btnContinueLearning"
+            tools:layout_editor_absoluteX="16dp">
+
+            <!-- Practice Button -->
+            <Button
+                android:id="@+id/btnPractice"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/rectangle_background2"
+                android:padding="10dp"
+                android:text="Practice"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnFlashcard"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Flashcard Button -->
+
+            <!-- Practice Icon (Inside Practice Button) -->
+
+            <!-- Flashcard Icon (Inside Flashcard Button) -->
+
+            <Button
+                android:id="@+id/btnFlashcard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:background="@drawable/rectangle_background2"
+                android:padding="10dp"
+                android:text="Flashcard"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btnPractice"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <ImageView
+                android:id="@+id/practicelogo"
+                android:layout_width="29dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="16dp"
+                android:background="@drawable/rectangle_background"
+                android:src="@drawable/dumbell"
+                app:layout_constraintBottom_toBottomOf="@id/btnPractice"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/btnPractice" />
+
+            <ImageView
+                android:id="@+id/flashcardLogo"
+                android:layout_width="35dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/rectangle_background"
+                android:src="@drawable/flashcards"
+                app:layout_constraintBottom_toBottomOf="@id/btnFlashcard"
+                app:layout_constraintStart_toStartOf="@+id/btnFlashcard"
+                app:layout_constraintTop_toTopOf="@id/btnFlashcard" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/text14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
+            android:fontFamily="sans-serif-condensed-light"
+            android:text="@string/text14"
+            android:textAllCaps="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.072"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/constraintLayout"
+            tools:text="@string/text14" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
