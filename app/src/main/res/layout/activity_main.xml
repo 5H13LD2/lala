@@ -20,19 +20,26 @@
         app:layout_constraintTop_toBottomOf="@+id/btn_guest"
         app:layout_constraintVertical_bias="0.362" />
 
-    <View
-        android:id="@+id/top_black"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="#000000"
-        app:layout_constraintHeight_percent="0.35"
-        app:layout_constraintTop_toTopOf="parent" /> <!-- 25% height -->
+    <!-- 25% height -->
 
     <!-- Bottom White Background (3/4 of screen) -->
 
     <!-- Heading Text (Inside the Black Background) -->
 
     <!-- Welcome Text (Inside the White Background) -->
+
+    <View
+        android:id="@+id/top_black"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.35"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/heading_text"
@@ -43,7 +50,7 @@
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@id/top_black"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.099"
+        app:layout_constraintHorizontal_bias="0.155"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/top_black"
         app:layout_constraintVertical_bias="1.0" />
@@ -58,9 +65,10 @@
         android:textSize="34sp"
         app:layout_constraintBottom_toTopOf="@+id/heading_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.052"
+        app:layout_constraintHorizontal_bias="0.12"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/top_black" />
+        app:layout_constraintTop_toTopOf="@+id/top_black"
+        app:layout_constraintVertical_bias="0.666" />
 
     <TextView
         android:id="@+id/text3"
