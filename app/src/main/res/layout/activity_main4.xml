@@ -7,21 +7,33 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity4">
 
-    <!-- Scrollable Content -->
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginBottom="56dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:fillViewport="true"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
-        android:fillViewport="true">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp"
-            android:layout_marginTop="120dp">
+            android:gravity="center_horizontal">
+
+            <!-- TextView for Current Day (Centered & Lowered) -->
+            <TextView
+                android:id="@+id/textCurrentDay"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginTop="40dp"
+                android:layout_marginBottom="16dp" />
 
             <!-- Row for "Recent Course" and "My Library" -->
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -36,8 +48,8 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/textMyLibrary"
-                    app:layout_constraintHorizontal_bias="0.4"/> <!-- 🔹 Hatak pa-kaliwa -->
+                    app:layout_constraintEnd_toStartOf="@id/textMyLibrary"
+                    app:layout_constraintHorizontal_bias="0.4" />
 
                 <TextView
                     android:id="@+id/textMyLibrary"
@@ -46,9 +58,9 @@
                     android:text="My Library"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    app:layout_constraintStart_toEndOf="@+id/textRecentCourse"
+                    app:layout_constraintStart_toEndOf="@id/textRecentCourse"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.6"/> <!-- 🔹 Hatak pa-kanan -->
+                    app:layout_constraintHorizontal_bias="0.6" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -58,73 +70,66 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"
-                android:padding="16dp"
-                android:contentDescription="List of courses" />
+                android:padding="16dp" />
 
-            <!-- Dummy Text for ScrollView Testing -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
-                android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-        Nulla facilisi. Proin vel metus nec eros convallis placerat.
-        Sed vitae sapien nec urna vulputate varius. Integer a augue
-        vel justo tristique efficitur. Cras a efficitur orci.
-        Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae;
-        Mauris euismod ligula non lorem vehicula, eget fringilla magna pretium.
+                android:text="
+                  Donec eget nisi vel lectus malesuada vestibulum at nec sem.
+        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
+        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
+        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
+        Integer vel elit sed mi ultric
+        Nulla facilisi. Nam et purus magna.
+        Ut accumsan vel nisl at consectetur.
+          Donec eget nisi vel lectus malesuada vestibulum at nec sem.
+        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
+        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
+        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
+        Integer vel elit sed mi ultric
+        Nulla facilisi. Nam et purus magna.
+        Ut accumsan vel nisl at consectetur.
+          Donec eget nisi vel lectus malesuada vestibulum at nec sem.
+        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
+        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
+        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
+        Integer vel elit sed mi ultric
+        Nulla facilisi. Nam et purus magna.
+        Ut accumsan vel nisl at consectetur.
+          Donec eget nisi vel lectus malesuada vestibulum at nec sem.
+        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
+        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
+        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
+        Integer vel elit sed mi ultric
+        Nulla facilisi. Nam et purus magna.
+        Ut accumsan vel nisl at consectetur.  Donec eget nisi vel lectus malesuada vestibulum at nec sem.
+        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
+        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
+        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
+        Integer vel elit sed mi ultric
+        Nulla facilisi. Nam et purus magna.
+        Ut accumsan vel nisl at consectetur.
 
-        Suspendisse potenti. Donec scelerisque sapien non felis pretium pharetra.
-        Nunc eget libero convallis, sagittis odio eget, vehicula nunc. Duis tincidunt
-        justo nec magna placerat, at faucibus metus venenatis.
 
-        Fusce fringilla dapibus felis, vel gravida risus malesuada vel.
-        Donec sed est non mi efficitur feugiat at et lorem. Vivamus tincidunt
-        odio et ligula dapibus, non tincidunt mauris efficitur.
-        Phasellus sodales, lacus et aliquam gravida, elit justo consectetur odio,
-        sed vehicula lorem felis in odio.
-
-        Morbi ut ultricies est. Pellentesque euismod ipsum ac justo suscipit,
-        eget condimentum purus faucibus. Cras quis pharetra dolor.
-        Curabitur laoreet urna sed enim tincidunt, ut faucibus massa volutpat.
-        Integer condimentum est vel nisl bibendum, non fermentum mi scelerisque.
-
-        Vestibulum euismod, lorem nec dictum vehicula, eros nisi facilisis magna,
-        vel tincidunt lectus risus in nisi.
-        Praesent sit amet mi eget magna elementum vestibulum nec ac lacus.
-        Nulla vehicula leo at elit pharetra, nec egestas orci vehicula.
 
         Donec eget nisi vel lectus malesuada vestibulum at nec sem.
         Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
         Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
         In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
-        Integer vel elit sed mi ultrices tristique nec a enim.
-
-        Aenean auctor, magna eget pretium tincidunt, nisl nulla
-        pharetra augue, sit amet dictum risus odio in purus.
-        Nullam ultricies luctus tellus eget tincidunt.
-        Sed et dolor in urna aliquet imperdiet.
-        Proin quis eros non nulla volutpat interdum non in odio.
-        Donec tincidunt, purus id suscipit cursus, mi metus fringilla turpis,
-        vel tempor dui neque et ligula.
-
-        Duis varius erat eget risus iaculis tincidunt.
-        Mauris eget nunc nec nisl efficitur scelerisque.
-        Fusce ac mauris sed odio dictum tincidunt.
-        Pellentesque habitant morbi tristique senectus et netus et malesuada
-        fames ac turpis egestas.
-
+        Integer vel elit sed mi ultric
         Nulla facilisi. Nam et purus magna.
         Ut accumsan vel nisl at consectetur.
         Suspendisse id erat quis mi malesuada hendrerit eget ut nisi.
         Quisque convallis orci eu felis pretium, vel pharetra purus mollis."
                 android:textSize="16sp" />
 
-
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Floating Trophy (Draggable) -->
+    <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabLeaderboard"
         android:layout_width="wrap_content"

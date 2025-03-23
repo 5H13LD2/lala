@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity4 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,5 +89,12 @@ class MainActivity4 : AppCompatActivity() {
                 return true
             }
         })
+
+        // 🔹 Hanapin ang TextView para sa kasalukuyang araw
+        val textCurrentDay = findViewById<TextView>(R.id.textCurrentDay)
+
+        // 🔹 Kunin ang araw ngayon at i-set sa TextView
+        val currentDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
+        textCurrentDay.text = "$currentDay GRIND!"
     }
 }

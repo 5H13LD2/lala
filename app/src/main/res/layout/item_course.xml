@@ -127,6 +127,7 @@
             android:fontFamily="sans-serif-condensed-light"
             android:text="@string/text14"
             android:textAllCaps="false"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.072"
             app:layout_constraintStart_toStartOf="parent"
@@ -135,3 +136,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
+
+
+
