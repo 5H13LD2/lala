@@ -72,62 +72,104 @@
                 android:nestedScrollingEnabled="false"
                 android:padding="16dp" />
 
+
+            <!-- New Section: Sharpen Your Skills -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/textSharpenTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sharpen Your Skills"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/textAllPractice"
+                    app:layout_constraintHorizontal_bias="0.4"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/textAllPractice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="All Practice"
+                    android:textColor="@android:color/holo_blue_dark"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.6"
+                    app:layout_constraintStart_toEndOf="@id/textSharpenTitle"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardViewPractice"
+                    android:layout_width="0dp"
+                    android:layout_height="160dp"
+                    android:layout_margin="16dp"
+                    android:padding="16dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="4dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/textSharpenTitle">
+
+                    <!-- Bold Title -->
+
+                    <TextView
+
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="16dp"
+                        android:text="@string/sharpen_description2"
+                        android:textColor="@android:color/black"
+
+                        android:textStyle="bold"
+                        android:textSize="20sp" />
+                    <!-- Description -->
+                    <TextView
+
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="50dp"
+                        android:text="@string/sharpen_description"
+                        android:textColor="@android:color/black"
+                        android:textSize="16sp" />
+                </androidx.cardview.widget.CardView>
+            </androidx.constraintlayout.widget.ConstraintLayout>
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
                 android:text="
-                  Donec eget nisi vel lectus malesuada vestibulum at nec sem.
-        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
-        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
-        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
-        Integer vel elit sed mi ultric
-        Nulla facilisi. Nam et purus magna.
-        Ut accumsan vel nisl at consectetur.
-          Donec eget nisi vel lectus malesuada vestibulum at nec sem.
-        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
-        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
-        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
-        Integer vel elit sed mi ultric
-        Nulla facilisi. Nam et purus magna.
-        Ut accumsan vel nisl at consectetur.
-          Donec eget nisi vel lectus malesuada vestibulum at nec sem.
-        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
-        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
-        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
-        Integer vel elit sed mi ultric
-        Nulla facilisi. Nam et purus magna.
-        Ut accumsan vel nisl at consectetur.
-          Donec eget nisi vel lectus malesuada vestibulum at nec sem.
-        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
-        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
-        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
-        Integer vel elit sed mi ultric
-        Nulla facilisi. Nam et purus magna.
-        Ut accumsan vel nisl at consectetur.  Donec eget nisi vel lectus malesuada vestibulum at nec sem.
-        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
-        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
-        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
-        Integer vel elit sed mi ultric
-        Nulla facilisi. Nam et purus magna.
-        Ut accumsan vel nisl at consectetur.
+Suspendisse id erat quis mi malesuada hendrerit eget ut nisi.
+Suspendisse id erat quis mi malesuada hendrerit eget ut nisi.Suspendisse id erat quis mi malesuada hendrerit eget ut nisi.
+Suspendisse id erat quis mi malesuada hendrerit eget ut nisi.
+Suspendisse id erat quis mi malesuada hendrerit eget ut nisi.
+Suspendisse id erat quis mi malesuada hendrerit eget ut nisi.
 
-
-
-        Donec eget nisi vel lectus malesuada vestibulum at nec sem.
-        Nam rhoncus arcu eget elit venenatis, et ullamcorper sapien faucibus.
-        Etiam luctus ultricies metus, nec convallis sapien feugiat vel.
-        In hac habitasse platea dictumst. Duis et mi a elit sodales auctor.
-        Integer vel elit sed mi ultric
-        Nulla facilisi. Nam et purus magna.
         Ut accumsan vel nisl at consectetur.
         Suspendisse id erat quis mi malesuada hendrerit eget ut nisi.
         Quisque convallis orci eu felis pretium, vel pharetra purus mollis."
                 android:textSize="16sp" />
 
+
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+    <!-- New Section: Sharpen Your Skills -->
+
 
     <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton

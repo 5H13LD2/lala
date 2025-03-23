@@ -12,4 +12,9 @@
     <string name="text13">My Library</string>
     <string name="text14">Part of course learning</string>
     <string name="leaderboard_button">Open Leaderboard</string>
+
+
+    <string name="sharpen_description">
+        After completing your first exercise, you will gain access to daily practice sessions.</string>
+    <string name="sharpen_description2">Practice with daily challenges!</string>
 </resources>

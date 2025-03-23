@@ -32,13 +32,13 @@ class MainActivity4 : AppCompatActivity() {
         val textMyLibrary = findViewById<TextView>(R.id.textMyLibrary)
         textMyLibrary.paintFlags = textMyLibrary.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-        // 🔹 Set Layout Manager
+
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        // 🔹 Set Adapter
+
         recyclerView.adapter = CourseAdapter(courseList)
 
-        // 🔹 Setup Bottom Navigation View
+
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
@@ -62,14 +62,14 @@ class MainActivity4 : AppCompatActivity() {
             }
         }
 
-        // 🔹 Floating Action Button (Leaderboard)
+
         val fabLeaderboard = findViewById<FloatingActionButton>(R.id.fabLeaderboard)
         fabLeaderboard.setOnClickListener {
             val intent = Intent(this@MainActivity4, LeaderboardAdapterActivity::class.java)
             startActivity(intent)
         }
 
-        // 🔥 Enable Dragging for FloatingActionButton
+
         fabLeaderboard.setOnTouchListener(object : View.OnTouchListener {
             var dX = 0f
             var dY = 0f
@@ -90,11 +90,11 @@ class MainActivity4 : AppCompatActivity() {
             }
         })
 
-        // 🔹 Hanapin ang TextView para sa kasalukuyang araw
+
         val textCurrentDay = findViewById<TextView>(R.id.textCurrentDay)
 
-        // 🔹 Kunin ang araw ngayon at i-set sa TextView
+
         val currentDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
-        textCurrentDay.text = "$currentDay GRIND!"
+        textCurrentDay.text = "Monday||Tuesday||Wednesday||Thursday" + "\n\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t$currentDay GRIND!"
     }
 }
