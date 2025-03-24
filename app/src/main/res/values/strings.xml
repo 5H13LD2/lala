@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">capstone1</string>
     <string name="heading">Please proceed and get the new experience of TechLaunch</string>
-    <string name="username">Email Address</string>
+    <string name="username">username</string>
     <string name="text4">Enter your TechLauncher email to login</string>
     <string name="text6">Dont have an account?</string>
     <string name="password">Password</string>
@@ -12,6 +12,10 @@
     <string name="text13">My Library</string>
     <string name="text14">Part of course learning</string>
     <string name="leaderboard_button">Open Leaderboard</string>
+    <string name="default_web_client_id">128887566458-u5u00kjmp9uueepri7n8735mpfnopi9m.apps.googleusercontent.com</string>
+    <string name="LeaderboardActivity">tangina</string>
+
+
 
 
     <string name="sharpen_description">

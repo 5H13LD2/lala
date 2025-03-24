@@ -74,6 +74,7 @@
 
 
             <!-- New Section: Sharpen Your Skills -->
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -92,7 +93,8 @@
                     app:layout_constraintEnd_toStartOf="@id/textAllPractice"
                     app:layout_constraintHorizontal_bias="0.4"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.094" />
 
                 <TextView
                     android:id="@+id/textAllPractice"
@@ -106,7 +108,8 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.6"
                     app:layout_constraintStart_toEndOf="@id/textSharpenTitle"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.115" />
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardViewPractice"
@@ -132,9 +135,9 @@
                         android:text="@string/sharpen_description2"
                         android:textColor="@android:color/black"
 
-                        android:textStyle="bold"
-                        android:textSize="20sp" />
-                    <!-- Description -->
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
                     <TextView
 
                         android:layout_width="match_parent"
@@ -144,8 +147,10 @@
                         android:text="@string/sharpen_description"
                         android:textColor="@android:color/black"
                         android:textSize="16sp" />
+                    <!-- Description -->
                 </androidx.cardview.widget.CardView>
             </androidx.constraintlayout.widget.ConstraintLayout>
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

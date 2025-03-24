@@ -7,10 +7,7 @@ plugins {
 
 buildscript {
     dependencies {
-        classpath("com.android.tools.build:gradle:8.2.0")  // Update Gradle version if needed
-        classpath("com.google.gms:google-services:4.4.0")  // Firebase Plugin (Correct Placement)
-        classpath ("com.google.gms:google-services:4.3.10")
-
+        classpath("com.android.tools.build:gradle:8.2.0")  // Gradle Plugin
+        classpath("com.google.gms:google-services:4.4.0")  // ✅ Latest Google Services
     }
-
 }
