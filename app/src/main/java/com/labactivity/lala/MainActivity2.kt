@@ -31,7 +31,7 @@ class MainActivity2 : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
-        // ✅ Configure Google Sign-In
+        //  Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
@@ -62,7 +62,7 @@ class MainActivity2 : AppCompatActivity() {
             finish()
         }
 
-        // ✅ Google Sign-In Button (Updated with btn_google)
+        //  Google Sign-In Button (Updated with btn_google)
         binding.btnGoogle.setOnClickListener {
             signInWithGoogle()
         }
@@ -119,8 +119,8 @@ class MainActivity2 : AppCompatActivity() {
             .addOnSuccessListener {
                 binding.progressBar.visibility = View.GONE
                 runOnUiThread {
-                    Toast.makeText(this, "User Added!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity3::class.java)) // ✅ Diretso sa MainActivity3
+
+                     
                     finish()
                 }
             }
@@ -130,26 +130,32 @@ class MainActivity2 : AppCompatActivity() {
                     Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
+        startActivity(Intent(this, MainActivity3::class.java))
     }
 
-    // ✅ Google Sign-In Function
+    //  Google Sign-In Function
     private fun signInWithGoogle() {
         googleSignInClient.signOut().addOnCompleteListener {
             val signInIntent = googleSignInClient.signInIntent
             googleSignInLauncher.launch(signInIntent)
+
+
         }
     }
 
-    // ✅ Activity Result API Implementation
+    //  Activity Result API Implementation
     private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val data = result.data
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
         try {
             val account = task.getResult(ApiException::class.java)!!
             firebaseAuthWithGoogle(account.idToken!!)
+            startActivity(Intent(this, MainActivity3::class.java))
+            Toast.makeText(this, "mukhang burat Added!", Toast.LENGTH_SHORT).show() // user added!
         } catch (e: ApiException) {
             Log.w("GoogleSignIn", "Google sign in failed", e)
             Toast.makeText(this, "Google Sign-In Failed.", Toast.LENGTH_SHORT).show()
+
         }
     }
 
