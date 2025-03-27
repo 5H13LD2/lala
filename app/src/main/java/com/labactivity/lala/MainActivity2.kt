@@ -31,13 +31,14 @@ class MainActivity2 : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
-        //  Configure Google Sign-In
+        // Configure Google Sign-In
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
+        // Manual Sign-Up Button
         binding.btnContinue.setOnClickListener {
             val email = binding.email.text.toString().trim()
             val password = binding.signinpass.text.toString().trim()
@@ -57,56 +58,62 @@ class MainActivity2 : AppCompatActivity() {
             registerUser(email, password, username)
         }
 
+        // Navigate to login activity
         binding.textView2.setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
         }
 
-        //  Google Sign-In Button (Updated with btn_google)
+        // Google Sign-In Button
         binding.btnGoogle.setOnClickListener {
             signInWithGoogle()
         }
     }
 
+    // Manual Email/Password Registration
     private fun registerUser(email: String, password: String, username: String) {
         binding.progressBar.visibility = View.VISIBLE
 
-        // I-check muna kung may existing account
-        auth.fetchSignInMethodsForEmail(email).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val signInMethods = task.result?.signInMethods
-                if (signInMethods != null && signInMethods.isNotEmpty()) {
-                    // May existing account na
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(this, "Email already in use. Please login instead.", Toast.LENGTH_SHORT).show()
-                } else {
-                    // Wala pang existing account, proceed sa registration
-                    auth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(this) { task ->
-                            binding.progressBar.visibility = View.GONE
+        try {
+            auth.fetchSignInMethodsForEmail(email).addOnCompleteListener { signInMethodsTask ->
+                if (signInMethodsTask.isSuccessful) {
+                    val signInMethods = signInMethodsTask.result?.signInMethods
+                    if (!signInMethods.isNullOrEmpty()) {
+                        // Email already in use
+                        binding.progressBar.visibility = View.GONE
+                        Toast.makeText(this, "Email already in use. Please login instead.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        // Proceed with registration
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(this) { createUserTask ->
+                                binding.progressBar.visibility = View.GONE
 
-                            if (task.isSuccessful) {
-                                auth.currentUser?.reload()?.addOnSuccessListener {
-                                    val userId = auth.currentUser?.uid
-                                    if (userId != null) {
-                                        saveUserToFirestore(userId, email, username)
-                                    } else {
-                                        Toast.makeText(this, "User ID is null!", Toast.LENGTH_SHORT).show()
+                                if (createUserTask.isSuccessful) {
+                                    auth.currentUser?.reload()?.addOnSuccessListener {
+                                        val userId = auth.currentUser?.uid
+                                        if (userId != null) {
+                                            saveUserToFirestore(userId, email, username)
+                                        } else {
+                                            Toast.makeText(this, "User ID is null!", Toast.LENGTH_SHORT).show()
+                                        }
                                     }
+                                } else {
+                                    Toast.makeText(this, "Signup Failed: ${createUserTask.exception?.message}", Toast.LENGTH_SHORT).show()
                                 }
-                            } else {
-                                Toast.makeText(this, "Signup Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                             }
-                        }
+                    }
+                } else {
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(this, "Error checking email: ${signInMethodsTask.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                binding.progressBar.visibility = View.GONE
-                Toast.makeText(this, "Error checking email: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
             }
+        } catch (e: Exception) {
+            binding.progressBar.visibility = View.GONE
+            Toast.makeText(this, "Error occurred: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
-
+    // Save user data to Firestore
     private fun saveUserToFirestore(userId: String, email: String, username: String) {
         val user = hashMapOf(
             "userId" to userId,
@@ -119,8 +126,6 @@ class MainActivity2 : AppCompatActivity() {
             .addOnSuccessListener {
                 binding.progressBar.visibility = View.GONE
                 runOnUiThread {
-
-                     
                     finish()
                 }
             }
@@ -130,20 +135,18 @@ class MainActivity2 : AppCompatActivity() {
                     Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
-        startActivity(Intent(this, MainActivity3::class.java))
     }
 
-    //  Google Sign-In Function
+    // Google Sign-In Method
     private fun signInWithGoogle() {
         googleSignInClient.signOut().addOnCompleteListener {
             val signInIntent = googleSignInClient.signInIntent
             googleSignInLauncher.launch(signInIntent)
-
-
+            binding.progressBar.visibility = View.GONE
         }
     }
 
-    //  Activity Result API Implementation
+    // Activity Result API for Google Sign-In
     private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val data = result.data
         val task = GoogleSignIn.getSignedInAccountFromIntent(data)
@@ -151,34 +154,39 @@ class MainActivity2 : AppCompatActivity() {
             val account = task.getResult(ApiException::class.java)!!
             firebaseAuthWithGoogle(account.idToken!!)
             startActivity(Intent(this, MainActivity3::class.java))
-            Toast.makeText(this, "mukhang burat Added!", Toast.LENGTH_SHORT).show() // user added!
+            Toast.makeText(this, "Google Account Added!", Toast.LENGTH_SHORT).show()
         } catch (e: ApiException) {
             Log.w("GoogleSignIn", "Google sign in failed", e)
             Toast.makeText(this, "Google Sign-In Failed.", Toast.LENGTH_SHORT).show()
-
         }
     }
 
+    // Firebase Authentication with Google credentials
     private fun firebaseAuthWithGoogle(idToken: String) {
         binding.progressBar.visibility = View.VISIBLE
 
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                binding.progressBar.visibility = View.GONE
+        try {
+            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            auth.signInWithCredential(credential)
+                .addOnCompleteListener(this) { task ->
+                    binding.progressBar.visibility = View.GONE
 
-                if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    val userId = user?.uid
-                    val email = user?.email
-                    val username = user?.displayName ?: "Google User"
+                    if (task.isSuccessful) {
+                        val user = auth.currentUser
+                        val userId = user?.uid
+                        val email = user?.email
+                        val username = user?.displayName ?: "Google User"
 
-                    if (userId != null && email != null) {
-                        saveUserToFirestore(userId, email, username)
+                        if (userId != null && email != null) {
+                            saveUserToFirestore(userId, email, username)
+                        }
+                    } else {
+                        Toast.makeText(this, "Authentication Failed.", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(this, "Authentication Failed.", Toast.LENGTH_SHORT).show()
                 }
-            }
+        } catch (e: Exception) {
+            binding.progressBar.visibility = View.GONE
+            Toast.makeText(this, "Error occurred during Google Authentication: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 }

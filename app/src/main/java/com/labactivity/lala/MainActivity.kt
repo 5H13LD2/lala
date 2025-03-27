@@ -47,15 +47,24 @@ class MainActivity : AppCompatActivity() {
 
     // ✅ Function to Check If User Exists
     private fun checkIfUserExists(email: String) {
-        auth.fetchSignInMethodsForEmail(email)
+        auth.fetchSignInMethodsForEmail(email) // Check if email exists
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val signInMethods = task.result?.signInMethods ?: emptyList()
 
                     if (signInMethods.isNotEmpty()) {
-                        Toast.makeText(this, "Email exists! Proceeding...", Toast.LENGTH_SHORT).show()
-                        startActivity(Intent(this, MainActivity3::class.java))
+                        // Email exists
+                        Toast.makeText(this, "Welcome Back TechLauncher!", Toast.LENGTH_SHORT).show()
+
+                        // Show the email of the logged-in user
+                        val userEmail = email
+                        Toast.makeText(this, "$userEmail logged in", Toast.LENGTH_SHORT).show()
+
+                        // Proceed to next activity
+                        val intent = Intent(this, MainActivity3::class.java)
+                        startActivity(intent)
                     } else {
+                        // Email not registered
                         Toast.makeText(this, "Email not registered.", Toast.LENGTH_SHORT).show()
                     }
                 } else {
