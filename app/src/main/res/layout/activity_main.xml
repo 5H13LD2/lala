@@ -79,9 +79,10 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/username"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.14"
+        app:layout_constraintHorizontal_bias="0.128"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/top_black" />
+        app:layout_constraintTop_toBottomOf="@+id/top_black"
+        app:layout_constraintVertical_bias="0.288" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="0dp"
@@ -97,12 +98,13 @@
         android:id="@+id/username"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="104dp"
-        android:hint="@string/username"
+        android:layout_marginTop="48dp"
+        android:hint="@string/email"
         android:inputType="text"
         android:minHeight="48dp"
         android:textColor="#000000"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.504"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/top_black" />
 
@@ -112,26 +114,24 @@
         android:layout_height="wrap_content"
         android:text="@string/text4"
         android:textSize="12sp"
-        app:layout_constraintBottom_toTopOf="@+id/btn_submit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.32"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/username"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/username" />
 
     <Button
         android:id="@+id/btn_submit"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="36dp"
         android:backgroundTint="#000000"
         android:text="Continue"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintHorizontal_bias="0.504"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/username" />
+        app:layout_constraintTop_toBottomOf="@+id/password" />
 
     <View
         android:layout_width="90dp"
@@ -202,4 +202,17 @@
         app:layout_constraintTop_toTopOf="@+id/top_black"
         app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/logo2" />
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:ems="10"
+        android:inputType="numberPassword"
+        android:text="@string/password"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text4" />
 </androidx.constraintlayout.widget.ConstraintLayout>

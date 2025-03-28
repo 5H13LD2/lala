@@ -28,9 +28,7 @@ class LeaderboardAdapter(private val userList: List<LeaderboardUser>) :
         holder.userScore.text = user.score.toString()
     }
 
-    override fun getItemCount(): Int = userList.size
-
-    // 🔹 Idagdag ito sa constructor para ma-update ang data
+    override fun getItemCount(): Int = userList.size// 🔹 Idagdag ito sa constructor para ma-update ang data
     fun updateData(newUsers: List<LeaderboardUser>) {
         (userList as MutableList).clear()
         userList.addAll(newUsers)

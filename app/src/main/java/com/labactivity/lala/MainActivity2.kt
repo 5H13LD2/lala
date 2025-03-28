@@ -24,169 +24,98 @@ class MainActivity2 : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityMain2Binding.inflate(layoutInflater)
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
-        // Configure Google Sign-In
+        // Google Sign-In options
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
             .build()
+
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
-        // Manual Sign-Up Button
+        // Sign up button logic
         binding.btnContinue.setOnClickListener {
-            val email = binding.email.text.toString().trim()
-            val password = binding.signinpass.text.toString().trim()
-            val confirmPassword = binding.consign.text.toString().trim()
-            val username = binding.signuser.text.toString().trim()
+            val username = binding.signuser.text.toString()
+            val email = binding.email.text.toString()
+            val password = binding.signinpass.text.toString()
 
-            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || username.isEmpty()) {
-                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+            } else {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val userId = auth.currentUser?.uid
+                            val user = hashMapOf(
+                                "username" to username,
+                                "email" to email
+                            )
 
-            if (password != confirmPassword) {
-                Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            registerUser(email, password, username)
-        }
-
-        // Navigate to login activity
-        binding.textView2.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
-
-        // Google Sign-In Button
-        binding.btnGoogle.setOnClickListener {
-            signInWithGoogle()
-        }
-    }
-
-    // Manual Email/Password Registration
-    private fun registerUser(email: String, password: String, username: String) {
-        binding.progressBar.visibility = View.VISIBLE
-
-        try {
-            auth.fetchSignInMethodsForEmail(email).addOnCompleteListener { signInMethodsTask ->
-                if (signInMethodsTask.isSuccessful) {
-                    val signInMethods = signInMethodsTask.result?.signInMethods
-                    if (!signInMethods.isNullOrEmpty()) {
-                        // Email already in use
-                        binding.progressBar.visibility = View.GONE
-                        Toast.makeText(this, "Email already in use. Please login instead.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        // Proceed with registration
-                        auth.createUserWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(this) { createUserTask ->
-                                binding.progressBar.visibility = View.GONE
-
-                                if (createUserTask.isSuccessful) {
-                                    auth.currentUser?.reload()?.addOnSuccessListener {
-                                        val userId = auth.currentUser?.uid
-                                        if (userId != null) {
-                                            saveUserToFirestore(userId, email, username)
-                                        } else {
-                                            Toast.makeText(this, "User ID is null!", Toast.LENGTH_SHORT).show()
-                                        }
+                            if (userId != null) {
+                                firestore.collection("users").document(userId)
+                                    .set(user)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(this, "Account created", Toast.LENGTH_SHORT).show()
+                                        startActivity(Intent(this, MainActivity3::class.java))
+                                        finish()
                                     }
-                                } else {
-                                    Toast.makeText(this, "Signup Failed: ${createUserTask.exception?.message}", Toast.LENGTH_SHORT).show()
-                                }
+                                    .addOnFailureListener {
+                                        Toast.makeText(this, "Failed to save user", Toast.LENGTH_SHORT).show()
+                                    }
                             }
+                        } else {
+                            Toast.makeText(this, "Signup failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        }
                     }
-                } else {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(this, "Error checking email: ${signInMethodsTask.exception?.message}", Toast.LENGTH_SHORT).show()
-                }
             }
-        } catch (e: Exception) {
-            binding.progressBar.visibility = View.GONE
-            Toast.makeText(this, "Error occurred: ${e.message}", Toast.LENGTH_SHORT).show()
         }
-    }
 
-    // Save user data to Firestore
-    private fun saveUserToFirestore(userId: String, email: String, username: String) {
-        val user = hashMapOf(
-            "userId" to userId,
-            "email" to email,
-            "username" to username
-        )
-
-        firestore.collection("Users").document(userId)
-            .set(user)
-            .addOnSuccessListener {
-                binding.progressBar.visibility = View.GONE
-                runOnUiThread {
-                    finish()
-                }
-            }
-            .addOnFailureListener { e ->
-                binding.progressBar.visibility = View.GONE
-                runOnUiThread {
-                    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-    }
-
-    // Google Sign-In Method
-    private fun signInWithGoogle() {
-        googleSignInClient.signOut().addOnCompleteListener {
+        // Google Sign-In button logic
+        binding.btnGoogle.setOnClickListener {
             val signInIntent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(signInIntent)
-            binding.progressBar.visibility = View.GONE
+            launcher.launch(signInIntent)
         }
     }
 
-    // Activity Result API for Google Sign-In
-    private val googleSignInLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val data = result.data
-        val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+    // Google Sign-In launcher
+    private val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
-            val account = task.getResult(ApiException::class.java)!!
-            firebaseAuthWithGoogle(account.idToken!!)
-            startActivity(Intent(this, MainActivity3::class.java))
-            Toast.makeText(this, "Google Account Added!", Toast.LENGTH_SHORT).show()
-        } catch (e: ApiException) {
-            Log.w("GoogleSignIn", "Google sign in failed", e)
-            Toast.makeText(this, "Google Sign-In Failed.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // Firebase Authentication with Google credentials
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        binding.progressBar.visibility = View.VISIBLE
-
-        try {
-            val credential = GoogleAuthProvider.getCredential(idToken, null)
+            val account = task.getResult(ApiException::class.java)
+            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
             auth.signInWithCredential(credential)
-                .addOnCompleteListener(this) { task ->
-                    binding.progressBar.visibility = View.GONE
+                .addOnCompleteListener { authTask ->
+                    if (authTask.isSuccessful) {
+                        val userId = auth.currentUser?.uid
+                        val user = hashMapOf(
+                            "username" to account.displayName,
+                            "email" to account.email
+                        )
 
-                    if (task.isSuccessful) {
-                        val user = auth.currentUser
-                        val userId = user?.uid
-                        val email = user?.email
-                        val username = user?.displayName ?: "Google User"
-
-                        if (userId != null && email != null) {
-                            saveUserToFirestore(userId, email, username)
+                        if (userId != null) {
+                            firestore.collection("users").document(userId)
+                                .set(user)
+                                .addOnSuccessListener {
+                                    Toast.makeText(this, "Google Sign-In successful", Toast.LENGTH_SHORT).show()
+                                    startActivity(Intent(this, MainActivity3::class.java))
+                                    finish()
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(this, "Failed to save Google user", Toast.LENGTH_SHORT).show()
+                                }
                         }
                     } else {
-                        Toast.makeText(this, "Authentication Failed.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show()
                     }
                 }
-        } catch (e: Exception) {
-            binding.progressBar.visibility = View.GONE
-            Toast.makeText(this, "Error occurred during Google Authentication: ${e.message}", Toast.LENGTH_SHORT).show()
+        } catch (e: ApiException) {
+            Log.e("SignIn", "Google sign in failed", e)
+            Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show()
         }
     }
 }

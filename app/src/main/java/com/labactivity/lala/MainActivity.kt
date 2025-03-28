@@ -31,6 +31,30 @@ class MainActivity : AppCompatActivity() {
 
             checkIfUserExists(email)
         }
+        binding.btnSubmit.setOnClickListener {
+            val email = binding.username.text.toString().trim()
+            val password = binding.password.text.toString().trim()
+
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please enter both email and password", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Firebase Authentication Login
+            auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        // Login success
+                        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this, MainActivity3::class.java)
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        // Login failed
+                        Toast.makeText(this, "Authentication failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+        }
 
         // ✅ Sign Up Button
         binding.text7.setOnClickListener {
