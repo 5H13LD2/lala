@@ -14,12 +14,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Lala">
-
+        <activity
+            android:name=".ProfileMainActivity5"
+            android:exported="false" />
         <!-- Google Sign-In Meta-Data -->
         <meta-data
             android:name="com.google.android.gms.auth.api.signin"
-            android:value="@string/default_web_client_id"/>
-
+            android:value="@string/default_web_client_id" />
 
         <activity
             android:name=".MainActivity4"
@@ -35,6 +36,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
