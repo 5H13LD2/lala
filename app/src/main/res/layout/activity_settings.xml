@@ -24,9 +24,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="#F7F7F7"
+                android:padding="4dp"
+                android:layout_marginTop="40dp"
                 app:navigationIcon="@drawable/ic_back"
                 app:title="Settings"
-                android:padding="4dp"
                 app:titleTextAppearance="@style/Toolbar.TitleText" />
 
             <LinearLayout
