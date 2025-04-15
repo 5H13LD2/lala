@@ -1,0 +1,13 @@
+<resources>
+    <!-- Base application theme -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">#FF5722</item>
+        <item name="colorPrimaryDark">#E64A19</item>
+        <item name="colorAccent">#4CD964</item>
+    </style>
+
+    <style name="Toolbar.TitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>

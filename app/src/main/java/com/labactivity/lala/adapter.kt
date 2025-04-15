@@ -8,12 +8,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import android.widget.Toast
 
 object CarColors {
-    val CLASSIC = Color.parseColor("#E8A064")
-    val SPORT = Color.parseColor("#4F8BEF")
-    val FLYING = Color.parseColor("#9D84C9")
-    val ELECTRIC = Color.parseColor("#4ABCA8")
+    val PYTHON = Color.parseColor("#E8A064")
+    val JAVA = Color.parseColor("#4F8BEF")
+    val MYSQL = Color.parseColor("#9D84C9")
+    val INTERVIEW = Color.parseColor("#4ABCA8")
 }
 
 data class Car(
@@ -43,13 +44,18 @@ class CarAdapter(
     inner class CarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val nameTextView: TextView = itemView.findViewById(R.id.carNameTextView)
         private val imageView: ImageView = itemView.findViewById(R.id.carImageView)
-        private val cardView: MaterialCardView = itemView.findViewById(R.id.cardView) // Fixed ID
+        private val cardView: MaterialCardView = itemView.findViewById(R.id.cardView)
 
         fun bind(car: Car) {
             nameTextView.text = car.name
             imageView.setImageResource(car.imageResId)
             cardView.setCardBackgroundColor(car.backgroundColor)
-            itemView.setOnClickListener { onItemClick(car) }
+
+            // ✅ Ginawang clickable ang buong CardView
+            cardView.setOnClickListener {
+                Toast.makeText(itemView.context, "${car.name}", Toast.LENGTH_SHORT).show()
+                onItemClick(car)
+            }
         }
     }
 }

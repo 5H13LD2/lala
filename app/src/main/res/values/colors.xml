@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="primary">#6200EE</color>
+
+    <!-- Background Shades -->
+    <color name="background_color_light">#B3DCFB</color>
+    <color name="background_color_medium">#7F5BD5</color>
+    <color name="background_color_dark">#27164E</color>
 </resources>
+

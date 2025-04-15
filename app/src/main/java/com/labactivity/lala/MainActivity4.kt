@@ -3,98 +3,104 @@ package com.labactivity.lala
 import android.content.Intent
 import android.graphics.Paint
 import android.os.Bundle
-import android.view.MotionEvent
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import java.text.SimpleDateFormat
-import java.util.*
+import com.labactivity.lala.databinding.ActivityMain4Binding
 
 class MainActivity4 : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMain4Binding
+    private lateinit var dayViews: Array<DayCircleView>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main4)
+        binding = ActivityMain4Binding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        // 🔹 Dummy Data for Courses
+        dayViews = arrayOf(
+            binding.dayMonday,
+            binding.dayTuesday,
+            binding.dayWednesday,
+            binding.dayThursday,
+            binding.dayFriday,
+            binding.daySaturday,
+            binding.daySunday
+        )
+
+        // Set click listeners for day buttons
+        dayViews.forEachIndexed { index, view ->
+            view.setOnClickListener { toggleDay(index) }
+        }
+
+        // Set initial states for days
+        updateDayStates()
+
+        // Setup RecyclerView to show courses
+        setupRecyclerView()
+
+        // Setup bottom navigation bar
+        setupBottomNavigation()
+    }
+
+    private fun toggleDay(dayIndex: Int) {
+        dayViews[dayIndex].setChecked(!dayViews[dayIndex].isChecked())
+    }
+
+    private fun updateDayStates() {
+        for (i in dayViews.indices) {
+            dayViews[i].setChecked(true)
+        }
+    }
+
+    private fun setupRecyclerView() {
         val courseList = listOf(
-            Course("Python Basics", R.drawable.logo2),
-            Course("Android Development", R.drawable.logo2),
+            Course("Python Basics", R.drawable.python),
+            Course("Android Development", R.drawable.java),
             Course("Data Structures", R.drawable.logo2)
         )
 
-        // 🔹 Find RecyclerView
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         val textMyLibrary = findViewById<TextView>(R.id.textMyLibrary)
         textMyLibrary.paintFlags = textMyLibrary.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-
-        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-
-
+        recyclerView.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         recyclerView.adapter = CourseAdapter(courseList)
+    }
 
-
+    private fun setupBottomNavigation() {
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         bottomNavigationView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> {
                     Toast.makeText(this, "Home Clicked", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, MainActivity4::class.java))
                     true
                 }
+
                 R.id.nav_profile -> {
                     Toast.makeText(this, "Profile Clicked", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, ProfileMainActivity5::class.java))
                     true
                 }
+
                 R.id.nav_settings -> {
                     Toast.makeText(this, "Settings Clicked", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, SettingsActivity::class.java))
                     true
                 }
+
                 R.id.nav_notifications -> {
                     Toast.makeText(this, "Notifications Clicked", Toast.LENGTH_SHORT).show()
                     true
                 }
+
                 else -> false
             }
         }
-
-
-        val fabLeaderboard = findViewById<FloatingActionButton>(R.id.fabLeaderboard)
-        fabLeaderboard.setOnClickListener {
-            val intent = Intent(this@MainActivity4, LeaderboardAdapterActivity::class.java)
-            startActivity(intent)
-        }
-
-
-        fabLeaderboard.setOnTouchListener(object : View.OnTouchListener {
-            var dX = 0f
-            var dY = 0f
-
-            override fun onTouch(view: View, event: MotionEvent): Boolean {
-                when (event.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        dX = view.x - event.rawX
-                        dY = view.y - event.rawY
-                    }
-
-                    MotionEvent.ACTION_MOVE -> {
-                        view.x = event.rawX + dX
-                        view.y = event.rawY + dY
-                    }
-                }
-                return true
-            }
-        })
-
-
-        val textCurrentDay = findViewById<TextView>(R.id.textCurrentDay)
-
-
-        val currentDay = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
-        textCurrentDay.text = "Monday||Tuesday||Wednesday||Thursday" + "\n\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t$currentDay GRIND!"
     }
 }

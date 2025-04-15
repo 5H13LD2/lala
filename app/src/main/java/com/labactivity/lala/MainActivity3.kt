@@ -12,13 +12,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.labactivity.lala.databinding.ActivityMain3Binding
 
 class MainActivity3 : AppCompatActivity() {
-    private lateinit var binding: ActivityMain3Binding  // ✅ Declare View Binding properly
+    private lateinit var binding: ActivityMain3Binding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // ✅ Initialize View Binding
         binding = ActivityMain3Binding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -28,28 +27,22 @@ class MainActivity3 : AppCompatActivity() {
             insets
         }
 
-        val carRecyclerView: RecyclerView = binding.carRecyclerView //
+        val carRecyclerView: RecyclerView = binding.carRecyclerView
         carRecyclerView.layoutManager = LinearLayoutManager(this)
 
         val cars = listOf(
-            Car("Classic Car", R.drawable.user, CarColors.CLASSIC),
-            Car("Sport Car", R.drawable.user, CarColors.SPORT),
-            Car("Flying Car", R.drawable.user, CarColors.FLYING),
-            Car("Electric Car", R.drawable.user, CarColors.ELECTRIC)
+            Car("Python", R.drawable.python, CarColors.PYTHON),
+            Car("Java", R.drawable.java, CarColors.JAVA),
+            Car("MySQL", R.drawable.sql, CarColors.MYSQL),
+            Car("Job Interview for IT",R.drawable.logo2, CarColors.INTERVIEW)
         )
 
-        // ✅ Fix onClickListener for classic button
-        binding.titleTextView.setOnClickListener {
-            val intent = Intent(this, MainActivity4::class.java)
-            startActivity(intent)
-        }
-
         carRecyclerView.adapter = CarAdapter(cars) { selectedCar ->
-            Toast.makeText(
-                this,
-                "${selectedCar.name}\n${selectedCar.description}",
-                Toast.LENGTH_SHORT
-            ).show()
+            // ✅ Kapag na-click ang card, mag-oopen ng bagong activity
+            val intent = Intent(this, MainActivity4::class.java).apply {
+                putExtra("CAR_NAME", selectedCar.name)
+            }
+            startActivity(intent)
         }
     }
 }
