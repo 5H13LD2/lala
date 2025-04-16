@@ -34,15 +34,16 @@ class MainActivity3 : AppCompatActivity() {
             Car("Python", R.drawable.python, CarColors.PYTHON),
             Car("Java", R.drawable.java, CarColors.JAVA),
             Car("MySQL", R.drawable.sql, CarColors.MYSQL),
-            Car("Job Interview for IT",R.drawable.logo2, CarColors.INTERVIEW)
+
         )
 
         carRecyclerView.adapter = CarAdapter(cars) { selectedCar ->
             // ✅ Kapag na-click ang card, mag-oopen ng bagong activity
-            val intent = Intent(this, MainActivity4::class.java).apply {
+            val intent = Intent(this, CoreModule::class.java).apply {
                 putExtra("CAR_NAME", selectedCar.name)
             }
             startActivity(intent)
         }
+      
     }
 }

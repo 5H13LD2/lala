@@ -14,7 +14,7 @@ object CarColors {
     val PYTHON = Color.parseColor("#E8A064")
     val JAVA = Color.parseColor("#4F8BEF")
     val MYSQL = Color.parseColor("#9D84C9")
-    val INTERVIEW = Color.parseColor("#4ABCA8")
+
 }
 
 data class Car(

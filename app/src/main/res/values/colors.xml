@@ -1,13 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <!-- Base Colors -->
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="primary">#6200EE</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- Primary Theme Colors -->
+    <color name="primary">#1976D2</color>
+    <color name="primary_dark">#0D47A1</color>
+    <color name="primary_light">#BBDEFB</color>
+    <color name="accent">#29B6F6</color>
 
     <!-- Background Shades -->
     <color name="background_color_light">#B3DCFB</color>
     <color name="background_color_medium">#7F5BD5</color>
     <color name="background_color_dark">#27164E</color>
-</resources>
+    <color name="light_background">#F5F5F5</color>
+    <color name="light_blue">#E1F5FE</color>
 
+    <!-- Text Colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+
+    <!-- Content Colors -->
+    <color name="code_background">#263238</color>
+    <color name="code_text">#ECEFF1</color>
+    <color name="success_green">#4CAF50</color>
+
+</resources>
