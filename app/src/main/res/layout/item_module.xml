@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -10,81 +9,84 @@
     app:cardCornerRadius="16dp"
     app:cardElevation="2dp">
 
-    <ScrollView
+    <!-- Parent LinearLayout containing all content -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Module Title and Description -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
+            <!-- Module Title and Description Layout -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:id="@+id/tvModuleTitle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:contentDescription="Module 1 title, Fundamentals of Python"
+                    android:textColor="@color/primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="Module 1: Fundamentals of Python" />
+
+                <FrameLayout
+                    android:id="@+id/moduleHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/tvModuleTitle"
+                        android:id="@+id/tvModuleDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        tools:text="Module 1: Fundamentals of Python" />
-
-                    <FrameLayout
-                        android:id="@+id/moduleHeader"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackground"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/tvModuleDescription"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="14sp"
-                            tools:text="Learn the basics of Python programming" />
-                    </FrameLayout>
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/ivModuleExpand"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center_vertical"
-                    android:src="@drawable/ic_expand_more"
-                    app:tint="@color/primary" />
-
+                        android:layout_marginTop="4dp"
+                        android:contentDescription="Module description: Learn the basics of Python programming"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        tools:text="Learn the basics of Python programming" />
+                </FrameLayout>
             </LinearLayout>
 
-            <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/moduleProgress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:indicatorColor="@color/primary"
-                app:trackColor="@color/light_blue" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvLessons"
-                android:layout_width="match_parent"
-                android:layout_height="427dp"
-                android:background="@color/light_background"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
+            <!-- Expand icon -->
+            <ImageView
+                android:id="@+id/ivModuleExpand"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="Expand module icon"
+                android:src="@drawable/ic_expand_more"
+                app:tint="@color/primary" />
         </LinearLayout>
-    </ScrollView>
 
+        <!-- Progress Indicator -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/moduleProgress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:indicatorColor="@color/primary"
+            app:trackColor="@color/light_blue" />
+
+        <!-- RecyclerView for Lessons -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvLessons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/light_background"
+            android:contentDescription="List of lessons"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+    </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

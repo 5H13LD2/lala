@@ -29,8 +29,7 @@ class LessonAdapter(
     }
 
     override fun onBindViewHolder(holder: LessonViewHolder, position: Int) {
-        val lesson = lessons[position]
-        holder.bind(lesson)
+        holder.bind(lessons[position])
     }
 
     override fun getItemCount(): Int = lessons.size
@@ -53,42 +52,47 @@ class LessonAdapter(
             tvLessonExplanation.text = lesson.explanation
             tvCodeExample.text = lesson.codeExample
 
-            // Set completed status
+            // Get current completion state of this lesson
             val isCompleted = completedLessonIds.contains(lesson.id)
-            ivCheckmark.visibility = if (isCompleted) View.VISIBLE else View.GONE
-            btnMarkAsDone.text = if (isCompleted) "Completed" else "Mark as Done"
-            btnMarkAsDone.isEnabled = true // Always enabled para puwedeng i-toggle
 
-            // Click listener for Mark as Done (toggle check/uncheck)
+            // Update the button and checkmark based on completion state
+            updateCompletionUI(isCompleted)
+
             btnMarkAsDone.setOnClickListener {
-                if (completedLessonIds.contains(lesson.id)) {
-                    // UNCHECK
-                    completedLessonIds.remove(lesson.id)
-                    ivCheckmark.visibility = View.GONE
-                    btnMarkAsDone.text = "Mark as Done"
+                // Alamin ang kasalukuyang completion state
+                val isCompleted = completedLessonIds.contains(lesson.id)
+
+                // I-toggle ang completion state
+                if (isCompleted) {
+                    completedLessonIds.remove(lesson.id) // I-mark as not completed
                     Log.d("Lesson", "Lesson unmarked: ${lesson.id}")
                 } else {
-                    // CHECK
-                    completedLessonIds.add(lesson.id)
-                    ivCheckmark.visibility = View.VISIBLE
-                    btnMarkAsDone.text = "Completed"
+                    completedLessonIds.add(lesson.id) // I-mark as completed
                     Log.d("Lesson", "Lesson marked as done: ${lesson.id}")
                 }
 
-                // Optional callback to save state
+                // I-update ang button UI batay sa bagong state
+                updateCompletionUI(!isCompleted)
+
+                // Log the updated state of completedLessonIds
+                Log.d("Completed Lessons", "Updated list: $completedLessonIds")
+
+                // Ipapaalam sa adapter na ang item ay nagbago (para ma-refresh ang UI)
+                notifyItemChanged(adapterPosition)
+
+                // Tawagan ang completion callback (optional)
                 onLessonCompleted(lesson.id)
             }
 
-            // Click listener to expand/collapse lesson
             lessonHeader.setOnClickListener {
                 lesson.isExpanded = !lesson.isExpanded
                 updateExpandState(lesson.isExpanded)
             }
 
-            // Initialize expanded state
+            // Set the expanded state based on the lesson's current state
             updateExpandState(lesson.isExpanded)
 
-            // Video click
+            // Handle video card clicks
             videoCard.setOnClickListener {
                 if (lesson.videoUrl.isNotEmpty()) {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(lesson.videoUrl))
@@ -97,12 +101,16 @@ class LessonAdapter(
             }
         }
 
+        private fun updateCompletionUI(isCompleted: Boolean) {
+            ivCheckmark.visibility = if (isCompleted) View.VISIBLE else View.GONE
+            btnMarkAsDone.text = if (isCompleted) "Completed" else "Mark as Done"
+        }
+
         private fun updateExpandState(isExpanded: Boolean) {
             ivLessonExpand.rotation = if (isExpanded) 180f else 0f
             if (isExpanded) {
                 lessonContent.visibility = View.VISIBLE
-                val animation = AnimationUtils.loadAnimation(context, R.anim.slide_down)
-                lessonContent.startAnimation(animation)
+                lessonContent.startAnimation(AnimationUtils.loadAnimation(context, R.anim.slide_down))
             } else {
                 lessonContent.visibility = View.GONE
             }

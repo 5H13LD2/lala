@@ -80,7 +80,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp"
+            android:padding="20dp"
             android:visibility="gone"
             tools:visibility="visible">
 
@@ -118,6 +118,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Updated TextView for Lesson Explanation -->
             <TextView
                 android:id="@+id/tvLessonExplanation"
                 android:layout_width="match_parent"
@@ -125,7 +126,7 @@
                 android:layout_marginBottom="12dp"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                tools:text="In this lesson, you'll learn the basics of Python..." />
+                android:text="In this lesson, you'll learn the basics of Python..." />
 
             <TextView
                 android:layout_width="match_parent"
@@ -136,38 +137,38 @@
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
+
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp">
-
                 <TextView
                     android:id="@+id/tvCodeExample"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/code_background"
                     android:fontFamily="monospace"
                     android:padding="12dp"
                     android:textColor="@color/code_text"
                     android:textSize="12sp"
-                    tools:text="print('Hello, World!')" />
-            </HorizontalScrollView>
+                    android:text="print('Hello, World!')" />
 
+            </HorizontalScrollView>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnMarkAsDone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:padding="12dp"
                 android:text="Mark as Done"
                 android:textAllCaps="false"
-                android:padding="12dp"
+                android:textColor="@color/white"
+                app:backgroundTint="@color/primary"
                 app:cornerRadius="8dp"
                 app:icon="@drawable/ic_check_circle"
-                app:iconTint="@color/white"
                 app:iconPadding="8dp"
-                app:backgroundTint="@color/primary"
-                android:textColor="@color/white" />
+                app:iconTint="@color/white" />
 
         </LinearLayout>
     </LinearLayout>

@@ -2,6 +2,7 @@ package com.labactivity.lala
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -46,13 +47,16 @@ class ModuleAdapter(
 
             // Set up progress indicator
             val progressPercentage = module.getProgressPercentage(completedLessonIds)
+            Log.d("Module", "Module Progress: $progressPercentage%")
             moduleProgress.progress = progressPercentage
+
 
             // Set up lessons RecyclerView
             rvLessons.layoutManager = LinearLayoutManager(context)
             val lessonAdapter = LessonAdapter(context, module.lessons, completedLessonIds) { lessonId ->
                 onLessonCompleted(lessonId)
                 notifyItemChanged(adapterPosition) // Update progress indicator
+                Log.d("Module", "Completed Lessons: $completedLessonIds")
             }
             rvLessons.adapter = lessonAdapter
 

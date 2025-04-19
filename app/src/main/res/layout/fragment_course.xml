@@ -18,7 +18,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/primary"
             app:title="Python Course"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="50dp"
             app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>
