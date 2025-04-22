@@ -15,11 +15,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lala">
         <activity
-            android:name=".CoreModule"
+            android:name=".JavaCoreModule"
             android:exported="false" />
         <activity
-            android:name=".SQL_LEARNING"
+            android:name=".CoreModule"
             android:exported="false" />
+
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />

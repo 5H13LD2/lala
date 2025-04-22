@@ -34,16 +34,22 @@ class MainActivity3 : AppCompatActivity() {
             Car("Python", R.drawable.python, CarColors.PYTHON),
             Car("Java", R.drawable.java, CarColors.JAVA),
             Car("MySQL", R.drawable.sql, CarColors.MYSQL),
-
         )
 
         carRecyclerView.adapter = CarAdapter(cars) { selectedCar ->
             // ✅ Kapag na-click ang card, mag-oopen ng bagong activity
-            val intent = Intent(this, CoreModule::class.java).apply {
-                putExtra("CAR_NAME", selectedCar.name)
+            val intent = if (selectedCar.name == "Java") {
+                // Kung Java ang na-click, pumunta sa JavaCoreModule
+                Intent(this, JavaCoreModule::class.java).apply {
+                    putExtra("CAR_NAME", selectedCar.name)
+                }
+            } else {
+                // Otherwise, go to CoreModule
+                Intent(this, CoreModule::class.java).apply {
+                    putExtra("CAR_NAME", selectedCar.name)
+                }
             }
             startActivity(intent)
         }
-      
     }
 }

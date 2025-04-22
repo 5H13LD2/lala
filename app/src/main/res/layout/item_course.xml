@@ -87,7 +87,7 @@
                 android:layout_marginStart="4dp"
                 android:background="@drawable/rectangle_background2"
                 android:padding="10dp"
-                android:text="Flashcard"
+                android:text="Quizzes"
                 android:textSize="14sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
