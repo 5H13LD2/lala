@@ -148,14 +148,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Exercises"
+                    android:text="Quizzes"
                     android:textColor="#757575"
                     android:textSize="16sp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Aced"
+                    android:text="Taked"
                     android:textColor="#757575"
                     android:textSize="16sp" />
             </LinearLayout>

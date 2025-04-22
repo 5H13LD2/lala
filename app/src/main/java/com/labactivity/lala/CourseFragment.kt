@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.progressindicator.LinearProgressIndicator
 
-
 class CourseFragment : Fragment() {
 
     private lateinit var sharedPreferences: SharedPreferences
@@ -60,9 +59,7 @@ class CourseFragment : Fragment() {
             course.modules,
             completedLessonIds
         ) { lessonId ->
-            completedLessonIds.add(lessonId)
-            saveCompletedLessons()  // Save the updated completed lessons
-            updateCoursesProgress() // Update the course progress UI
+            toggleLessonCompletion(lessonId) // Toggle lesson completion on click
         }
         rvModules.adapter = moduleAdapter
 
@@ -73,7 +70,7 @@ class CourseFragment : Fragment() {
     private fun updateCoursesProgress() {
         val totalLessons = course.modules.sumOf { it.lessons.size }
         val completedCount = completedLessonIds.size
-        val progressPercentage = if (totalLessons > 0) (completedCount.toInt() * 100) / totalLessons else 0
+        val progressPercentage = if (totalLessons > 0) (completedCount * 100) / totalLessons else 0
         progressIndicator.progress = progressPercentage
     }
 
@@ -88,7 +85,20 @@ class CourseFragment : Fragment() {
         Log.d("CourseFragment", "Completed Lessons Saved: ${completedLessonIds.size}")
     }
 
-    private fun createDummyCourse(): Courses {
+    // Function to toggle the completion state of a lesson
+    private fun toggleLessonCompletion(lessonId: String) {
+        if (completedLessonIds.contains(lessonId)) {
+            completedLessonIds.remove(lessonId) // If already marked as done, unmark it
+        } else {
+            completedLessonIds.add(lessonId) // Otherwise, mark it as done
+        }
+        saveCompletedLessons() // Save the updated state
+        updateCoursesProgress() // Update progress bar
+        moduleAdapter.notifyDataSetChanged() // Refresh the module list
+    }
+
+
+private fun createDummyCourse(): Courses {
         return Courses(
             id = "python_101",
             title = "Python Course",

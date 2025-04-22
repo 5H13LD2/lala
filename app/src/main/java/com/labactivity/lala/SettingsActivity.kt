@@ -85,10 +85,10 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveNotificationPreference(enabled: Boolean) {
+    private fun saveNotificationPreference(disabled: Boolean) {
         // Save to SharedPreferences
         getSharedPreferences("app_preferences", MODE_PRIVATE).edit()
-            .putBoolean("notifications_enabled", enabled)
+            .putBoolean("notifications_enabled",disabled)
             .apply()
     }
 

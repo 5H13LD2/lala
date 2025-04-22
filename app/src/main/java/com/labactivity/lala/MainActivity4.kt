@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.labactivity.lala.databinding.ActivityMain4Binding
+import java.util.Calendar
 
 class MainActivity4 : AppCompatActivity() {
 
@@ -51,10 +52,32 @@ class MainActivity4 : AppCompatActivity() {
     }
 
     private fun updateDayStates() {
+        // Uncheck all days first
         for (i in dayViews.indices) {
-            dayViews[i].setChecked(true)
+            dayViews[i].setChecked(false)
+        }
+
+        // Get current day of week (Calendar.SUNDAY = 1, MONDAY = 2, ..., SATURDAY = 7)
+        val calendar = Calendar.getInstance()
+        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+
+        // Map Calendar day to index in dayViews array (0 = Monday, ..., 6 = Sunday)
+        val index = when (dayOfWeek) {
+            Calendar.MONDAY -> 0
+            Calendar.TUESDAY -> 1
+            Calendar.WEDNESDAY -> 2
+            Calendar.THURSDAY -> 3
+            Calendar.FRIDAY -> 4
+            Calendar.SATURDAY -> 5
+            Calendar.SUNDAY -> 6
+            else -> -1
+        }
+
+        if (index != -1) {
+            dayViews[index].setChecked(true)
         }
     }
+
 
     private fun setupRecyclerView() {
         val courseList = listOf(

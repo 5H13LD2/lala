@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
+
 class ModuleAdapter(
     private val context: Context,
     private val modules: List<Module>,
@@ -49,12 +50,11 @@ class ModuleAdapter(
             Log.d("Module", "Module Progress: $progressPercentage%")
             moduleProgress.progress = progressPercentage
 
-
             // Set up lessons RecyclerView
             rvLessons.layoutManager = LinearLayoutManager(context)
             val lessonAdapter = LessonAdapter(context, module.lessons, completedLessonIds) { lessonId ->
-                onLessonCompleted(lessonId)
-                notifyItemChanged(adapterPosition) // Update progress indicator
+                onLessonCompleted(lessonId)  // Notify parent fragment of the completed lesson
+                notifyItemChanged(adapterPosition)  // Refresh the progress for this module
                 Log.d("Module", "Completed Lessons: $completedLessonIds")
             }
             rvLessons.adapter = lessonAdapter

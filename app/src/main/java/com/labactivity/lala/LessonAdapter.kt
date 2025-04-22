@@ -59,29 +59,7 @@ class LessonAdapter(
             updateCompletionUI(isCompleted)
 
             btnMarkAsDone.setOnClickListener {
-                // Alamin ang kasalukuyang completion state
-                val isCompleted = completedLessonIds.contains(lesson.id)
-
-                // I-toggle ang completion state
-                if (isCompleted) {
-                    completedLessonIds.remove(lesson.id) // I-mark as not completed
-                    Log.d("Lesson", "Lesson unmarked: ${lesson.id}")
-                } else {
-                    completedLessonIds.add(lesson.id) // I-mark as completed
-                    Log.d("Lesson", "Lesson marked as done: ${lesson.id}")
-                }
-
-                // I-update ang button UI batay sa bagong state
-                updateCompletionUI(!isCompleted)
-
-                // Log the updated state of completedLessonIds
-                Log.d("Completed Lessons", "Updated list: $completedLessonIds")
-
-                // Ipapaalam sa adapter na ang item ay nagbago (para ma-refresh ang UI)
-                notifyItemChanged(adapterPosition)
-
-                // Tawagan ang completion callback (optional)
-                onLessonCompleted(lesson.id)
+                toggleLessonCompletion(lesson)
             }
 
             lessonHeader.setOnClickListener {
@@ -99,6 +77,29 @@ class LessonAdapter(
                     context.startActivity(intent)
                 }
             }
+        }
+
+        private fun toggleLessonCompletion(lesson: Lesson) {
+            val isCompleted = completedLessonIds.contains(lesson.id)
+            if (isCompleted) {
+                completedLessonIds.remove(lesson.id)  // Unmark as completed
+                Log.d("Lesson", "Lesson unmarked: ${lesson.id}")
+            } else {
+                completedLessonIds.add(lesson.id)  // Mark as completed
+                Log.d("Lesson", "Lesson marked as done: ${lesson.id}")
+            }
+
+            // Update the UI based on the new completion state
+            updateCompletionUI(!isCompleted)
+
+            // Log the updated state of completed lessons
+            Log.d("Completed Lessons", "Updated list: $completedLessonIds")
+
+            // Notify the adapter to refresh the UI
+            notifyItemChanged(adapterPosition)
+
+            // Call the completion callback
+            onLessonCompleted(lesson.id)
         }
 
         private fun updateCompletionUI(isCompleted: Boolean) {
