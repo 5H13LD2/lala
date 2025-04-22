@@ -59,8 +59,8 @@ class MainActivity4 : AppCompatActivity() {
     private fun setupRecyclerView() {
         val courseList = listOf(
             Course("Python Basics", R.drawable.python),
-            Course("Android Development", R.drawable.java),
-            Course("Data Structures", R.drawable.logo2)
+            Course("Java Fundamentals", R.drawable.java),
+            Course("SQL Basics", R.drawable.sql)
         )
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
