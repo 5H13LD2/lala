@@ -17,6 +17,8 @@ class CourseAdapter(private val courseList: List<Course>) :
         val courseTitle: TextView = view.findViewById(R.id.courseTitle)
         val btnContinue: Button = view.findViewById(R.id.btnContinueLearning)
         val btnFlashcard: Button = view.findViewById(R.id.btnFlashcard)
+        val btnPractice: Button = view.findViewById(R.id.btnPractice)
+        val practiceLogo: ImageView = view.findViewById(R.id.practicelogo)
         val text14: TextView = view.findViewById(R.id.text14)
     }
 
@@ -31,19 +33,32 @@ class CourseAdapter(private val courseList: List<Course>) :
         holder.courseImage.setImageResource(course.imageResId)
         holder.courseTitle.text = course.name
 
-        // ✅ Underline `text14`
+        // Underline text14
         holder.text14.paintFlags = holder.text14.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-        // ✅ Accessibility improvement
+        // Accessibility
         holder.itemView.contentDescription = "Course: ${course.name}"
 
-        // ✅ Click listeners
+        // Show/Hide Practice button and dumbbell icon
+        if (course.name.contains("SQL", ignoreCase = true)) {
+            holder.btnPractice.visibility = View.GONE
+            holder.practiceLogo.visibility = View.GONE
+        } else {
+            holder.btnPractice.visibility = View.VISIBLE
+            holder.practiceLogo.visibility = View.VISIBLE
+        }
+
+        // Button click listeners
         holder.btnContinue.setOnClickListener {
-            // TODO: Implement action for "Continue Learning"
+            // TODO: Action for Continue Learning
         }
 
         holder.btnFlashcard.setOnClickListener {
-            // TODO: Implement action for "Flashcard"
+            // TODO: Action for Quizzes
+        }
+
+        holder.btnPractice.setOnClickListener {
+            // TODO: Action for Practice (only shown when NOT SQL)
         }
     }
 
