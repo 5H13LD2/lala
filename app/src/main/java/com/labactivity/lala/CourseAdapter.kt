@@ -36,10 +36,10 @@ class CourseAdapter(private val courseList: List<Course>) :
         holder.courseImage.setImageResource(course.imageResId)
         holder.courseTitle.text = course.name
 
-        // Underline
+        // Underline the text14
         holder.text14.paintFlags = holder.text14.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-        // Practice visibility
+        // Hide Practice button for SQL
         if (course.name.contains("SQL", ignoreCase = true)) {
             holder.btnPractice.visibility = View.GONE
             holder.practiceLogo.visibility = View.GONE
@@ -48,7 +48,7 @@ class CourseAdapter(private val courseList: List<Course>) :
             holder.practiceLogo.visibility = View.VISIBLE
         }
 
-        // Continue Learning click
+        // Continue Learning logic
         holder.btnContinue.setOnClickListener {
             val intent = when {
                 course.name.contains("Python", ignoreCase = true) ->
@@ -63,11 +63,18 @@ class CourseAdapter(private val courseList: List<Course>) :
             intent?.let { context.startActivity(it) }
         }
 
-        // Flashcard & Practice logic placeholders
+        // Flashcard logic for Python
         holder.btnFlashcard.setOnClickListener {
-            // TODO: Add logic for flashcard
+            val intent = when {
+                course.name.contains("Python", ignoreCase = true) ->
+                    Intent(context, MainActivity6::class.java)
+                else -> null
+            }
+
+            intent?.let { context.startActivity(it) }
         }
 
+        // Practice logic placeholder
         holder.btnPractice.setOnClickListener {
             // TODO: Add logic for practice
         }
