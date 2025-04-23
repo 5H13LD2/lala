@@ -1,13 +1,13 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.chaquo.python") // ✅ Chaquopy plugin added
 }
 
 android {
     lint {
         abortOnError = false
     }
-
 
     namespace = "com.labactivity.lala"
     compileSdk = 35
@@ -19,8 +19,29 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
 
+        // ✅ Chaquopy config - fixed syntax
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
+
+        // Correctly formatted Chaquopy Python configuration
+        chaquopy {
+            defaultConfig {
+                pip {
+                    install("numpy")             // ✅ For math & arrays
+                    install("sympy")             // ✅ For symbolic math
+                    install("pandas")            // ✅ For tabular data & analysis
+                    install("matplotlib")        // ✅ For plotting/visualization
+                    install("requests")          // ✅ For making HTTP requests
+                    install("flask")             // ✅ For micro web frameworks
+                    install("regex")             // ✅ Advanced string pattern handling
+                    install("python-dateutil")   // ✅ Better datetime handling
+                    install("scikit-learn")      // ✅ For ML basics
+                }
+            }
+        }
+    }
 
     buildFeatures {
         viewBinding = true
@@ -56,14 +77,12 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // ✅ Firebase dependencies (correct format)
-    implementation("com.google.firebase:firebase-auth:22.3.1") // ✅ Latest version
+    // ✅ Firebase
+    implementation("com.google.firebase:firebase-auth:22.3.1")
     implementation("com.google.firebase:firebase-firestore:24.10.1")
-    implementation("androidx.cardview:cardview:1.0.0")
-    implementation ("com.google.android.gms:play-services-auth:20.7.0")
-
-
+    implementation("androidx.cardview:cardview:1.0.0") // Latest pa rin ito
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
 }
 
-// ✅ Apply Firebase Plugin (Keep at the bottom)
+// ✅ Apply Firebase Plugin
 apply(plugin = "com.google.gms.google-services")

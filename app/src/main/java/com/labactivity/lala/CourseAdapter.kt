@@ -76,8 +76,10 @@ class CourseAdapter(private val courseList: List<Course>) :
 
         // Practice logic placeholder
         holder.btnPractice.setOnClickListener {
-            // TODO: Add logic for practice
+            val intent = Intent(context, MainActivity7::class.java)
+            context.startActivity(intent)
         }
+
     }
 
     override fun getItemCount(): Int = courseList.size

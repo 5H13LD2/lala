@@ -39,7 +39,7 @@
         android:layout_margin="16dp"
         android:layout_marginBottom="60dp"
         android:background="@drawable/blue_button_background"
-        android:text="Return to Home"
+        android:text="Return to Dashboard"
         android:textColor="#FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="8dp" />
