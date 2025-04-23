@@ -1,5 +1,6 @@
 package com.labactivity.lala
 
+import android.content.Intent
 import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
@@ -30,16 +31,15 @@ class CourseAdapter(private val courseList: List<Course>) :
 
     override fun onBindViewHolder(holder: CourseViewHolder, position: Int) {
         val course = courseList[position]
+        val context = holder.itemView.context
+
         holder.courseImage.setImageResource(course.imageResId)
         holder.courseTitle.text = course.name
 
-        // Underline text14
+        // Underline
         holder.text14.paintFlags = holder.text14.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
-        // Accessibility
-        holder.itemView.contentDescription = "Course: ${course.name}"
-
-        // Show/Hide Practice button and dumbbell icon
+        // Practice visibility
         if (course.name.contains("SQL", ignoreCase = true)) {
             holder.btnPractice.visibility = View.GONE
             holder.practiceLogo.visibility = View.GONE
@@ -48,17 +48,28 @@ class CourseAdapter(private val courseList: List<Course>) :
             holder.practiceLogo.visibility = View.VISIBLE
         }
 
-        // Button click listeners
+        // Continue Learning click
         holder.btnContinue.setOnClickListener {
-            // TODO: Action for Continue Learning
+            val intent = when {
+                course.name.contains("Python", ignoreCase = true) ->
+                    Intent(context, CoreModule::class.java)
+                course.name.contains("Java", ignoreCase = true) ->
+                    Intent(context, JavaCoreModule::class.java)
+                course.name.contains("SQL", ignoreCase = true) ->
+                    Intent(context, SqlCoreModule::class.java)
+                else -> null
+            }
+
+            intent?.let { context.startActivity(it) }
         }
 
+        // Flashcard & Practice logic placeholders
         holder.btnFlashcard.setOnClickListener {
-            // TODO: Action for Quizzes
+            // TODO: Add logic for flashcard
         }
 
         holder.btnPractice.setOnClickListener {
-            // TODO: Action for Practice (only shown when NOT SQL)
+            // TODO: Add logic for practice
         }
     }
 
