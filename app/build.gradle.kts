@@ -43,6 +43,18 @@ android {
         }
     }
 
+
+
+    buildFeatures {
+        viewBinding = true
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+        }
+    }
+
     buildFeatures {
         viewBinding = true
     }

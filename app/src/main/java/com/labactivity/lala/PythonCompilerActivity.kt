@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
@@ -48,7 +49,13 @@ class PythonCompilerActivity : AppCompatActivity() {
     private fun executeCode() {
         val userCode = codeEditText.text.toString().trimIndent()
         val executor = PythonExecutor()
-        val result = executor.execute(userCode)
-        outputTextView.text = result
+        try {
+            val result = executor.execute(userCode)
+            outputTextView.text = result
+        } catch (e: Exception) {
+            // Display the error message in the UI
+            Toast.makeText(this, "Execution failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            outputTextView.text = "Error: ${e.message}"
+        }
     }
 }
