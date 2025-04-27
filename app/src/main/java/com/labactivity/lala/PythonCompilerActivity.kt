@@ -1,20 +1,37 @@
 package com.labactivity.lala
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.method.ScrollingMovementMethod
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
 import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class PythonCompilerActivity : AppCompatActivity() {
 
     private lateinit var codeEditText: EditText
     private lateinit var runButton: Button
     private lateinit var outputTextView: TextView
+    private lateinit var inputContainer: LinearLayout
+    private lateinit var userInputEditText: EditText
+    private lateinit var submitInputButton: Button
+
+    private val handler = Handler(Looper.getMainLooper())
+    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
+
+    private var pythonExecutionActive = false
+    private var checkInputTimer: Runnable? = null
+    private var outputFile: File? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,11 +46,18 @@ class PythonCompilerActivity : AppCompatActivity() {
         codeEditText = findViewById(R.id.codeEditText)
         runButton = findViewById(R.id.runButton)
         outputTextView = findViewById(R.id.outputTextView)
+        inputContainer = findViewById(R.id.inputContainer)
+        userInputEditText = findViewById(R.id.userInputEditText)
+        submitInputButton = findViewById(R.id.submitInputButton)
 
-        // Optional: Starter code
+        // Enable scrolling for output
+        outputTextView.movementMethod = ScrollingMovementMethod()
+
+        // Optional: Starter code with input example
         codeEditText.setText(
             """
-            print("Hello from Python!")
+           for i in range(5):
+               print(f"Line {i}: Hello, TechLauncher!")
             """.trimIndent()
         )
 
@@ -41,6 +65,23 @@ class PythonCompilerActivity : AppCompatActivity() {
         runButton.setOnClickListener {
             executePythonScript()
         }
+
+        // Set click listener for Submit Input button
+        submitInputButton.setOnClickListener {
+            val userInput = userInputEditText.text.toString()
+            submitUserInput(userInput)
+            userInputEditText.text.clear()
+        }
+
+        // Define the output file path
+        val fileDir = applicationContext.filesDir
+        outputFile = File(fileDir, "code_output.txt")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopInputCheck()
+        executor.shutdown()
     }
 
     private fun executePythonScript() {
@@ -51,48 +92,185 @@ class PythonCompilerActivity : AppCompatActivity() {
             return
         }
 
-        try {
-            // Start Python environment if not already started
-            val py = Python.getInstance()
+        // Disable the run button while execution is in progress
+        runButton.isEnabled = false
+        outputTextView.text = "Starting execution...\n"
+        inputContainer.visibility = View.GONE
 
-            // Get the Python module that contains our execution function
-            val pyModule = py.getModule("myscript")
+        // Set flag to indicate Python execution is active
+        pythonExecutionActive = true
 
-            // Call the function that executes user code and pass the code as parameter
-            pyModule.callAttr("execute_code", userCode)
+        executor.execute {
+            try {
+                // Start Python environment
+                val py = Python.getInstance()
+                val pyModule = py.getModule("myscript")
 
-            // Try several possible file locations
-            val fileDir = applicationContext.filesDir
-            val possibleLocations = listOf(
-                File(fileDir, "files/code_output.txt"),
-                File(fileDir.parentFile, "files/code_output.txt"),
-                File(fileDir, "code_output.txt"),
-                File(fileDir.parentFile, "code_output.txt")
-            )
+                handler.post {
+                    outputTextView.append("Python module loaded, preparing execution...\n")
+                }
 
-            var outputFound = false
+                // Execute the user code (this should no longer block)
+                val result = pyModule.callAttr("execute_code", userCode)
 
-            // Try to read from each possible location
-            for (outputFile in possibleLocations) {
-                if (outputFile.exists()) {
-                    val output = outputFile.readText()
-                    outputTextView.text = output
-                    outputFound = true
+                handler.post {
+                    outputTextView.append("Code execution initiated...\n")
+                    outputTextView.append("Output file path: ${outputFile?.absolutePath}\n")
+                }
 
-                    break
+                // Start checking for input requests
+                startInputCheck(pyModule)
+
+                // Begin checking for output updates
+                var checkCount = 0
+                while (pythonExecutionActive && checkCount < 100) {  // Limit to prevent infinite loops
+                    updateOutput()
+                    Thread.sleep(500)  // Check for updates every 500ms
+
+                    // Check if execution has completed
+                    try {
+                        val isActive = pyModule.callAttr("is_execution_active").toBoolean()
+                        if (!isActive) {
+                            pythonExecutionActive = false
+                            handler.post {
+                                outputTextView.append("Python execution completed.\n")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        handler.post {
+                            outputTextView.append("Error checking execution status: ${e.message}\n")
+                        }
+                    }
+
+                    checkCount++
+                }
+
+                // Final output update
+                updateOutput()
+
+                handler.post {
+                    runButton.isEnabled = true
+                    if (checkCount >= 100) {
+                        outputTextView.append("Monitoring timed out. Check if script is running too long.\n")
+                    }
+                }
+
+            } catch (e: Exception) {
+                handler.post {
+                    Toast.makeText(this, "Execution failed: ${e.message}", Toast.LENGTH_SHORT)
+                        .show()
+                    outputTextView.text =
+                        "Error: ${e.message}\n\nStack trace: ${e.stackTraceToString()}"
+                    runButton.isEnabled = true
+                    pythonExecutionActive = false
+                }
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // Improved input handling
+    private fun startInputCheck(pyModule: com.chaquo.python.PyObject) {
+        checkInputTimer = object : Runnable {
+            override fun run() {
+                if (!pythonExecutionActive) return
+
+                try {
+                    val isInputRequested = pyModule.callAttr("is_input_requested").toBoolean()
+
+                    if (isInputRequested) {
+                        val prompt = pyModule.callAttr("get_input_prompt").toString()
+
+                        handler.post {
+                            inputContainer.visibility = View.VISIBLE
+                            userInputEditText.hint = prompt.ifEmpty { "Enter input..." }
+                            // Request focus and show keyboard
+                            userInputEditText.requestFocus()
+                        }
+                    } else {
+                        handler.post {
+                            if (inputContainer.visibility == View.VISIBLE) {
+                                inputContainer.visibility = View.GONE
+                            }
+                        }
+                    }
+
+                    // Continue checking only if execution is still active
+                    if (pythonExecutionActive) {
+                        handler.postDelayed(this, 300)
+                    }
+                } catch (e: Exception) {
+                    handler.post {
+                        outputTextView.append("Input check error: ${e.message}\n")
+                        inputContainer.visibility = View.GONE
+                    }
+                    pythonExecutionActive = false
                 }
             }
+        }
 
-            // If no output file was found, display diagnostic information
-            if (!outputFound) {
-                val pyResult = pyModule.callAttr("get_file_info").toString()
-                outputTextView.text = "No output file found.\n\nPython diagnostic info:\n$pyResult"
+        handler.post(checkInputTimer!!)
+    }
+
+    private fun stopInputCheck() {
+        checkInputTimer?.let {
+            handler.removeCallbacks(it)
+        }
+        checkInputTimer = null
+        pythonExecutionActive = false
+    }
+
+    private fun submitUserInput(input: String) {
+        executor.execute {
+            try {
+                val py = Python.getInstance()
+                val pyModule = py.getModule("myscript")
+
+                // Provide input to Python
+                pyModule.callAttr("provide_input", input)
+
+                // Hide input container
+                handler.post {
+                    inputContainer.visibility = View.GONE
+                }
+
+                // Update output to show the input
+                updateOutput()
+
+            } catch (e: Exception) {
+                handler.post {
+                    Toast.makeText(
+                        this,
+                        "Failed to submit input: ${e.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
+        }
+    }
 
+    private fun updateOutput() {
+        try {
+            if (outputFile?.exists() == true) {
+                var output = outputFile?.readText() ?: ""
+                if (output.isNotBlank()) {
+                    handler.post {
+                        outputTextView.text = output
+                    }
+                }
+            } else {
+                handler.post {
+                    if (!outputTextView.text.contains("Waiting for output file")) {
+                        outputTextView.append("Waiting for output file...\n")
+                    }
+                }
+            }
         } catch (e: Exception) {
-            Toast.makeText(this, "Execution failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            outputTextView.text = "Error: ${e.message}\n\nStack trace: ${e.stackTraceToString()}"
-            e.printStackTrace()
+            handler.post {
+                if (!outputTextView.text.contains("Error reading output")) {
+                    outputTextView.append("Error reading output: ${e.message}\n")
+                }
+            }
         }
     }
 }

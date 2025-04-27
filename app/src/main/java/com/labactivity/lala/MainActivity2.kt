@@ -38,6 +38,10 @@ class MainActivity2 : AppCompatActivity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
+        binding.textView2.setOnClickListener {
+            startActivity(Intent(this, MainActivity::class.java))
+        }
+
         // Sign up button logic
         binding.btnContinue.setOnClickListener {
             val username = binding.signuser.text.toString()

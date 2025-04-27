@@ -1,91 +1,151 @@
+# In myscript.py
 import sys
 from io import StringIO
 import os
+import threading
+import time
+
+# Global variables to handle input
+input_requested = False
+input_prompt = ""
+input_value = None
+input_ready = threading.Event()
+execution_active = False
+
+# Custom input function that doesn't block the main thread
+def custom_input(prompt=""):
+    global input_requested, input_prompt, input_value, input_ready
+
+    # Set prompt and flag
+    input_prompt = prompt
+    input_requested = True
+
+    # Print the prompt to stdout (will be captured)
+    print(prompt, end="")
+    sys.stdout.flush()
+
+    # Wait for input to be provided by the Android app (with timeout)
+    input_ready.clear()
+    input_received = input_ready.wait(60.0)  # 60-second timeout
+
+    if not input_received:
+        print("\nInput timed out")
+        return ""
+
+    # Reset flag
+    input_requested = False
+
+    # Print the input value to make it appear in the output
+    print(input_value)
+
+    # Return the value provided by the Android app
+    result = input_value
+    return result
+
+# Don't replace the built-in input function immediately
+# We'll do this inside execute_code to avoid blocking at import time
 
 def execute_code(user_code):
     """
     Execute Python code and save output to a file
     """
+    global input_value, input_ready, execution_active
+
+    # Set execution flag
+    execution_active = True
+
+    # Replace the built-in input function
+    sys.modules['builtins'].input = custom_input
+
     # Capture stdout
     original_stdout = sys.stdout
     capture = StringIO()
     sys.stdout = capture
 
     try:
-        # Execute the user's code
-        exec(user_code)
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        # Restore stdout
-        sys.stdout = original_stdout
-
-    try:
-        # Get Android app context for file operations
-        from com.chaquo.python import Python
-        app_context = Python.getPlatform().getApplication()
-
-        # Get files directory
-        files_dir = app_context.getFilesDir().getAbsolutePath()
-
-        # Create output directory if needed
-        output_dir = os.path.join(files_dir, "files")
-        os.makedirs(output_dir, exist_ok=True)
-
-        # Define output file path
-        output_file = os.path.join(files_dir, "code_output.txt")
-
-        # Write output to file
+        # Write initial message to output file
+        output_file = get_output_file_path()
         with open(output_file, "w") as f:
-            f.write(capture.getvalue())
-
-        # Also try alternate location for compatibility
-        alt_output_file = os.path.join(output_dir, "code_output.txt")
-        with open(alt_output_file, "w") as f:
-            f.write(capture.getvalue())
-
+            f.write("Running Python code...\n")
     except Exception as e:
-        # If file operations fail, write to a different location
-        with open(files_dir + "/error_log.txt", "w") as f:
-            f.write(f"File operation error: {str(e)}")
+        print(f"Error writing initial output: {str(e)}")
 
-        # Try to print to Logcat for debugging
-        print(f"File operation error: {str(e)}")
-
-def get_file_info():
-    """
-    Get diagnostic information about file paths and permissions
-    """
-    info = []
-
-    try:
-        from com.chaquo.python import Python
-        app_context = Python.getPlatform().getApplication()
-
-        files_dir = app_context.getFilesDir().getAbsolutePath()
-        info.append(f"Files dir: {files_dir}")
-
-        output_dir = os.path.join(files_dir, "files")
-        info.append(f"Output dir exists: {os.path.exists(output_dir)}")
-
-        output_file = os.path.join(files_dir, "code_output.txt")
-        info.append(f"Output file exists: {os.path.exists(output_file)}")
-
-        # Check for write permission
+    # Execute in a separate thread to prevent blocking
+    def run_code():
+        global execution_active
         try:
-            with open(files_dir + "/test_write.txt", "w") as f:
-                f.write("Test")
-            info.append("Write permission: OK")
-            os.remove(files_dir + "/test_write.txt")
+            # Execute the user's code
+            exec(user_code, globals())
         except Exception as e:
-            info.append(f"Write permission error: {str(e)}")
+            print(f"Error executing code: {e}")
+        finally:
+            # Restore stdout
+            sys.stdout = original_stdout
+            execution_active = False
 
-        # List files in directory
-        info.append("Files in directory:")
-        for f in os.listdir(files_dir):
-            info.append(f"- {f}")
+    # Start the thread
+    code_thread = threading.Thread(target=run_code)
+    code_thread.daemon = True  # Make thread a daemon so it doesn't block app exit
+    code_thread.start()
 
-    except Exception as e:
-        info.append(f"Error getting file info: {str(e)}")
+    # Start a separate thread to monitor and update output
+    def update_output():
+        while execution_active:
+            try:
+                with open(get_output_file_path(), "w") as f:
+                    f.write(capture.getvalue())
+            except Exception as e:
+                print(f"Error updating output file: {e}")
+            time.sleep(0.2)
 
-    return "\n".join(info)
+        # Final write
+        try:
+            with open(get_output_file_path(), "w") as f:
+                f.write(capture.getvalue())
+        except Exception as e:
+            print(f"Error writing final output: {e}")
+
+    update_thread = threading.Thread(target=update_output)
+    update_thread.daemon = True
+    update_thread.start()
+
+    # Let the threads run independently (non-blocking)
+    return True
+
+def is_execution_active():
+    """
+    Check if Python code execution is still active
+    """
+    global execution_active
+    return execution_active
+
+def get_output_file_path():
+    """
+    Get the path to the output file
+    """
+    from com.chaquo.python import Python
+    app_context = Python.getPlatform().getApplication()
+    files_dir = app_context.getFilesDir().getAbsolutePath()
+    return os.path.join(files_dir, "code_output.txt")
+
+def is_input_requested():
+    """
+    Check if input is being requested by the Python script
+    """
+    global input_requested
+    return input_requested
+
+def get_input_prompt():
+    """
+    Get the current input prompt
+    """
+    global input_prompt
+    return input_prompt
+
+def provide_input(value):
+    """
+    Provide input to the Python script
+    """
+    global input_value, input_ready
+    input_value = value
+    input_ready.set()
