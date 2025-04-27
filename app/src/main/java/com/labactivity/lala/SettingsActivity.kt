@@ -57,7 +57,7 @@ class SettingsActivity : AppCompatActivity() {
 
         binding.restorePurchasesLayout.setOnClickListener {
             // Handle restore purchases
-            Toast.makeText(this, "Restore Purchases clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Ask AI clicked", Toast.LENGTH_SHORT).show()
         }
 
         binding.subscribeLayout.setOnClickListener {

@@ -62,11 +62,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // ✅ Guest Login Button (Direct to MainActivity3)
-        binding.btnGuest.setOnClickListener {
-            val intent = Intent(this,MainActivity3::class.java)
-            startActivity(intent)
-        }
+
+
     }
 
     // ✅ Function to Check If User Exists

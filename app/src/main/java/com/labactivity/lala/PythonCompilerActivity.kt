@@ -78,11 +78,7 @@ class PythonCompilerActivity : AppCompatActivity() {
                     val output = outputFile.readText()
                     outputTextView.text = output
                     outputFound = true
-                    Toast.makeText(
-                        this,
-                        "Found output at: ${outputFile.absolutePath}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+
                     break
                 }
             }
