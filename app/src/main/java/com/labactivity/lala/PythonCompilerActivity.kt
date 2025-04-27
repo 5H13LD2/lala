@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
+import java.io.File
 
 class PythonCompilerActivity : AppCompatActivity() {
 
@@ -19,43 +20,83 @@ class PythonCompilerActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.compiler)
 
-        // Start Chaquopy Python instance
+        // Initialize Python if not already started
         if (!Python.isStarted()) {
             Python.start(AndroidPlatform(this))
         }
 
-        // UI Bindings
+        // Find UI elements
         codeEditText = findViewById(R.id.codeEditText)
         runButton = findViewById(R.id.runButton)
         outputTextView = findViewById(R.id.outputTextView)
 
-        // Sample starter code
+        // Optional: Starter code
         codeEditText.setText(
             """
-            # Write your Python code here
-            print("Hello World")
-            
-            # Try some math
-            result = 5 + 7
-            print(f"5 + 7 = {result}")
+            print("Hello from Python!")
             """.trimIndent()
         )
 
+        // Set click listener for Run button
         runButton.setOnClickListener {
-            executeCode()
+            executePythonScript()
         }
     }
 
-    private fun executeCode() {
-        val userCode = codeEditText.text.toString().trimIndent()
-        val executor = PythonExecutor()
+    private fun executePythonScript() {
+        val userCode = codeEditText.text.toString().trim()
+
+        if (userCode.isBlank()) {
+            Toast.makeText(this, "Please enter some Python code.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         try {
-            val result = executor.execute(userCode)
-            outputTextView.text = result
+            // Start Python environment if not already started
+            val py = Python.getInstance()
+
+            // Get the Python module that contains our execution function
+            val pyModule = py.getModule("myscript")
+
+            // Call the function that executes user code and pass the code as parameter
+            pyModule.callAttr("execute_code", userCode)
+
+            // Try several possible file locations
+            val fileDir = applicationContext.filesDir
+            val possibleLocations = listOf(
+                File(fileDir, "files/code_output.txt"),
+                File(fileDir.parentFile, "files/code_output.txt"),
+                File(fileDir, "code_output.txt"),
+                File(fileDir.parentFile, "code_output.txt")
+            )
+
+            var outputFound = false
+
+            // Try to read from each possible location
+            for (outputFile in possibleLocations) {
+                if (outputFile.exists()) {
+                    val output = outputFile.readText()
+                    outputTextView.text = output
+                    outputFound = true
+                    Toast.makeText(
+                        this,
+                        "Found output at: ${outputFile.absolutePath}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    break
+                }
+            }
+
+            // If no output file was found, display diagnostic information
+            if (!outputFound) {
+                val pyResult = pyModule.callAttr("get_file_info").toString()
+                outputTextView.text = "No output file found.\n\nPython diagnostic info:\n$pyResult"
+            }
+
         } catch (e: Exception) {
-            // Display the error message in the UI
             Toast.makeText(this, "Execution failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            outputTextView.text = "Error: ${e.message}"
+            outputTextView.text = "Error: ${e.message}\n\nStack trace: ${e.stackTraceToString()}"
+            e.printStackTrace()
         }
     }
 }
