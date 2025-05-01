@@ -69,6 +69,19 @@
                 app:tint="@color/primary" />
         </LinearLayout>
 
+        <!-- Quiz Score TextView -->
+        <TextView
+            android:id="@+id/sqlTvQuizScore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            android:visibility="gone"
+            android:textColor="@color/success_green"
+            tools:text="Score: 8/10"
+            tools:visibility="visible"/>
+
         <!-- Progress Indicator -->
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/sqlModuleProgress"
@@ -85,6 +98,16 @@
             android:layout_height="wrap_content"
             android:background="@color/light_background"
             android:contentDescription="List of lessons"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!-- Quiz Button -->
+        <Button
+            android:id="@+id/sqlBtnTakeQuizzes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Take Quiz"
             android:visibility="gone"
             tools:visibility="visible" />
 

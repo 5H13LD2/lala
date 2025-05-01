@@ -1,24 +1,31 @@
 package com.labactivity.lala
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.labactivity.lala.quiz.DynamicQuizActivity
 
 class JavaModuleAdapter(
     private val context: Context,
     private val modules: List<Module>,
     private val completedLessonIds: MutableSet<String>,
-    private val onLessonCompleted: (String) -> Unit
+    private val onLessonCompleted: (String) -> Unit,
+    private val onLessonClick: (Lesson) -> Unit,
+    private val onQuizClick: (Module) -> Unit
 ) : RecyclerView.Adapter<JavaModuleAdapter.ModuleViewHolder>() {
+
+    private val quizScoreManager = QuizScoreManager(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ModuleViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.java_itemmodule, parent, false)
@@ -39,9 +46,13 @@ class JavaModuleAdapter(
         private val ivModuleExpand: ImageView = itemView.findViewById(R.id.javaIvModuleExpand)
         private val rvLessons: RecyclerView = itemView.findViewById(R.id.javaRvLessons)
         private val moduleProgress: LinearProgressIndicator = itemView.findViewById(R.id.javaModuleProgress)
+        private val btnTakeQuizzes: Button = itemView.findViewById(R.id.javaBtnTakeQuizzes)
+        private val tvQuizScore: TextView = itemView.findViewById(R.id.javaTvQuizScore)
 
         fun bind(module: Module) {
-            tvModuleTitle.text = module.title
+            // Set module title with score indicator if available
+            setModuleTitleWithScoreIndicator(module)
+            
             tvModuleDescription.text = module.description
 
             val progressPercentage = module.getProgressPercentage(completedLessonIds)
@@ -49,12 +60,21 @@ class JavaModuleAdapter(
             moduleProgress.progress = progressPercentage
 
             rvLessons.layoutManager = LinearLayoutManager(context)
-            val lessonAdapter = LessonAdapter(context, module.lessons, completedLessonIds) { lessonId ->
-                onLessonCompleted(lessonId)
-                notifyItemChanged(adapterPosition)
-                Log.d("JavaModule", "Completed Lessons: $completedLessonIds")
-            }
+            val lessonAdapter = LessonAdapter(context, module.lessons, completedLessonIds,
+                onLessonClick = onLessonClick,
+                onLessonCompleted = { lessonId ->
+                    onLessonCompleted(lessonId)
+                    notifyItemChanged(adapterPosition)
+                    Log.d("JavaModule", "Completed Lessons: $completedLessonIds")
+                }
+            )
             rvLessons.adapter = lessonAdapter
+
+            // Set up the Take Quiz button
+            btnTakeQuizzes.setOnClickListener {
+                Log.d("JavaModuleAdapter", "Quiz button clicked for module: ${module.id} - ${module.title}")
+                onQuizClick(module)
+            }
 
             updateExpandState(module.isExpanded)
 
@@ -64,14 +84,38 @@ class JavaModuleAdapter(
             }
         }
 
+        private fun setModuleTitleWithScoreIndicator(module: Module) {
+            // Check if we have a score for this module
+            val scorePair = quizScoreManager.getQuizScore(module.id)
+            
+            if (scorePair != null) {
+                val (score, total) = scorePair
+                val isPassing = quizScoreManager.isPassing(module.id)
+                
+                // Create a formatted title with score indicator
+                val statusEmoji = if (isPassing) "🟩 " else "🟥 "
+                tvModuleTitle.text = statusEmoji + module.title
+                
+                // Display score in the separate score TextView
+                tvQuizScore.text = "Score: $score/$total"
+                tvQuizScore.visibility = View.VISIBLE
+            } else {
+                // No score yet, just show the title
+                tvModuleTitle.text = module.title
+                tvQuizScore.visibility = View.GONE
+            }
+        }
+
         private fun updateExpandState(isExpanded: Boolean) {
             ivModuleExpand.rotation = if (isExpanded) 180f else 0f
             if (isExpanded) {
                 rvLessons.visibility = View.VISIBLE
+                btnTakeQuizzes.visibility = View.VISIBLE
                 val animation = AnimationUtils.loadAnimation(context, R.anim.slide_down)
                 rvLessons.startAnimation(animation)
             } else {
                 rvLessons.visibility = View.GONE
+                btnTakeQuizzes.visibility = View.GONE
             }
         }
     }

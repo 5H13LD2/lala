@@ -57,12 +57,27 @@ class JavaCourseFragment : Fragment() {
         javaModuleAdapter = JavaModuleAdapter(
             requireContext(),
             course.modules,
-            completedLessonIds
-        ) { lessonId ->
-            completedLessonIds.add(lessonId)
-            saveCompletedLessons()  // Save the updated completed lessons
-            updateCoursesProgress() // Update the course progress UI
-        }
+            completedLessonIds,
+            onLessonCompleted = { lessonId ->
+                completedLessonIds.add(lessonId)
+                saveCompletedLessons()  // Save the updated completed lessons
+                updateCoursesProgress() // Update the course progress UI
+            },
+            onLessonClick = { lesson ->
+                // Handle lesson click (e.g., open lesson detail)
+                // For now, just log the click
+                android.util.Log.d("JavaCourseFragment", "Lesson clicked: ${lesson.title}")
+            },
+            onQuizClick = { module ->
+                // Navigate to the quiz for this module
+                android.util.Log.d("JavaCourseFragment", "Quiz button clicked for module: ${module.id}")
+                val intent = android.content.Intent(requireContext(), com.labactivity.lala.quiz.DynamicQuizActivity::class.java).apply {
+                    putExtra("module_id", module.id)
+                    putExtra("module_title", module.title)
+                }
+                startActivity(intent)
+            }
+        )
         javaRvModules.adapter = javaModuleAdapter
 
         // Initialize course progress

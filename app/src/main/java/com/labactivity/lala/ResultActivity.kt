@@ -50,7 +50,7 @@ class ResultActivity : AppCompatActivity() {
 
         val tryAgainButton = findViewById<Button>(R.id.try_again_button)
         tryAgainButton.setOnClickListener {
-            val intent = Intent(this, QuizActivity::class.java).apply {
+            val intent = Intent(this, com.labactivity.lala.quiz.DynamicQuizActivity::class.java).apply {
                 putExtra("module_id", moduleId)
                 putExtra("module_title", moduleTitle)
             }

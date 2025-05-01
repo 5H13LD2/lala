@@ -4,12 +4,15 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.labactivity.lala.quiz.ModuleQuizRepository
+import com.labactivity.lala.quiz.Quiz
 
 class QuizActivity : AppCompatActivity() {
 
@@ -20,10 +23,10 @@ class QuizActivity : AppCompatActivity() {
     private lateinit var optionsRadioGroup: RadioGroup
     private lateinit var nextButton: Button
 
-    private val questionRepository = QuestionRepository()
-    private val questions = questionRepository.getQuestions()
+    private lateinit var quizRepository: ModuleQuizRepository
+    private lateinit var questions: List<Quiz>
     private var currentQuestionIndex = 0
-    private val userAnswers = IntArray(questions.size) { -1 } // -1 means unanswered
+    private val userAnswers = mutableMapOf<String, Int>() // Map of questionId to selected answer
 
     private var countDownTimer: CountDownTimer? = null
     private val startTimeInMillis: Long = 225000 // 3:45 in milliseconds
@@ -42,8 +45,26 @@ class QuizActivity : AppCompatActivity() {
         // Get module info from intent
         moduleId = intent.getStringExtra("module_id") ?: ""
         moduleTitle = intent.getStringExtra("module_title") ?: ""
+        
+        Log.d("QuizActivity", "Module ID: $moduleId, Title: $moduleTitle")
 
+        // Initialize views
         initializeViews()
+        
+        // Get questions from ModuleQuizRepository
+        quizRepository = ModuleQuizRepository()
+        questions = quizRepository.getQuestionsForModule(moduleId)
+        
+        Log.d("QuizActivity", "Retrieved ${questions.size} questions for module $moduleId")
+        
+        if (questions.isEmpty()) {
+            // No questions found for this module
+            Log.e("QuizActivity", "No questions found for module $moduleId")
+            showNoQuestionsError()
+            return
+        }
+        
+        // Start the quiz
         startTimer()
         displayQuestion()
 
@@ -56,6 +77,14 @@ class QuizActivity : AppCompatActivity() {
                 finishQuiz()
             }
         }
+    }
+
+    private fun showNoQuestionsError() {
+        questionTextView.text = "No questions available for this module."
+        questionCounterTextView.visibility = View.GONE
+        optionsRadioGroup.visibility = View.GONE
+        nextButton.text = "Go back"
+        nextButton.setOnClickListener { finish() }
     }
 
     private fun initializeViews() {
@@ -96,28 +125,27 @@ class QuizActivity : AppCompatActivity() {
 
     private fun displayQuestion() {
         val question = questions[currentQuestionIndex]
-        questionTextView.text = question.text
+        questionTextView.text = question.question
         questionCounterTextView.text = "Question ${currentQuestionIndex + 1} of ${questions.size}"
 
-        val option1 = findViewById<RadioButton>(R.id.option_1)
-        val option2 = findViewById<RadioButton>(R.id.option_2)
-        val option3 = findViewById<RadioButton>(R.id.option_3)
-        val option4 = findViewById<RadioButton>(R.id.option_4)
-
-        option1.text = question.options[0]
-        option2.text = question.options[1]
-        option3.text = question.options[2]
-        option4.text = question.options[3]
-
-        optionsRadioGroup.clearCheck()
-
-        if (userAnswers[currentQuestionIndex] != -1) {
-            when (userAnswers[currentQuestionIndex]) {
-                0 -> option1.isChecked = true
-                1 -> option2.isChecked = true
-                2 -> option3.isChecked = true
-                3 -> option4.isChecked = true
+        // Clear previous radio buttons
+        optionsRadioGroup.removeAllViews()
+        
+        // Add radio buttons for each option
+        question.options.forEachIndexed { index, option ->
+            val radioButton = RadioButton(this).apply {
+                id = index
+                text = option
+                textSize = 16f
+                setPadding(16, 16, 16, 16)
             }
+            optionsRadioGroup.addView(radioButton)
+        }
+        
+        // Check selected option if user has already answered
+        userAnswers[question.id]?.let { selectedIndex ->
+            val radioButton = optionsRadioGroup.getChildAt(selectedIndex) as? RadioButton
+            radioButton?.isChecked = true
         }
 
         if (currentQuestionIndex == questions.size - 1) {
@@ -128,12 +156,11 @@ class QuizActivity : AppCompatActivity() {
     }
 
     private fun saveAnswer() {
+        val currentQuestion = questions[currentQuestionIndex]
         val selectedId = optionsRadioGroup.checkedRadioButtonId
-        when (selectedId) {
-            R.id.option_1 -> userAnswers[currentQuestionIndex] = 0
-            R.id.option_2 -> userAnswers[currentQuestionIndex] = 1
-            R.id.option_3 -> userAnswers[currentQuestionIndex] = 2
-            R.id.option_4 -> userAnswers[currentQuestionIndex] = 3
+        
+        if (selectedId != -1) {
+            userAnswers[currentQuestion.id] = selectedId
         }
     }
 
@@ -141,9 +168,20 @@ class QuizActivity : AppCompatActivity() {
         countDownTimer?.cancel()
 
         var score = 0
-        for (i in questions.indices) {
-            if (userAnswers[i] == questions[i].correctAnswerIndex) {
+        var correctAnswers = 0
+        var incorrectAnswers = 0
+        var skippedQuestions = 0
+        
+        for (question in questions) {
+            val userAnswer = userAnswers[question.id]
+            
+            if (userAnswer == null) {
+                skippedQuestions++
+            } else if (userAnswer == question.correctOptionIndex) {
                 score++
+                correctAnswers++
+            } else {
+                incorrectAnswers++
             }
         }
 
@@ -157,6 +195,9 @@ class QuizActivity : AppCompatActivity() {
         intent.putExtra("TOTAL", questions.size)
         intent.putExtra("MODULE_ID", moduleId)
         intent.putExtra("MODULE_TITLE", moduleTitle)
+        intent.putExtra("CORRECT_ANSWERS", correctAnswers)
+        intent.putExtra("INCORRECT_ANSWERS", incorrectAnswers)
+        intent.putExtra("SKIPPED_QUESTIONS", skippedQuestions)
         startActivity(intent)
         finish()
     }

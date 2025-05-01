@@ -20,12 +20,22 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.labactivity.lala.quiz.DynamicQuizActivity
 
 class ModuleAdapter(
     private val context: Context,
     private val modules: List<Module>,
     private val completedLessonIds: MutableSet<String>,
-    private val onLessonCompleted: (String) -> Unit
+    private val onLessonCompleted: (String) -> Unit,
+    private val onLessonClick: (Lesson) -> Unit = { /* Default empty implementation */ },
+    private val onQuizClick: (Module) -> Unit = { module ->
+        // Default implementation to launch DynamicQuizActivity
+        val intent = Intent(context, DynamicQuizActivity::class.java).apply {
+            putExtra("module_id", module.id)
+            putExtra("module_title", module.title)
+        }
+        context.startActivity(intent)
+    }
 ) : RecyclerView.Adapter<ModuleAdapter.ModuleViewHolder>() {
 
     private val quizScoreManager = QuizScoreManager(context)
@@ -65,22 +75,23 @@ class ModuleAdapter(
 
             // Set up lessons RecyclerView
             rvLessons.layoutManager = LinearLayoutManager(context)
-            val lessonAdapter = LessonAdapter(context, module.lessons, completedLessonIds) { lessonId ->
-                onLessonCompleted(lessonId)  // Notify parent fragment of the completed lesson
-                notifyItemChanged(adapterPosition)  // Refresh the progress for this module
-                Log.d("Module", "Completed Lessons: $completedLessonIds")
-            }
+            val lessonAdapter = LessonAdapter(
+                context, 
+                module.lessons, 
+                completedLessonIds,
+                onLessonClick = onLessonClick, 
+                onLessonCompleted = { lessonId ->
+                    onLessonCompleted(lessonId)  // Notify parent fragment of the completed lesson
+                    notifyItemChanged(adapterPosition)  // Refresh the progress for this module
+                    Log.d("Module", "Completed Lessons: $completedLessonIds")
+                }
+            )
             rvLessons.adapter = lessonAdapter
 
             // Set up the Take Quiz button
             btnTakeQuizzes.setOnClickListener {
                 Log.d("ModuleAdapter", "Quiz button clicked for module: ${module.id} - ${module.title}")
-                
-                val intent = Intent(context, MainActivity6::class.java).apply {
-                    putExtra("module_id", module.id)
-                    putExtra("module_title", module.title)
-                }
-                context.startActivity(intent)
+                onQuizClick(module)
             }
 
             // Initialize expanded state

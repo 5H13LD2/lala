@@ -19,7 +19,7 @@ class SqlCourseFragment : Fragment() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var sqlRvModules: RecyclerView
     private lateinit var sqlProgressIndicator: LinearProgressIndicator
-    private lateinit var sqlmoduleAdapter: ModuleAdapter
+    private lateinit var sqlModuleAdapter: SqlModuleAdapter
 
     private val completedLessonIds = mutableSetOf<String>()
     private lateinit var course: Courses
@@ -54,16 +54,31 @@ class SqlCourseFragment : Fragment() {
 
         // Set up RecyclerView
         sqlRvModules.layoutManager = LinearLayoutManager(requireContext())
-        sqlmoduleAdapter = ModuleAdapter(
+        sqlModuleAdapter = SqlModuleAdapter(
             requireContext(),
             course.modules,
-            completedLessonIds
-        ) { lessonId ->
-            completedLessonIds.add(lessonId)
-            saveCompletedLessons()  // Save the updated completed lessons
-            updateCoursesProgress() // Update the course progress UI
-        }
-        sqlRvModules.adapter = sqlmoduleAdapter
+            completedLessonIds,
+            onLessonCompleted = { lessonId ->
+                completedLessonIds.add(lessonId)
+                saveCompletedLessons()  // Save the updated completed lessons
+                updateCoursesProgress() // Update the course progress UI
+            },
+            onLessonClick = { lesson ->
+                // Handle lesson click (e.g., open lesson detail)
+                // For now, just log the click
+                Log.d("SqlCourseFragment", "Lesson clicked: ${lesson.title}")
+            },
+            onQuizClick = { module ->
+                // Navigate to the quiz for this module
+                Log.d("SqlCourseFragment", "Quiz button clicked for module: ${module.id}")
+                val intent = android.content.Intent(requireContext(), com.labactivity.lala.quiz.DynamicQuizActivity::class.java).apply {
+                    putExtra("module_id", module.id)
+                    putExtra("module_title", module.title)
+                }
+                startActivity(intent)
+            }
+        )
+        sqlRvModules.adapter = sqlModuleAdapter
 
         // Initialize course progress
         updateCoursesProgress()

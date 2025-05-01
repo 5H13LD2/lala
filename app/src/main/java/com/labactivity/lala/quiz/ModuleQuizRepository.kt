@@ -200,6 +200,197 @@ class ModuleQuizRepository {
                 difficulty = Difficulty.EASY
             )
         ),
+
+        // Java Module IDs: map from java_module_1, java_module_2, etc.
+        "java_module_1" to listOf(
+            Quiz(
+                id = "java_1.1",
+                question = "What is Java?",
+                options = listOf(
+                    "A programming language",
+                    "A coffee type",
+                    "An island in Indonesia",
+                    "All of the above"
+                ),
+                correctOptionIndex = 3,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "java_1.2",
+                question = "Which of these is NOT a Java feature?",
+                options = listOf(
+                    "Object-Oriented",
+                    "Interpreted",
+                    "Dynamic typing",
+                    "Platform Independent"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "java_1.3",
+                question = "What is the correct way to declare a variable in Java?",
+                options = listOf(
+                    "var x = 10;",
+                    "int x = 10;",
+                    "x = 10;",
+                    "Integer x = 10;"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "java_1.4",
+                question = "What is the Java Virtual Machine (JVM)?",
+                options = listOf(
+                    "A physical computer for running Java",
+                    "An abstract computing machine that enables Java platform independence",
+                    "A compiler that converts Java to machine code",
+                    "A tool that checks Java syntax"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "java_1.5",
+                question = "What is the main method signature in Java?",
+                options = listOf(
+                    "public void main()",
+                    "public static void main()",
+                    "public static void main(String[] args)",
+                    "public static void main(String args)"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            )
+        ),
+
+        "java_module_2" to listOf(
+            Quiz(
+                id = "java_2.1",
+                question = "What is an if-else statement in Java?",
+                options = listOf(
+                    "A looping construct",
+                    "A conditional statement",
+                    "An error handling mechanism",
+                    "A data type"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "java_2.2",
+                question = "Which loop construct guarantees that the loop body will execute at least once?",
+                options = listOf(
+                    "for loop",
+                    "while loop",
+                    "do-while loop",
+                    "foreach loop"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "java_2.3",
+                question = "What is the correct syntax for a Java switch statement?",
+                options = listOf(
+                    "switch (expression) { case value: ... }",
+                    "switch expression { case value: ... }",
+                    "switch (expression) { case (value): ... }",
+                    "switch expression { case (value): ... }"
+                ),
+                correctOptionIndex = 0,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "java_2.4",
+                question = "Which statement is used to exit a loop in Java?",
+                options = listOf(
+                    "exit;",
+                    "goto;",
+                    "break;",
+                    "stop;"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "java_2.5",
+                question = "What is the output of this code: for(int i=0; i<5; i++) { System.out.print(i); }",
+                options = listOf(
+                    "0123",
+                    "01234",
+                    "1234",
+                    "12345"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.NORMAL
+            )
+        ),
+
+        // SQL Module IDs
+        "module_1" to listOf(
+            Quiz(
+                id = "sql_1.1",
+                question = "What does SQL stand for?",
+                options = listOf(
+                    "Structured Question Language",
+                    "Structured Query Language",
+                    "Standard Query Language",
+                    "System Query Language"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "sql_1.2",
+                question = "Which SQL statement is used to retrieve data from a database?",
+                options = listOf(
+                    "GET",
+                    "OPEN",
+                    "EXTRACT",
+                    "SELECT"
+                ),
+                correctOptionIndex = 3,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "sql_1.3",
+                question = "Which SQL clause is used to filter records?",
+                options = listOf(
+                    "WHERE",
+                    "HAVING",
+                    "FILTER",
+                    "GROUP BY"
+                ),
+                correctOptionIndex = 0,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "sql_1.4",
+                question = "What is a primary key?",
+                options = listOf(
+                    "The first column in a table",
+                    "A column that uniquely identifies each row",
+                    "A column that can contain NULL values",
+                    "The main table in a database"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "sql_1.5",
+                question = "Which SQL statement is used to add new records to a table?",
+                options = listOf(
+                    "ADD",
+                    "INSERT",
+                    "UPDATE",
+                    "CREATE"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            )
+        ),
         
         // Fallback module with Python questions (used if module ID doesn't match any specific module)
         "python" to listOf(
@@ -267,37 +458,61 @@ class ModuleQuizRepository {
     )
     
     /**
-     * Get all quiz questions for a specific module, limited to 10 questions
+     * Gets quiz questions for a specific module
      * @param moduleId The ID of the module
-     * @return List of Quiz objects for the module, or fallback questions if module not found
+     * @return List of Quiz objects for the specified module (limited to 10)
      */
     fun getQuestionsForModule(moduleId: String): List<Quiz> {
-        Log.d("ModuleQuizRepository", "Getting questions for moduleId: $moduleId")
+        Log.d("ModuleQuizRepository", "Getting questions for module ID: $moduleId")
         
-        // Try to get questions with exact module ID match
+        // Try to get questions for the specified module ID
         val questions = quizzesByModule[moduleId]
         
-        // If no questions found for this ID, use Python fallback questions
-        val result = if (questions.isNullOrEmpty()) {
-            Log.d("ModuleQuizRepository", "No questions found for moduleId: $moduleId, using fallback")
-            quizzesByModule["python"] ?: emptyList()
-        } else {
-            Log.d("ModuleQuizRepository", "Found ${questions.size} questions for moduleId: $moduleId")
-            questions
-        }
+        // If no questions are found for this module ID, try using it as a prefix match
+        val fallbackQuestions = if (questions == null) {
+            // Look for modules that start with the given ID
+            quizzesByModule.entries.find { (key, _) -> key.startsWith(moduleId) || moduleId.startsWith(key) }?.value
+        } else null
         
-        // Limit to 10 questions max
-        return result.take(10)
+        // If still no questions are found, return python questions as a fallback
+        return when {
+            questions != null -> {
+                Log.d("ModuleQuizRepository", "Found ${questions.size} questions for module ID: $moduleId")
+                questions.take(10) // Limit to 10 questions
+            }
+            fallbackQuestions != null -> {
+                Log.d("ModuleQuizRepository", "Using fallback questions by prefix match for module ID: $moduleId")
+                fallbackQuestions.take(10) // Limit to 10 questions
+            }
+            else -> {
+                Log.d("ModuleQuizRepository", "No questions found for module ID: $moduleId, using Python fallback")
+                quizzesByModule["python"]?.take(10) ?: emptyList()
+            }
+        }
     }
     
     /**
-     * Get the total number of questions for a module
+     * Gets the total number of questions available for a module
      * @param moduleId The ID of the module
-     * @return Number of questions (max 10)
+     * @return The number of questions available, limited to a maximum of 10
      */
     fun getQuestionCountForModule(moduleId: String): Int {
-        val count = quizzesByModule[moduleId]?.size ?: 0
-        return count.coerceAtMost(10)
+        // Try to get questions for the specified module ID
+        val questions = quizzesByModule[moduleId]
+        
+        // If no questions are found for this module ID, try using it as a prefix match
+        val fallbackQuestions = if (questions == null) {
+            // Look for modules that start with the given ID
+            quizzesByModule.entries.find { (key, _) -> key.startsWith(moduleId) || moduleId.startsWith(key) }?.value
+        } else null
+        
+        val count = when {
+            questions != null -> questions.size
+            fallbackQuestions != null -> fallbackQuestions.size
+            else -> quizzesByModule["python"]?.size ?: 0
+        }
+        
+        return minOf(count, 10) // Limit to 10 questions
     }
     
     /**

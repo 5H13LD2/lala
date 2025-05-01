@@ -20,6 +20,7 @@ class LessonAdapter(
     private val context: Context,
     private val lessons: List<Lesson>,
     private val completedLessonIds: MutableSet<String>,
+    private val onLessonClick: (Lesson) -> Unit,
     private val onLessonCompleted: (String) -> Unit
 ) : RecyclerView.Adapter<LessonAdapter.LessonViewHolder>() {
 
@@ -29,7 +30,8 @@ class LessonAdapter(
     }
 
     override fun onBindViewHolder(holder: LessonViewHolder, position: Int) {
-        holder.bind(lessons[position])
+        val lesson = lessons[position]
+        holder.bind(lesson)
     }
 
     override fun getItemCount(): Int = lessons.size

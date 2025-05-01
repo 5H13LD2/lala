@@ -1,6 +1,7 @@
 package com.labactivity.lala
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -57,10 +58,27 @@ class CourseFragment : Fragment() {
         moduleAdapter = ModuleAdapter(
             requireContext(),
             course.modules,
-            completedLessonIds
-        ) { lessonId ->
-            toggleLessonCompletion(lessonId) // Toggle lesson completion on click
-        }
+            completedLessonIds,
+            onLessonCompleted = { lessonId ->
+                completedLessonIds.add(lessonId)
+                saveCompletedLessons()  // Save the updated completed lessons
+                updateCoursesProgress() // Update the course progress UI
+            },
+            onLessonClick = { lesson ->
+                // Handle lesson click (e.g., open lesson detail)
+                // For now, just log the click
+                Log.d("CourseFragment", "Lesson clicked: ${lesson.title}")
+            },
+            onQuizClick = { module ->
+                // Navigate to the quiz for this module
+                Log.d("CourseFragment", "Quiz button clicked for module: ${module.id}")
+                val intent = Intent(requireContext(), com.labactivity.lala.quiz.DynamicQuizActivity::class.java).apply {
+                    putExtra("module_id", module.id)
+                    putExtra("module_title", module.title)
+                }
+                startActivity(intent)
+            }
+        )
         rvModules.adapter = moduleAdapter
 
         // Initialize course progress
@@ -85,20 +103,7 @@ class CourseFragment : Fragment() {
         Log.d("CourseFragment", "Completed Lessons Saved: ${completedLessonIds.size}")
     }
 
-    // Function to toggle the completion state of a lesson
-    private fun toggleLessonCompletion(lessonId: String) {
-        if (completedLessonIds.contains(lessonId)) {
-            completedLessonIds.remove(lessonId) // If already marked as done, unmark it
-        } else {
-            completedLessonIds.add(lessonId) // Otherwise, mark it as done
-        }
-        saveCompletedLessons() // Save the updated state
-        updateCoursesProgress() // Update progress bar
-        moduleAdapter.notifyDataSetChanged() // Refresh the module list
-    }
-
-
-private fun createDummyCourse(): Courses {
+    private fun createDummyCourse(): Courses {
         return Courses(
             id = "python_101",
             title = "Python Course",
