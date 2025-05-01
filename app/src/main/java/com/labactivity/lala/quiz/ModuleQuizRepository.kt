@@ -70,6 +70,66 @@ class ModuleQuizRepository {
                 ),
                 correctOptionIndex = 2,
                 difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "1.6",
+                question = "Which operator is used for exponentiation in Python?",
+                options = listOf(
+                    "^",
+                    "**",
+                    "++",
+                    "*^"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "1.7",
+                question = "What will print(\"Hello\" + \"World\") output?",
+                options = listOf(
+                    "Hello World",
+                    "HelloWorld",
+                    "Hello + World",
+                    "Error"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "1.8",
+                question = "What is the correct way to create a multi-line string in Python?",
+                options = listOf(
+                    "Using single quotes (\'...\')",
+                    "Using double quotes (\"...\")",
+                    "Using triple quotes (\'\'\'...\'\'\')",
+                    "Using backslashes (\\n)"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "1.9",
+                question = "How do you convert a string to an integer in Python?",
+                options = listOf(
+                    "int(str)",
+                    "toString(int)",
+                    "str.toInt()",
+                    "Integer.parse(str)"
+                ),
+                correctOptionIndex = 0,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "1.10",
+                question = "Which of the following is True in Python?",
+                options = listOf(
+                    "None == 0",
+                    "1 == True",
+                    "0 == True",
+                    "False == None"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.NORMAL
             )
         ),
         
@@ -134,6 +194,66 @@ class ModuleQuizRepository {
                 ),
                 correctOptionIndex = 2,
                 difficulty = Difficulty.HARD
+            ),
+            Quiz(
+                id = "2.6",
+                question = "What does the 'continue' statement do in Python?",
+                options = listOf(
+                    "Skips the current iteration and continues with the next",
+                    "Continues to the next function",
+                    "Exits the loop completely",
+                    "Pauses the loop execution"
+                ),
+                correctOptionIndex = 0,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "2.7",
+                question = "Which statement is used to handle exceptions in Python?",
+                options = listOf(
+                    "catch",
+                    "try",
+                    "except",
+                    "handle"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "2.8",
+                question = "What is the output of the following code?\nif True: print('A'); else: print('B')",
+                options = listOf(
+                    "A",
+                    "B",
+                    "AB",
+                    "Error"
+                ),
+                correctOptionIndex = 0,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "2.9",
+                question = "Which of the following is NOT a valid loop in Python?",
+                options = listOf(
+                    "while loop",
+                    "for loop",
+                    "do-while loop",
+                    "foreach loop"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "2.10",
+                question = "What will the following code output?\nx = 5; y = 10; print('Yes' if x > y else 'No')",
+                options = listOf(
+                    "Yes",
+                    "No",
+                    "Error",
+                    "None"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.NORMAL
             )
         ),
         
@@ -198,6 +318,66 @@ class ModuleQuizRepository {
                 ),
                 correctOptionIndex = 0,
                 difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "3.6",
+                question = "What does the pop() method do for a dictionary in Python?",
+                options = listOf(
+                    "Removes the last element",
+                    "Removes an element with a specific key and returns its value",
+                    "Removes all elements",
+                    "Sorts the dictionary"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "3.7",
+                question = "Which data structure in Python uses keys and values?",
+                options = listOf(
+                    "List",
+                    "Tuple",
+                    "Set",
+                    "Dictionary"
+                ),
+                correctOptionIndex = 3,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "3.8",
+                question = "What will be the output of: set([1, 2, 3, 2, 1])?",
+                options = listOf(
+                    "{1, 2, 3, 2, 1}",
+                    "{1, 2, 3}",
+                    "Error",
+                    "[1, 2, 3]"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "3.9",
+                question = "Which method would you use to sort a list in Python?",
+                options = listOf(
+                    "list.sort()",
+                    "sorted(list)",
+                    "Both A and B",
+                    "list.order()"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "3.10",
+                question = "What is a frozenset in Python?",
+                options = listOf(
+                    "A set that can't be modified after creation",
+                    "A set that contains only immutable elements",
+                    "A set with numerical values only",
+                    "A set that's automatically sorted"
+                ),
+                correctOptionIndex = 0,
+                difficulty = Difficulty.HARD
             )
         ),
 
@@ -259,6 +439,66 @@ class ModuleQuizRepository {
                     "public static void main()",
                     "public static void main(String[] args)",
                     "public static void main(String args)"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "java_1.6",
+                question = "Which Java keyword is used to create a class?",
+                options = listOf(
+                    "struct",
+                    "class",
+                    "interface",
+                    "object"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "java_1.7",
+                question = "What is the correct way to create an object in Java?",
+                options = listOf(
+                    "MyClass obj = MyClass();",
+                    "MyClass obj = new MyClass;",
+                    "MyClass obj = new MyClass();",
+                    "new MyClass obj();"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "java_1.8",
+                question = "Which of the following is a primitive data type in Java?",
+                options = listOf(
+                    "String",
+                    "Array",
+                    "int",
+                    "Object"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "java_1.9",
+                question = "What is the size of int data type in Java?",
+                options = listOf(
+                    "8 bits",
+                    "16 bits",
+                    "32 bits",
+                    "64 bits"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "java_1.10",
+                question = "Which of the following declarations is incorrect?",
+                options = listOf(
+                    "int[] arr = new int[5];",
+                    "int arr[] = new int[5];",
+                    "int arr[] = new int[];",
+                    "int[] arr = {1, 2, 3, 4, 5};"
                 ),
                 correctOptionIndex = 2,
                 difficulty = Difficulty.NORMAL
@@ -325,6 +565,66 @@ class ModuleQuizRepository {
                 ),
                 correctOptionIndex = 1,
                 difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "java_2.6",
+                question = "What will happen if you try to compile and run this code: while(true) { System.out.println(\"Hello\"); }",
+                options = listOf(
+                    "It will print 'Hello' once",
+                    "It will print 'Hello' infinite times",
+                    "Compilation error",
+                    "Runtime error"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "java_2.7",
+                question = "Which of the following is NOT a valid loop in Java?",
+                options = listOf(
+                    "for loop",
+                    "foreach loop",
+                    "while loop",
+                    "until loop"
+                ),
+                correctOptionIndex = 3,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "java_2.8",
+                question = "What is the enhanced for loop in Java?",
+                options = listOf(
+                    "A loop that only works with arrays",
+                    "A loop that automatically increments the counter",
+                    "A loop that iterates through elements of an array or collection",
+                    "A loop that can have multiple counters"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "java_2.9",
+                question = "What happens if break is not used in a case of a switch statement?",
+                options = listOf(
+                    "Compilation error",
+                    "Runtime error",
+                    "Falls through to the next case",
+                    "Switch exits automatically"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "java_2.10",
+                question = "Which statement is used for exception handling in Java?",
+                options = listOf(
+                    "if-else",
+                    "switch-case",
+                    "try-catch",
+                    "for-while"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
             )
         ),
 
@@ -389,6 +689,66 @@ class ModuleQuizRepository {
                 ),
                 correctOptionIndex = 1,
                 difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "sql_1.6",
+                question = "Which SQL statement is used to update existing records in a table?",
+                options = listOf(
+                    "SAVE",
+                    "MODIFY",
+                    "UPDATE",
+                    "CHANGE"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "sql_1.7",
+                question = "Which SQL statement is used to delete records from a table?",
+                options = listOf(
+                    "DELETE",
+                    "REMOVE",
+                    "DROP",
+                    "CLEAR"
+                ),
+                correctOptionIndex = 0,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "sql_1.8",
+                question = "Which SQL clause is used to sort the result set?",
+                options = listOf(
+                    "SORT BY",
+                    "ORDER BY",
+                    "GROUP BY",
+                    "ARRANGE BY"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "sql_1.9",
+                question = "What is a foreign key?",
+                options = listOf(
+                    "A key that uniquely identifies a record in a table",
+                    "A key that links two tables together",
+                    "A key used for encryption",
+                    "A key used for indexing"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "sql_1.10",
+                question = "Which SQL function is used to return the highest value in a column?",
+                options = listOf(
+                    "TOP()",
+                    "MAXIMUM()",
+                    "HIGH()",
+                    "MAX()"
+                ),
+                correctOptionIndex = 3,
+                difficulty = Difficulty.NORMAL
             )
         ),
         
@@ -453,6 +813,66 @@ class ModuleQuizRepository {
                 ),
                 correctOptionIndex = 1,
                 difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "p.6",
+                question = "Which of the following is used to define a block of code in Python?",
+                options = listOf(
+                    "Curly braces {}",
+                    "Parentheses ()",
+                    "Indentation",
+                    "Square brackets []"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "p.7",
+                question = "What will be the output of 'Hello' + 'World'?",
+                options = listOf(
+                    "Hello World",
+                    "HelloWorld",
+                    "Hello + World",
+                    "Error"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
+            ),
+            Quiz(
+                id = "p.8",
+                question = "Which Python data type is mutable?",
+                options = listOf(
+                    "String",
+                    "Tuple",
+                    "List",
+                    "int"
+                ),
+                correctOptionIndex = 2,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "p.9",
+                question = "What will be the output of 5 // 2?",
+                options = listOf(
+                    "2.5",
+                    "2",
+                    "3",
+                    "2.0"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.NORMAL
+            ),
+            Quiz(
+                id = "p.10",
+                question = "What is the Python package manager called?",
+                options = listOf(
+                    "npm",
+                    "pip",
+                    "pkg",
+                    "pypm"
+                ),
+                correctOptionIndex = 1,
+                difficulty = Difficulty.EASY
             )
         )
     )
@@ -468,27 +888,45 @@ class ModuleQuizRepository {
         // Try to get questions for the specified module ID
         val questions = quizzesByModule[moduleId]
         
-        // If no questions are found for this module ID, try using it as a prefix match
-        val fallbackQuestions = if (questions == null) {
-            // Look for modules that start with the given ID
-            quizzesByModule.entries.find { (key, _) -> key.startsWith(moduleId) || moduleId.startsWith(key) }?.value
-        } else null
+        // If exact match is found, return those questions
+        if (questions != null) {
+            Log.d("ModuleQuizRepository", "Found ${questions.size} questions for module ID: $moduleId")
+            return questions.take(10) // Limit to 10 questions
+        }
         
-        // If still no questions are found, return python questions as a fallback
-        return when {
-            questions != null -> {
-                Log.d("ModuleQuizRepository", "Found ${questions.size} questions for module ID: $moduleId")
-                questions.take(10) // Limit to 10 questions
+        // No exact match - determine the module type based on ID prefix
+        val moduleType = when {
+            // Python core modules (numbered 1, 2, 3)
+            moduleId.matches(Regex("^[1-3].*$")) -> {
+                val pythonModuleId = moduleId.substringBefore(".")
+                Log.d("ModuleQuizRepository", "Identified as Python module $pythonModuleId")
+                if (quizzesByModule.containsKey(pythonModuleId)) pythonModuleId else "python"
             }
-            fallbackQuestions != null -> {
-                Log.d("ModuleQuizRepository", "Using fallback questions by prefix match for module ID: $moduleId")
-                fallbackQuestions.take(10) // Limit to 10 questions
+            
+            // Java modules
+            moduleId.contains("java", ignoreCase = true) -> {
+                Log.d("ModuleQuizRepository", "Identified as Java module")
+                "java_module_1"  // Default to first Java module
             }
+            
+            // SQL modules
+            moduleId.contains("sql", ignoreCase = true) -> {
+                Log.d("ModuleQuizRepository", "Identified as SQL module")
+                "module_1"  // Default to first SQL module
+            }
+            
+            // Default fallback
             else -> {
-                Log.d("ModuleQuizRepository", "No questions found for module ID: $moduleId, using Python fallback")
-                quizzesByModule["python"]?.take(10) ?: emptyList()
+                Log.d("ModuleQuizRepository", "Module type unknown, using Python fallback")
+                "python"
             }
         }
+        
+        // Get questions for the determined module type
+        val moduleQuestions = quizzesByModule[moduleType]
+        Log.d("ModuleQuizRepository", "Using $moduleType questions as fallback for $moduleId")
+        
+        return moduleQuestions?.take(10) ?: emptyList()
     }
     
     /**
@@ -500,19 +938,32 @@ class ModuleQuizRepository {
         // Try to get questions for the specified module ID
         val questions = quizzesByModule[moduleId]
         
-        // If no questions are found for this module ID, try using it as a prefix match
-        val fallbackQuestions = if (questions == null) {
-            // Look for modules that start with the given ID
-            quizzesByModule.entries.find { (key, _) -> key.startsWith(moduleId) || moduleId.startsWith(key) }?.value
-        } else null
-        
-        val count = when {
-            questions != null -> questions.size
-            fallbackQuestions != null -> fallbackQuestions.size
-            else -> quizzesByModule["python"]?.size ?: 0
+        // If exact match is found, return the count
+        if (questions != null) {
+            return minOf(questions.size, 10)
         }
         
-        return minOf(count, 10) // Limit to 10 questions
+        // No exact match - determine the module type based on ID prefix
+        val moduleType = when {
+            // Python core modules (numbered 1, 2, 3)
+            moduleId.matches(Regex("^[1-3].*$")) -> {
+                val pythonModuleId = moduleId.substringBefore(".")
+                if (quizzesByModule.containsKey(pythonModuleId)) pythonModuleId else "python"
+            }
+            
+            // Java modules
+            moduleId.contains("java", ignoreCase = true) -> "java_module_1"
+            
+            // SQL modules
+            moduleId.contains("sql", ignoreCase = true) -> "module_1"
+            
+            // Default fallback
+            else -> "python"
+        }
+        
+        // Get count for the determined module type
+        val moduleQuestions = quizzesByModule[moduleType]
+        return minOf(moduleQuestions?.size ?: 0, 10)
     }
     
     /**

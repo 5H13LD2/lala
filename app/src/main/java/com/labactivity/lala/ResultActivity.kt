@@ -45,6 +45,8 @@ class ResultActivity : AppCompatActivity() {
         reviewAnswersButton.setOnClickListener {
             val intent = Intent(this, ReviewActivity::class.java)
             intent.putExtra("SCORE", score)
+            intent.putExtra("MODULE_ID", moduleId)
+            intent.putExtra("MODULE_TITLE", moduleTitle)
             startActivity(intent)
         }
 
