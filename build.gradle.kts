@@ -12,7 +12,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.2.0")  // Make sure this matches your Android Studio version
+        classpath("com.android.tools.build:gradle:8.9.2")  // Make sure this matches your Android Studio version
         classpath("com.google.gms:google-services:4.4.0")
         classpath("com.chaquo.python:gradle:16.0.0")
     }

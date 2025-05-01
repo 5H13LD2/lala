@@ -33,6 +33,9 @@
             android:name=".QuizActivity"
             android:exported="false" />
         <activity
+            android:name=".quiz.DynamicQuizActivity"
+            android:exported="false" />
+        <activity
             android:name=".ResultActivity"
             android:exported="false" />
         <activity

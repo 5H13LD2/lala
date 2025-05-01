@@ -2,6 +2,10 @@ package com.labactivity.lala
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.util.Log
 import android.view.View
@@ -12,6 +16,7 @@ import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
@@ -19,9 +24,11 @@ import com.google.android.material.progressindicator.LinearProgressIndicator
 class ModuleAdapter(
     private val context: Context,
     private val modules: List<Module>,
-    private val completedLessonIds: MutableSet<String>, // ✅ changed to MutableSet
+    private val completedLessonIds: MutableSet<String>,
     private val onLessonCompleted: (String) -> Unit
 ) : RecyclerView.Adapter<ModuleAdapter.ModuleViewHolder>() {
+
+    private val quizScoreManager = QuizScoreManager(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ModuleViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.item_module, parent, false)
@@ -43,9 +50,12 @@ class ModuleAdapter(
         private val rvLessons: RecyclerView = itemView.findViewById(R.id.rvLessons)
         private val moduleProgress: LinearProgressIndicator = itemView.findViewById(R.id.moduleProgress)
         private val btnTakeQuizzes: Button = itemView.findViewById(R.id.btnTakeQuizzes)
+        private val tvQuizScore: TextView = itemView.findViewById(R.id.tvQuizScore)
 
         fun bind(module: Module) {
-            tvModuleTitle.text = module.title
+            // Set module title with score indicator if available
+            setModuleTitleWithScoreIndicator(module)
+            
             tvModuleDescription.text = module.description
 
             // Set up progress indicator
@@ -64,6 +74,8 @@ class ModuleAdapter(
 
             // Set up the Take Quiz button
             btnTakeQuizzes.setOnClickListener {
+                Log.d("ModuleAdapter", "Quiz button clicked for module: ${module.id} - ${module.title}")
+                
                 val intent = Intent(context, MainActivity6::class.java).apply {
                     putExtra("module_id", module.id)
                     putExtra("module_title", module.title)
@@ -78,6 +90,37 @@ class ModuleAdapter(
             moduleHeader.setOnClickListener {
                 module.isExpanded = !module.isExpanded
                 updateExpandState(module.isExpanded)
+            }
+        }
+
+        private fun setModuleTitleWithScoreIndicator(module: Module) {
+            // Check if we have a score for this module
+            val scorePair = quizScoreManager.getQuizScore(module.id)
+            
+            if (scorePair != null) {
+                val (score, total) = scorePair
+                val isPassing = quizScoreManager.isPassing(module.id)
+                
+                // Create a SpannableString for colored square indicator
+                val statusEmoji = if (isPassing) "🟩 " else "🟥 "
+                val scoreText = " — ${if (isPassing) "✅" else "❌"} Score: $score/$total"
+                
+                // Set the module title with status indicator
+                tvModuleTitle.text = statusEmoji + module.title + scoreText
+                
+                // Apply color to the score text
+                val textColor = if (isPassing) 
+                    ContextCompat.getColor(context, R.color.success_green)
+                else 
+                    ContextCompat.getColor(context, R.color.error_red)
+                
+                tvQuizScore.text = "Score: $score/$total"
+                tvQuizScore.setTextColor(textColor)
+                tvQuizScore.visibility = View.VISIBLE
+            } else {
+                // No score yet, just show the title
+                tvModuleTitle.text = module.title
+                tvQuizScore.visibility = View.GONE
             }
         }
 

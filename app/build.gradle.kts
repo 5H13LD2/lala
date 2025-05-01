@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
+    id("kotlin-parcelize") // Add kotlin-parcelize plugin
 }
 
 android {
@@ -37,13 +38,6 @@ android {
             pip {
                 install("numpy")
                 install("sympy")
-                install("pandas")
-                install("matplotlib")
-                install("requests")
-                install("flask")
-                install("regex")
-                install("python-dateutil")
-                install("scikit-learn")
             }
 
             sourceSets {

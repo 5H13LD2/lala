@@ -28,9 +28,20 @@ class QuizActivity : AppCompatActivity() {
     private var countDownTimer: CountDownTimer? = null
     private val startTimeInMillis: Long = 225000 // 3:45 in milliseconds
 
+    private lateinit var quizScoreManager: QuizScoreManager
+    private var moduleId: String = ""
+    private var moduleTitle: String = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz)
+
+        // Initialize the score manager
+        quizScoreManager = QuizScoreManager(this)
+        
+        // Get module info from intent
+        moduleId = intent.getStringExtra("module_id") ?: ""
+        moduleTitle = intent.getStringExtra("module_title") ?: ""
 
         initializeViews()
         startTimer()
@@ -136,9 +147,16 @@ class QuizActivity : AppCompatActivity() {
             }
         }
 
+        // Save the score for this module
+        if (moduleId.isNotEmpty()) {
+            quizScoreManager.saveQuizScore(moduleId, score, questions.size)
+        }
+
         val intent = Intent(this, ResultActivity::class.java)
         intent.putExtra("SCORE", score)
         intent.putExtra("TOTAL", questions.size)
+        intent.putExtra("MODULE_ID", moduleId)
+        intent.putExtra("MODULE_TITLE", moduleTitle)
         startActivity(intent)
         finish()
     }

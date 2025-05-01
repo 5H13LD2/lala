@@ -26,6 +26,7 @@
     <color name="code_background">#263238</color>
     <color name="code_text">#ECEFF1</color>
     <color name="success_green">#4CAF50</color>
+    <color name="error_red">#F44336</color>
 
     <color name="blue_primary">#2196F3</color>
     <color name="code_text1">#212121</color>

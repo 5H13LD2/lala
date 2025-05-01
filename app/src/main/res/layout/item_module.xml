@@ -40,6 +40,19 @@
                     android:textStyle="bold"
                     tools:text="Module 1: Fundamentals of Python" />
 
+                <!-- Added TextView for quiz score -->
+                <TextView
+                    android:id="@+id/tvQuizScore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:text="Score: 10/10"
+                    tools:visibility="visible"
+                    tools:textColor="@color/success_green" />
+
                 <FrameLayout
                     android:id="@+id/moduleHeader"
                     android:layout_width="match_parent"

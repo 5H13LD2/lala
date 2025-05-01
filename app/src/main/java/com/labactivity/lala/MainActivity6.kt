@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.labactivity.lala.quiz.DynamicQuizActivity
 
 class MainActivity6 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,11 +19,15 @@ class MainActivity6 : AppCompatActivity() {
         // Update the welcome title with the module title
         val welcomeTitle = findViewById<TextView>(R.id.welcome_title)
         welcomeTitle.text = moduleTitle
+        
+        // Update subtitle based on module
+        val welcomeSubtitle = findViewById<TextView>(R.id.welcome_subtitle)
+        welcomeSubtitle.text = "Test your knowledge on $moduleTitle!"
 
         val startButton = findViewById<Button>(R.id.start_button)
         startButton.setOnClickListener {
-            val intent = Intent(this, QuizActivity::class.java).apply {
-                // Pass module information to QuizActivity
+            val intent = Intent(this, DynamicQuizActivity::class.java).apply {
+                // Pass module information to DynamicQuizActivity
                 putExtra("module_id", moduleId)
                 putExtra("module_title", moduleTitle)
             }
