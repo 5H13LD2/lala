@@ -1,11 +1,13 @@
 package com.labactivity.lala
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -40,6 +42,7 @@ class ModuleAdapter(
         private val ivModuleExpand: ImageView = itemView.findViewById(R.id.ivModuleExpand)
         private val rvLessons: RecyclerView = itemView.findViewById(R.id.rvLessons)
         private val moduleProgress: LinearProgressIndicator = itemView.findViewById(R.id.moduleProgress)
+        private val btnTakeQuizzes: Button = itemView.findViewById(R.id.btnTakeQuizzes)
 
         fun bind(module: Module) {
             tvModuleTitle.text = module.title
@@ -59,6 +62,15 @@ class ModuleAdapter(
             }
             rvLessons.adapter = lessonAdapter
 
+            // Set up the Take Quiz button
+            btnTakeQuizzes.setOnClickListener {
+                val intent = Intent(context, MainActivity6::class.java).apply {
+                    putExtra("module_id", module.id)
+                    putExtra("module_title", module.title)
+                }
+                context.startActivity(intent)
+            }
+
             // Initialize expanded state
             updateExpandState(module.isExpanded)
 
@@ -73,10 +85,12 @@ class ModuleAdapter(
             ivModuleExpand.rotation = if (isExpanded) 180f else 0f
             if (isExpanded) {
                 rvLessons.visibility = View.VISIBLE
+                btnTakeQuizzes.visibility = View.VISIBLE
                 val animation = AnimationUtils.loadAnimation(context, R.anim.slide_down)
                 rvLessons.startAnimation(animation)
             } else {
                 rvLessons.visibility = View.GONE
+                btnTakeQuizzes.visibility = View.GONE
             }
         }
     }
