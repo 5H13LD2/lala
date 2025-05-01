@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".quiz.TestQuizRepositoryActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Quiz Repository Test"
+        android:layout_marginTop="50dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <EditText
+            android:id="@+id/module_id_edit_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Enter Module ID"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <Button
+            android:id="@+id/query_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Query"
+            android:layout_marginStart="8dp" />
+
+        <Button
+            android:id="@+id/reset_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reset"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+    
+    <TextView
+        android:id="@+id/repo_name_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Repository: Not Selected"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+    
+    <TextView
+        android:id="@+id/question_count_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Question Count: 0"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+    
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Questions:"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+    
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/questions_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:listitem="@layout/item_quiz_test" />
+
+</LinearLayout> 

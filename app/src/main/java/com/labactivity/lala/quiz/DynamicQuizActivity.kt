@@ -15,6 +15,10 @@ import com.labactivity.lala.R
 import com.labactivity.lala.ResultActivity
 import java.util.concurrent.TimeUnit
 
+// Additional imports
+import com.labactivity.lala.quiz.QuizRepository
+import com.labactivity.lala.quiz.QuizRepositoryFactory
+
 class DynamicQuizActivity : AppCompatActivity() {
 
     // UI components
@@ -25,7 +29,7 @@ class DynamicQuizActivity : AppCompatActivity() {
     private lateinit var btnNext: Button
     
     // Data
-    private lateinit var quizRepository: ModuleQuizRepository
+    private lateinit var quizRepository: QuizRepository
     private lateinit var moduleId: String
     private lateinit var moduleTitle: String
     private lateinit var questions: List<Quiz>
@@ -58,8 +62,11 @@ class DynamicQuizActivity : AppCompatActivity() {
         // Set up title
         title = moduleTitle
         
-        // Initialize quiz repository and get questions for this module
-        quizRepository = ModuleQuizRepository()
+        // Get the appropriate repository for this module using the factory
+        quizRepository = QuizRepositoryFactory.getRepositoryForModule(moduleId)
+        Log.d("DynamicQuizActivity", "Using repository: ${quizRepository.javaClass.simpleName}")
+        
+        // Get questions for this module
         questions = quizRepository.getQuestionsForModule(moduleId)
         
         Log.d("DynamicQuizActivity", "Retrieved ${questions.size} questions for module $moduleId")

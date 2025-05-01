@@ -7,7 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.labactivity.lala.quiz.DynamicQuizActivity
-import com.labactivity.lala.quiz.ModuleQuizRepository
+import com.labactivity.lala.quiz.QuizRepositoryFactory
 
 class MainActivity6 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,9 +28,10 @@ class MainActivity6 : AppCompatActivity() {
         val welcomeSubtitle = findViewById<TextView>(R.id.welcome_subtitle)
         welcomeSubtitle.text = "Test your knowledge on $moduleTitle!"
         
-        // Verify module has questions in ModuleQuizRepository
-        val quizRepository = ModuleQuizRepository()
+        // Get the appropriate repository for this module and verify it has questions
+        val quizRepository = QuizRepositoryFactory.getRepositoryForModule(moduleId)
         val questionCount = quizRepository.getQuestionCountForModule(moduleId)
+        Log.d("MainActivity6", "Using repository: ${quizRepository.javaClass.simpleName}")
         Log.d("MainActivity6", "Module $moduleId has $questionCount questions available")
 
         val startButton = findViewById<Button>(R.id.start_button)

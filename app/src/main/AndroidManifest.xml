@@ -30,6 +30,11 @@
         </activity>
 
         <activity
+            android:name=".quiz.TestQuizRepositoryActivity"
+            android:exported="false"
+            android:label="Quiz Repository Test" />
+
+        <activity
             android:name=".QuizActivity"
             android:exported="false" />
         <activity

@@ -11,7 +11,8 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.labactivity.lala.quiz.ModuleQuizRepository
+import com.labactivity.lala.quiz.QuizRepository
+import com.labactivity.lala.quiz.QuizRepositoryFactory
 import com.labactivity.lala.quiz.Quiz
 
 class QuizActivity : AppCompatActivity() {
@@ -23,7 +24,7 @@ class QuizActivity : AppCompatActivity() {
     private lateinit var optionsRadioGroup: RadioGroup
     private lateinit var nextButton: Button
 
-    private lateinit var quizRepository: ModuleQuizRepository
+    private lateinit var quizRepository: QuizRepository
     private lateinit var questions: List<Quiz>
     private var currentQuestionIndex = 0
     private val userAnswers = mutableMapOf<String, Int>() // Map of questionId to selected answer
@@ -51,8 +52,11 @@ class QuizActivity : AppCompatActivity() {
         // Initialize views
         initializeViews()
         
-        // Get questions from ModuleQuizRepository
-        quizRepository = ModuleQuizRepository()
+        // Get the appropriate repository for this module using the factory
+        quizRepository = QuizRepositoryFactory.getRepositoryForModule(moduleId)
+        Log.d("QuizActivity", "Using repository: ${quizRepository.javaClass.simpleName}")
+        
+        // Get questions for this module
         questions = quizRepository.getQuestionsForModule(moduleId)
         
         Log.d("QuizActivity", "Retrieved ${questions.size} questions for module $moduleId")

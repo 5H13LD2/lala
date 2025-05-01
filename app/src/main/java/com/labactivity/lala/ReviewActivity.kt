@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.labactivity.lala.quiz.ModuleQuizRepository
+import com.labactivity.lala.quiz.QuizRepositoryFactory
 import com.labactivity.lala.quiz.Quiz
 
 class ReviewActivity : AppCompatActivity() {
@@ -35,8 +35,11 @@ class ReviewActivity : AppCompatActivity() {
         // Update UI with module information
         moduleTitleTextView.text = "$moduleTitle - Review"
         
-        // Initialize the ModuleQuizRepository and get questions for this specific module
-        val quizRepository = ModuleQuizRepository()
+        // Get the appropriate repository for this module using the factory
+        val quizRepository = QuizRepositoryFactory.getRepositoryForModule(moduleId)
+        Log.d("ReviewActivity", "Using repository: ${quizRepository.javaClass.simpleName}")
+        
+        // Get questions for this specific module
         val questions = quizRepository.getQuestionsForModule(moduleId)
 
         if (questions.isEmpty()) {
@@ -46,7 +49,7 @@ class ReviewActivity : AppCompatActivity() {
             Log.d("ReviewActivity", "Found ${questions.size} questions for review")
         }
 
-        // Initialize the adapter with the questions from ModuleQuizRepository
+        // Initialize the adapter with the questions from the selected repository
         reviewAdapter = QuizReviewAdapter(questions, moduleId)
         questionsRecyclerView.adapter = reviewAdapter
         questionsRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -62,7 +65,7 @@ class ReviewActivity : AppCompatActivity() {
 }
 
 /**
- * Adapter for displaying Quiz objects from ModuleQuizRepository in the review screen
+ * Adapter for displaying Quiz objects in the review screen
  */
 class QuizReviewAdapter(
     private val quizzes: List<Quiz>,

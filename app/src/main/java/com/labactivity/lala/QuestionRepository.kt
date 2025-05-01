@@ -6,16 +6,16 @@ import android.util.Log
  * Repository for general quiz questions.
  * 
  * @deprecated This repository is deprecated and will be removed in future versions.
- * For module-specific questions, use ModuleQuizRepository instead.
+ * For module-specific questions, use QuizRepositoryFactory instead.
  */
-@Deprecated("Use ModuleQuizRepository for all quiz questions")
+@Deprecated("Use QuizRepositoryFactory for all quiz questions")
 class QuestionRepository {
     init {
-        Log.w("QuestionRepository", "WARNING: QuestionRepository is deprecated. Use ModuleQuizRepository instead for all module quizzes.")
+        Log.w("QuestionRepository", "WARNING: QuestionRepository is deprecated. Use QuizRepositoryFactory instead for all module quizzes.")
     }
     
     fun getQuestions(): List<Question> {
-        Log.w("QuestionRepository", "getQuestions() called - this method is deprecated, use ModuleQuizRepository.getQuestionsForModule() instead")
+        Log.w("QuestionRepository", "getQuestions() called - this method is deprecated, use QuizRepositoryFactory.getRepositoryForModule(moduleId).getQuestionsForModule() instead")
         return listOf(
             // BEGINNER
             Question(
