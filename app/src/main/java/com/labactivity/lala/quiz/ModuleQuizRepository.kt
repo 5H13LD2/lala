@@ -6,11 +6,11 @@ import android.util.Log
  * Repository that manages Python quiz questions
  */
 class ModuleQuizRepository : QuizRepository {
-    
+
     // Map of module IDs to lists of quiz questions
     private val quizzesByModule: Map<String, List<Quiz>> = mapOf(
         // Module 1: Fundamentals of Python
-        "1" to listOf(
+        "python_module_1" to listOf(
             Quiz(
                 id = "1.1",
                 question = "What is the correct way to create a variable in Python?",
@@ -132,9 +132,9 @@ class ModuleQuizRepository : QuizRepository {
                 difficulty = Difficulty.EASY
             )
         ),
-        
+
         // Module 2: Control Flow in Python
-        "2" to listOf(
+        "python_module_2" to listOf(
             Quiz(
                 id = "2.1",
                 question = "What does the 'if' statement do?",
@@ -207,7 +207,7 @@ class ModuleQuizRepository : QuizRepository {
             )
         ),
 
-        "3" to listOf(
+        "python_module_3" to listOf(
             Quiz(
                 id = "3.1",
                 question = "How do you define a function in Python?",
@@ -280,7 +280,7 @@ class ModuleQuizRepository : QuizRepository {
             )
         ),
 
-        "4" to listOf(
+        "python_module_4" to listOf(
             Quiz(
                 id = "4.1",
                 question = "How do you create a list in Python?",
@@ -353,7 +353,7 @@ class ModuleQuizRepository : QuizRepository {
             )
         ),
 
-        "5" to listOf(
+        "python_module_5" to listOf(
             Quiz(
                 id = "5.1",
                 question = "How do you define a dictionary in Python?",
@@ -429,38 +429,36 @@ class ModuleQuizRepository : QuizRepository {
 
     override fun getQuestionsForModule(moduleId: String): List<Quiz> {
         Log.d("ModuleQuizRepository", "Getting questions for module ID: $moduleId")
-        
+
         // Try to get questions for the specified module ID
         val questions = quizzesByModule[moduleId]
-        
+
         // If exact match is found, return those questions
         if (questions != null) {
             Log.d("ModuleQuizRepository", "Found ${questions.size} questions for module ID: $moduleId")
             return questions.take(10) // Limit to 10 questions
         }
-        
+
         // No exact match - determine the appropriate Python module
         val pythonModuleId = when {
-            // Python core modules (numbered 1, 2, 3)
-            moduleId.matches(Regex("^[1-5].*$")) -> {
-                val parsedId = moduleId.substringBefore(".")
-                Log.d("ModuleQuizRepository", "Identified as Python module $parsedId")
-                if (quizzesByModule.containsKey(parsedId)) parsedId else "python"
+            // Python core modules (e.g., python_module_1, python_module_2)
+            moduleId.matches(Regex("^python_module_\\d+$")) -> {
+                moduleId // Directly use the moduleId when prefixed with python_module_
             }
-            // Default fallback
+            // Default fallback for generic Python module
             else -> {
                 Log.d("ModuleQuizRepository", "No specific Python module found, using fallback")
-                "python"
+                "python_module_1" // Default to "python_module_1" as fallback
             }
         }
-        
+
         // Get questions for the determined module type
         val moduleQuestions = quizzesByModule[pythonModuleId]
         Log.d("ModuleQuizRepository", "Using $pythonModuleId questions as fallback for $moduleId")
-        
+
         return moduleQuestions?.take(10) ?: emptyList()
     }
-    
+
     /**
      * Gets the total number of questions available for a module
      * @param moduleId The ID of the module
@@ -469,49 +467,38 @@ class ModuleQuizRepository : QuizRepository {
     override fun getQuestionCountForModule(moduleId: String): Int {
         // Try to get questions for the specified module ID
         val questions = quizzesByModule[moduleId]
-        
+
         // If exact match is found, return the count
         if (questions != null) {
             return minOf(questions.size, 10)
         }
-        
-        // No exact match - determine the appropriate Python module
-        val pythonModuleId = when {
-            // Python core modules (numbered 1, 2, 3)
-            moduleId.matches(Regex("^[1-5].*$")) -> {
-                val parsedId = moduleId.substringBefore(".")
-                if (quizzesByModule.containsKey(parsedId)) parsedId else "python"
-            }
-            // Default fallback
-            else -> "python"
-        }
-        
-        // Get count for the determined module type
-        val moduleQuestions = quizzesByModule[pythonModuleId]
-        return minOf(moduleQuestions?.size ?: 0, 10)
+
+        // If no questions found, return 0
+        return 0
     }
-    
-    /**
-     * Get a list of all module IDs
-     * @return List of module IDs
-     */
+
     override fun getAllModuleIds(): List<String> {
         return quizzesByModule.keys.toList()
     }
-    
+
     /**
      * Checks if this repository can handle questions for the given module ID
      * @param moduleId The ID of the module to check
      * @return true if this repository can handle the module, false otherwise
      */
     override fun canHandleModule(moduleId: String): Boolean {
-        // Can handle if it's an exact match
+        Log.d("ModuleQuizRepository", "Checking if can handle module ID: $moduleId")
+
+        // Can handle if it's an exact match with our database
         if (quizzesByModule.containsKey(moduleId)) {
+            Log.d("ModuleQuizRepository", "Direct match found for module ID: $moduleId")
             return true
         }
-        
-        // Only claim single-digit modules 1-5 or those explicitly containing "python"
-        return moduleId.matches(Regex("^[1-5]$")) || // Exact match for single digits 1-5
-               moduleId.contains("python", ignoreCase = true)
+
+        // Check if this is a Python module
+        val isPythonModule = moduleId.matches(Regex("^python_module_\\d+$")) // Handles "python_module_1", "python_module_2", etc.
+
+        Log.d("ModuleQuizRepository", "Module ID: $moduleId is Python module: $isPythonModule")
+        return isPythonModule
     }
-} 
+}

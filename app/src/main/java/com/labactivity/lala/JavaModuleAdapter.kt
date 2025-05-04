@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
@@ -87,17 +88,26 @@ class JavaModuleAdapter(
         private fun setModuleTitleWithScoreIndicator(module: Module) {
             // Check if we have a score for this module
             val scorePair = quizScoreManager.getQuizScore(module.id)
-            
+
             if (scorePair != null) {
                 val (score, total) = scorePair
                 val isPassing = quizScoreManager.isPassing(module.id)
-                
-                // Create a formatted title with score indicator
+
+                // Create a SpannableString for colored square indicator
                 val statusEmoji = if (isPassing) "🟩 " else "🟥 "
-                tvModuleTitle.text = statusEmoji + module.title
-                
-                // Display score in the separate score TextView
+                val scoreText = "  ${if (isPassing) "✅" else ""} "
+
+                // Set the module title with status indicator
+                tvModuleTitle.text = statusEmoji + module.title + scoreText
+
+                // Apply color to the score text
+                val textColor = if (isPassing)
+                    ContextCompat.getColor(context, R.color.success_green)
+                else
+                    ContextCompat.getColor(context, R.color.error_red)
+
                 tvQuizScore.text = "Score: $score/$total"
+                tvQuizScore.setTextColor(textColor)
                 tvQuizScore.visibility = View.VISIBLE
             } else {
                 // No score yet, just show the title

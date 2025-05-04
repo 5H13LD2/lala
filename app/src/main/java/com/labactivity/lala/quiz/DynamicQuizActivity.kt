@@ -57,7 +57,19 @@ class DynamicQuizActivity : AppCompatActivity() {
         moduleId = intent.getStringExtra("module_id") ?: "1"
         moduleTitle = intent.getStringExtra("module_title") ?: "Python Quiz"
         
-        Log.d("DynamicQuizActivity", "Module ID: $moduleId, Title: $moduleTitle")
+        Log.d("DynamicQuizActivity", "Original Module ID: $moduleId, Title: $moduleTitle")
+        
+        // Apply prefix logic BEFORE repository selection
+        when {
+            moduleTitle.contains("SQL", ignoreCase = true) && !moduleId.contains("sql") ->
+                moduleId = "sql_$moduleId"
+            moduleTitle.contains("Python", ignoreCase = true) && !moduleId.contains("python") ->
+                moduleId = "python_$moduleId"
+            moduleTitle.contains("Java", ignoreCase = true) && !moduleId.contains("java") ->
+                moduleId = "java_$moduleId"
+        }
+        
+        Log.d("DynamicQuizActivity", "Modified Module ID: $moduleId")
         
         // Set up title
         title = moduleTitle

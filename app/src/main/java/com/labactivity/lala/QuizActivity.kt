@@ -47,7 +47,19 @@ class QuizActivity : AppCompatActivity() {
         moduleId = intent.getStringExtra("module_id") ?: ""
         moduleTitle = intent.getStringExtra("module_title") ?: ""
         
-        Log.d("QuizActivity", "Module ID: $moduleId, Title: $moduleTitle")
+        Log.d("QuizActivity", "Original Module ID: $moduleId, Title: $moduleTitle")
+        
+        // Apply prefix logic BEFORE repository selection
+        when {
+            moduleTitle.contains("SQL", ignoreCase = true) && !moduleId.contains("sql") ->
+                moduleId = "sql_$moduleId"
+            moduleTitle.contains("Python", ignoreCase = true) && !moduleId.contains("python") ->
+                moduleId = "python_$moduleId"
+            moduleTitle.contains("Java", ignoreCase = true) && !moduleId.contains("java") ->
+                moduleId = "java_$moduleId"
+        }
+        
+        Log.d("QuizActivity", "Modified Module ID: $moduleId")
 
         // Initialize views
         initializeViews()

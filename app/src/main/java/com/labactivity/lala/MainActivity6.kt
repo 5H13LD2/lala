@@ -15,10 +15,22 @@ class MainActivity6 : AppCompatActivity() {
         setContentView(R.layout.activity_main6)
 
         // Get module information from intent
-        val moduleId = intent.getStringExtra("module_id") ?: ""
+        var moduleId = intent.getStringExtra("module_id") ?: ""
         val moduleTitle = intent.getStringExtra("module_title") ?: "Python Quiz"
         
-        Log.d("MainActivity6", "Received module ID: $moduleId, Title: $moduleTitle")
+        Log.d("MainActivity6", "Original module ID: $moduleId, Title: $moduleTitle")
+
+
+        when {
+            moduleTitle.contains("SQL", ignoreCase = true) && !moduleId.contains("sql") ->
+                moduleId = "sql_$moduleId"
+            moduleTitle.contains("Python", ignoreCase = true) && !moduleId.contains("python") ->
+                moduleId = "python_$moduleId"
+            moduleTitle.contains("Java", ignoreCase = true) && !moduleId.contains("java") ->
+                moduleId = "java_$moduleId"
+        }
+        
+        Log.d("MainActivity6", "Modified module ID: $moduleId")
 
         // Update the welcome title with the module title
         val welcomeTitle = findViewById<TextView>(R.id.welcome_title)
