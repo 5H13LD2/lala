@@ -4,7 +4,7 @@
     <string name="username">username</string>
     <string name="text4">Enter your TechLauncher email to login</string>
     <string name="text6">Dont have an account?</string>
-    <string name="password">Password</string>
+    <string name="password">TechLaunch Password</string>
     <string name="Conpass">Confirm Password</string>
     <string name="email">Email Address</string>
     <string name="text8">Have an Account?</string>

@@ -441,8 +441,8 @@ class ModuleQuizRepository : QuizRepository {
         
         // No exact match - determine the appropriate Python module
         val pythonModuleId = when {
-            // Python core modules (numbered 1-7)
-            moduleId.matches(Regex("^[1-7].*$")) -> {
+            // Python core modules (numbered 1, 2, 3)
+            moduleId.matches(Regex("^[1-5].*$")) -> {
                 val parsedId = moduleId.substringBefore(".")
                 Log.d("ModuleQuizRepository", "Identified as Python module $parsedId")
                 if (quizzesByModule.containsKey(parsedId)) parsedId else "python"
@@ -477,8 +477,8 @@ class ModuleQuizRepository : QuizRepository {
         
         // No exact match - determine the appropriate Python module
         val pythonModuleId = when {
-            // Python core modules (numbered 1-7)
-            moduleId.matches(Regex("^[1-7].*$")) -> {
+            // Python core modules (numbered 1, 2, 3)
+            moduleId.matches(Regex("^[1-5].*$")) -> {
                 val parsedId = moduleId.substringBefore(".")
                 if (quizzesByModule.containsKey(parsedId)) parsedId else "python"
             }
@@ -510,8 +510,8 @@ class ModuleQuizRepository : QuizRepository {
             return true
         }
         
-        // Only claim single-digit modules 1-7 or those explicitly containing "python"
-        return moduleId.matches(Regex("^[1-7]$")) || // Exact match for single digits 1-7
+        // Only claim single-digit modules 1-5 or those explicitly containing "python"
+        return moduleId.matches(Regex("^[1-5]$")) || // Exact match for single digits 1-5
                moduleId.contains("python", ignoreCase = true)
     }
 } 

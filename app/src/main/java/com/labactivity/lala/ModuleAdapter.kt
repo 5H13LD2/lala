@@ -114,7 +114,7 @@ class ModuleAdapter(
                 
                 // Create a SpannableString for colored square indicator
                 val statusEmoji = if (isPassing) "🟩 " else "🟥 "
-                val scoreText = " — ${if (isPassing) "✅" else "❌"} Score: $score/$total"
+                val scoreText = "  ${if (isPassing) "✅" else ""} "
                 
                 // Set the module title with status indicator
                 tvModuleTitle.text = statusEmoji + module.title + scoreText

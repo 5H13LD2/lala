@@ -462,7 +462,7 @@ class JavaModuleQuizRepository : QuizRepository {
         }
         
         // Can handle Java modules or anything with "java" in the module ID
-        return moduleId.matches(Regex("java_module_[1-7]")) || // Exact match for java_module_1 through 7
+        return moduleId.matches(Regex("java_module_[1-3]")) || // Exact match for java_module_1, 2, 3
                moduleId.contains("java", ignoreCase = true)
     }
 } 

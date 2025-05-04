@@ -32,7 +32,7 @@ class ResultActivity : AppCompatActivity() {
         // Determine if passing and set appropriate color
         val isPassing = score >= (total * 0.7).toInt()
         val resultMessageView = findViewById<TextView>(R.id.result_message)
-        
+
         if (isPassing) {
             resultMessageView.text = "Congratulations! You passed the quiz."
             resultMessageView.setTextColor(ContextCompat.getColor(this, R.color.success_green))

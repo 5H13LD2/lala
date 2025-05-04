@@ -470,13 +470,13 @@ class SqlModuleQuizRepository : QuizRepository {
         }
         
         // Explicitly exclude single-digit IDs which are Python modules
-        if (moduleId.matches(Regex("^[1-7]$"))) {
+        if (moduleId.matches(Regex("^[1-5]$"))) {
             return false
         }
         
         // Can handle SQL modules or anything with "sql" in the module ID
-        return moduleId.matches(Regex("sql_module_[1-7]")) || // Exact match for sql_module_1 through 7
-               moduleId.matches(Regex("^module_[1-7]$")) ||   // Exact match for legacy module_1 through 7
+        return moduleId.matches(Regex("sql_module_[1-3]")) || // Exact match for sql_module_1, 2, 3
+               moduleId.matches(Regex("^module_[1-3]$")) ||   // Exact match for legacy module_1, 2, 3
                moduleId.contains("sql", ignoreCase = true)
     }
 } 

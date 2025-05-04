@@ -7,14 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- 25% height -->
-
-    <!-- Bottom White Background (3/4 of screen) -->
-
-    <!-- Heading Text (Inside the Black Background) -->
-
-    <!-- Welcome Text (Inside the White Background) -->
-
     <TextView
         android:id="@+id/text7"
         android:layout_width="wrap_content"
@@ -193,10 +185,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="44dp"
         android:ems="10"
-        android:inputType="numberPassword"
-        android:text="@string/password"
+        android:fontFamily="sans-serif-thin"
+        android:inputType="textPassword"
+        android:text=""
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text4" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
