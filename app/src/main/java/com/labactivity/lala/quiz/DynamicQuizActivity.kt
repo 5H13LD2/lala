@@ -14,8 +14,6 @@ import androidx.core.content.ContextCompat
 import com.labactivity.lala.R
 import com.labactivity.lala.ResultActivity
 import java.util.concurrent.TimeUnit
-
-// Additional imports
 import com.labactivity.lala.quiz.QuizRepository
 import com.labactivity.lala.quiz.QuizRepositoryFactory
 

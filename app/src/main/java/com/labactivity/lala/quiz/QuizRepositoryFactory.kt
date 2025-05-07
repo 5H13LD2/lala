@@ -23,30 +23,30 @@ object QuizRepositoryFactory {
     fun getRepositoryForModule(moduleId: String): QuizRepository {
         Log.d(TAG, "Finding repository for module ID: $moduleId")
         
-        // First check SQL repository since it has specific module ID patterns
-        val sqlRepo = SqlModuleQuizRepository()
-        if (sqlRepo.canHandleModule(moduleId)) {
-            Log.d(TAG, "Selected repository: SqlModuleQuizRepository for module ID: $moduleId")
-            return sqlRepo
-        }
-        
-        // Then check Java repository
-        val javaRepo = JavaModuleQuizRepository()
-        if (javaRepo.canHandleModule(moduleId)) {
-            Log.d(TAG, "Selected repository: JavaModuleQuizRepository for module ID: $moduleId")
-            return javaRepo
-        }
-        
-        // Finally check Python repository
+        // First check Python repository since it handles legacy numeric IDs
         val pythonRepo = ModuleQuizRepository()
         if (pythonRepo.canHandleModule(moduleId)) {
             Log.d(TAG, "Selected repository: ModuleQuizRepository (Python) for module ID: $moduleId")
             return pythonRepo
         }
         
-        // If no repository can handle the module, log an error and return SQL as fallback
-        Log.e(TAG, "No repository found for module ID: $moduleId, using SQL repository as fallback")
-        return sqlRepo
+        // Then check SQL repository
+        val sqlRepo = SqlModuleQuizRepository()
+        if (sqlRepo.canHandleModule(moduleId)) {
+            Log.d(TAG, "Selected repository: SqlModuleQuizRepository for module ID: $moduleId")
+            return sqlRepo
+        }
+        
+        // Finally check Java repository
+        val javaRepo = JavaModuleQuizRepository()
+        if (javaRepo.canHandleModule(moduleId)) {
+            Log.d(TAG, "Selected repository: JavaModuleQuizRepository for module ID: $moduleId")
+            return javaRepo
+        }
+        
+        // If no repository can handle the module, log an error and return Python as fallback
+        Log.e(TAG, "No repository found for module ID: $moduleId, using Python repository as fallback")
+        return pythonRepo
     }
     
 

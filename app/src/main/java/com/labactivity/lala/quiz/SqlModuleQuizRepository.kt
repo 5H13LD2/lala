@@ -99,14 +99,14 @@ class SqlModuleQuizRepository : QuizRepository {
                 Log.d(TAG, "Using existing sql_module_X format: $moduleId")
                 moduleId
             }
-            // If it's in module_X format, convert to sql_module_X
-            moduleId.matches(Regex("^module_[1-5]$")) -> {
+            // If it's in module_X format where X is 6-9, convert to sql_module_X
+            moduleId.matches(Regex("^module_[6-9]$")) -> {
                 val moduleNum = moduleId.substringAfter("_")
                 val newId = "sql_module_$moduleNum"
                 Log.d(TAG, "Converting $moduleId to $newId")
                 newId
             }
-            // If it's in sql_X format, convert to sql_module_X
+            // If it's in sql_X format
             moduleId.matches(Regex("^sql_[1-5]$")) -> {
                 val moduleNum = moduleId.substringAfter("_")
                 val newId = "sql_module_$moduleNum"
@@ -181,9 +181,9 @@ class SqlModuleQuizRepository : QuizRepository {
                 Log.d(TAG, "Matched sql_module_X format")
                 true
             }
-            // Check for module_X format where X is 1-5 (SQL modules)
-            moduleId.matches(Regex("^module_[1-5]$")) -> {
-                Log.d(TAG, "Matched module_X format, converting to sql_module_X")
+            // Check for module_X format where X is 6-10 (SQL modules)
+            moduleId.matches(Regex("^module_[6-9]$")) -> {
+                Log.d(TAG, "Matched module_X format for SQL module")
                 true
             }
             // Check for sql_X format

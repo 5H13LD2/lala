@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import com.labactivity.lala.databinding.ActivitySettingsBinding
+import com.labactivity.lala.quiz.TestQuizRepositoryActivity
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -55,14 +56,12 @@ class SettingsActivity : AppCompatActivity() {
             Toast.makeText(this, "Learning Reminder Time clicked", Toast.LENGTH_SHORT).show()
         }
 
-        binding.restorePurchasesLayout.setOnClickListener {
-            // Handle restore purchases
-            Toast.makeText(this, "Ask AI clicked", Toast.LENGTH_SHORT).show()
-        }
 
         binding.subscribeLayout.setOnClickListener {
             // Navigate to subscription screen
-            Toast.makeText(this, "Subscribe clicked", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Developer tools clicked", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, TestQuizRepositoryActivity::class.java)
+            startActivity(intent)
         }
 
         binding.logoutButton.setOnClickListener {

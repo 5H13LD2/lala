@@ -229,30 +229,6 @@
                 android:layout_height="1dp"
                 android:background="#EEEEEE" />
 
-            <LinearLayout
-                android:id="@+id/restorePurchasesLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:background="@android:color/white"
-                android:padding="16dp"
-                android:clickable="true"
-                android:focusable="true">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Ask AI"
-                    android:textColor="#333333"
-                    android:textSize="16sp" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_chevron" />
-            </LinearLayout>
-
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -272,7 +248,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Subscribe"
+                    android:text="Developer Debugging"
                     android:textColor="#333333"
                     android:textSize="16sp" />
 

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 
 class CourseAdapter(private val courseList: List<Course>) :
@@ -66,9 +67,10 @@ class CourseAdapter(private val courseList: List<Course>) :
         }
 
         holder.btnFlashcard.setOnClickListener {
-            val intent = Intent(context, com.labactivity.lala.quiz.TestQuizRepositoryActivity::class.java)
-            context.startActivity(intent)
+            Toast.makeText(context, "Flashcard clicked", Toast.LENGTH_SHORT).show()
         }
+
+
     }
 
     override fun getItemCount(): Int = courseList.size

@@ -86,12 +86,12 @@ class ModuleQuizRepository : QuizRepository {
             ),
             Quiz(
                 id = "1.7",
-                question = "What does this code output?\nname = 'Jerico'\nprint('Hello', name)",
+                question = "What does this code output?\nname = 'TechLauncher'\nprint('Hello', name)",
                 options = listOf(
-                    "HelloJerico",
-                    "Hello+Jerico",
-                    "Hello Jerico",
-                    "Jerico Hello"
+                    "HelloTechLauncher",
+                    "Hello+TechLauncher",
+                    "Hello TechLauncher",
+                    "TechLauncher Hello"
                 ),
                 correctOptionIndex = 2,
                 difficulty = Difficulty.EASY
@@ -135,7 +135,7 @@ class ModuleQuizRepository : QuizRepository {
         ),
 
         // Module 2: Control Flow in Python
-        "module_2" to listOf(
+        "python_module_2" to listOf(
             Quiz(
                 id = "2.1",
                 question = "What does the 'if' statement do?",
@@ -208,7 +208,7 @@ class ModuleQuizRepository : QuizRepository {
             )
         ),
 
-        "module_3" to listOf(
+        "python_module_3" to listOf(
             Quiz(
                 id = "3.1",
                 question = "How do you define a function in Python?",
@@ -281,7 +281,7 @@ class ModuleQuizRepository : QuizRepository {
             )
         ),
 
-        "module_4" to listOf(
+        "python_module_4" to listOf(
             Quiz(
                 id = "4.1",
                 question = "How do you create a list in Python?",
@@ -354,7 +354,7 @@ class ModuleQuizRepository : QuizRepository {
             )
         ),
 
-        "module_5" to listOf(
+        "python_module_5" to listOf(
             Quiz(
                 id = "5.1",
                 question = "How do you define a dictionary in Python?",
@@ -429,33 +429,54 @@ class ModuleQuizRepository : QuizRepository {
     )
 
     override fun getQuestionsForModule(moduleId: String): List<Quiz> {
-        Log.d("ModuleQuizRepository", "Getting questions for module ID: $moduleId")
+        Log.d(TAG, "Getting questions for module ID: $moduleId")
 
         // Try to get questions for the specified module ID
         val questions = quizzesByModule[moduleId]
 
         // If exact match is found, return those questions
         if (questions != null) {
-            Log.d("ModuleQuizRepository", "Found ${questions.size} questions for module ID: $moduleId")
+            Log.d(TAG, "Found ${questions.size} questions for module ID: $moduleId")
             return questions.take(10) // Limit to 10 questions
         }
 
-        // No exact match - determine the appropriate Python module
+        // No exact match - determine the appropriate python module
         val pythonModuleId = when {
-            // Python core modules (e.g., python_module_1, python_module_2)
-            moduleId.matches(Regex("^python_module_\\d+$")) -> {
-                moduleId // Directly use the moduleId when prefixed with python_module_
+            // If it's already in python_module_X format
+            moduleId.matches(Regex("^python_module_[1-5]$")) -> {
+                Log.d(TAG, "Using existing python_module_X format: $moduleId")
+                moduleId
             }
-            // Default fallback for generic Python module
+            // If it's in module_X format, convert to python_module_X
+            moduleId.matches(Regex("^module_[1-5]$")) -> {
+                val moduleNum = moduleId.substringAfter("_")
+                val newId = "python_module_$moduleNum"
+                Log.d(TAG, "Converting $moduleId to $newId")
+                newId
+            }
+            // If it's a single digit 1-5
+            moduleId.matches(Regex("^[1-5]$")) -> {
+                val newId = "python_module_$moduleId"
+                Log.d(TAG, "Converting single digit $moduleId to $newId")
+                newId
+            }
+            // If it's in python_X format
+            moduleId.matches(Regex("^python_[1-5]$")) -> {
+                val moduleNum = moduleId.substringAfter("_")
+                val newId = "python_module_$moduleNum"
+                Log.d(TAG, "Converting $moduleId to $newId")
+                newId
+            }
+            // Default to first python module
             else -> {
-                Log.d("ModuleQuizRepository", "No specific Python module found, using fallback")
-                "python_module_1" // Default to "python_module_1" as fallback
+                Log.d(TAG, "Using default python module: python_module_1")
+                "python_module_1"
             }
         }
 
-        // Get questions for the determined module type
+        // Get questions for the determined module
         val moduleQuestions = quizzesByModule[pythonModuleId]
-        Log.d("ModuleQuizRepository", "Using $pythonModuleId questions as fallback for $moduleId")
+        Log.d(TAG, "Using $pythonModuleId questions as fallback for $moduleId")
 
         return moduleQuestions?.take(10) ?: emptyList()
     }
@@ -499,16 +520,34 @@ class ModuleQuizRepository : QuizRepository {
         // Check for Python-specific patterns
         val isPythonModule = when {
             // Check for single digits 1-5 (Python modules)
-            moduleId.matches(Regex("^[1-5]$")) -> true
+            moduleId.matches(Regex("^[1-5]$")) -> {
+                Log.d(TAG, "Matched single-digit Python module")
+                true
+            }
             // Check for python_module_X format
-            moduleId.matches(Regex("^python_module_[1-5]$")) -> true
+            moduleId.matches(Regex("^python_module_[1-5]$")) -> {
+                Log.d(TAG, "Matched python_module_X format")
+                true
+            }
             // Check for module_X format where X is 1-5 (Python modules)
-            moduleId.matches(Regex("^module_[1-5]$")) -> true
+            moduleId.matches(Regex("^module_[1-5]$")) -> {
+                Log.d(TAG, "Matched module_X format, converting to python_module_X")
+                true
+            }
             // Check for python_X format
-            moduleId.matches(Regex("^python_[1-5]$")) -> true
+            moduleId.matches(Regex("^python_[1-5]$")) -> {
+                Log.d(TAG, "Matched python_X format")
+                true
+            }
             // Check for any ID containing "python" (case insensitive)
-            moduleId.contains("python", ignoreCase = true) -> true
-            else -> false
+            moduleId.contains("python", ignoreCase = true) -> {
+                Log.d(TAG, "Matched ID containing 'python'")
+                true
+            }
+            else -> {
+                Log.d(TAG, "No Python module pattern matched")
+                false
+            }
         }
         
         Log.d(TAG, "Module ID: $moduleId is Python module: $isPythonModule")
