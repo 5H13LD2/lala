@@ -1,5 +1,6 @@
 package com.labactivity.lala.quiz
 
+import android.content.ContentValues.TAG
 import android.util.Log
 
 /**
@@ -80,35 +81,48 @@ class SqlModuleQuizRepository : QuizRepository {
     )
 
     override fun getQuestionsForModule(moduleId: String): List<Quiz> {
-        Log.d("sqlModuleRepository", "Getting questions for module ID: $moduleId")
+        Log.d(TAG, "Getting questions for module ID: $moduleId")
 
         // Try to get questions for the specified module ID
         val questions = quizzesByModule[moduleId]
 
         // If exact match is found, return those questions
         if (questions != null) {
-            Log.d("\"sqlModuleRepository", "Found ${questions.size} questions for module ID: $moduleId")
+            Log.d(TAG, "Found ${questions.size} questions for module ID: $moduleId")
             return questions.take(10) // Limit to 10 questions
         }
 
         // No exact match - determine the appropriate sql module
-       val sqlModuleId = when {
-            // If it contains "sql_module_" followed by a number
-            moduleId.matches(Regex("sql_module_[1-7].*")) -> {
-                val parsedId = moduleId.substringBefore(".")
-                Log.d("\"sqlModuleRepository", "Parsed sql module ID: $parsedId")
-                if (quizzesByModule.containsKey(parsedId)) parsedId else "sql_module_1"
+        val sqlModuleId = when {
+            // If it's already in sql_module_X format
+            moduleId.matches(Regex("^sql_module_[1-5]$")) -> {
+                Log.d(TAG, "Using existing sql_module_X format: $moduleId")
+                moduleId
+            }
+            // If it's in module_X format, convert to sql_module_X
+            moduleId.matches(Regex("^module_[1-5]$")) -> {
+                val moduleNum = moduleId.substringAfter("_")
+                val newId = "sql_module_$moduleNum"
+                Log.d(TAG, "Converting $moduleId to $newId")
+                newId
+            }
+            // If it's in sql_X format, convert to sql_module_X
+            moduleId.matches(Regex("^sql_[1-5]$")) -> {
+                val moduleNum = moduleId.substringAfter("_")
+                val newId = "sql_module_$moduleNum"
+                Log.d(TAG, "Converting $moduleId to $newId")
+                newId
             }
             // Default to first sql module
             else -> {
-                Log.d("\"sqlModuleRepository", "Using default sql module: sql_module_1")
+                Log.d(TAG, "Using default sql module: sql_module_1")
                 "sql_module_1"
             }
         }
 
         // Get questions for the determined module
         val moduleQuestions = quizzesByModule[sqlModuleId]
-        Log.d("\"sqlModuleRepository2", "Using $sqlModuleId questions as fallback for $moduleId")
+        Log.d(TAG, "Using $sqlModuleId questions as fallback for $moduleId")
 
         return moduleQuestions?.take(10) ?: emptyList()
     }
@@ -152,27 +166,43 @@ class SqlModuleQuizRepository : QuizRepository {
      * @return true if this repository can handle the module, false otherwise
      */
     override fun canHandleModule(moduleId: String): Boolean {
-        Log.d("SqlModuleQuizRepository", "Checking if can handle module ID: $moduleId")
+        Log.d(TAG, "Checking if module ID: $moduleId is an SQL module")
         
-        // Can handle if it's an exact match with our database
+        // Check for exact matches first
         if (quizzesByModule.containsKey(moduleId)) {
-            Log.d("SqlModuleQuizRepository", "Direct match found for module ID: $moduleId")
+            Log.d(TAG, "Direct match found for SQL module: $moduleId")
             return true
         }
         
-        // Explicitly exclude single-digit IDs which are Python modules
-        if (moduleId.matches(Regex("^[1-5]$"))) {
-            Log.d("SqlModuleQuizRepository", "Excluded single-digit module ID: $moduleId (Python module)")
-            return false
+        // Check for SQL-specific patterns
+        val isSqlModule = when {
+            // Check for sql_module_X format
+            moduleId.matches(Regex("^sql_module_[1-5]$")) -> {
+                Log.d(TAG, "Matched sql_module_X format")
+                true
+            }
+            // Check for module_X format where X is 1-5 (SQL modules)
+            moduleId.matches(Regex("^module_[1-5]$")) -> {
+                Log.d(TAG, "Matched module_X format, converting to sql_module_X")
+                true
+            }
+            // Check for sql_X format
+            moduleId.matches(Regex("^sql_[1-5]$")) -> {
+                Log.d(TAG, "Matched sql_X format")
+                true
+            }
+            // Check for any ID containing "sql" (case insensitive)
+            moduleId.contains("sql", ignoreCase = true) -> {
+                Log.d(TAG, "Matched ID containing 'sql'")
+                true
+            }
+            else -> {
+                Log.d(TAG, "No SQL module pattern matched")
+                false
+            }
         }
         
-        // Check if this is an SQL module
-        val isSqlModule = moduleId.matches(Regex("sql_module_[1-3]")) || // Exact match for sql_module_1, 2, 3
-                         moduleId.matches(Regex("^module_[1-3]$")) ||   // Exact match for legacy module_1, 2, 3
-                         moduleId.matches(Regex("^sql_[1-3]$")) ||      // Handle new prefixed format sql_1, sql_2, sql_3
-                         moduleId.contains("sql", ignoreCase = true)
-
-        Log.d("SqlModuleQuizRepository", "Module ID: $moduleId is SQL module: $isSqlModule")
+        Log.d(TAG, "Module ID: $moduleId is SQL module: $isSqlModule")
         return isSqlModule
     }
 } 

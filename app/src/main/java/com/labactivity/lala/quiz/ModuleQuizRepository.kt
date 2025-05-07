@@ -1,5 +1,6 @@
 package com.labactivity.lala.quiz
 
+import android.content.ContentValues.TAG
 import android.util.Log
 
 /**
@@ -134,7 +135,7 @@ class ModuleQuizRepository : QuizRepository {
         ),
 
         // Module 2: Control Flow in Python
-        "python_module_2" to listOf(
+        "module_2" to listOf(
             Quiz(
                 id = "2.1",
                 question = "What does the 'if' statement do?",
@@ -207,7 +208,7 @@ class ModuleQuizRepository : QuizRepository {
             )
         ),
 
-        "python_module_3" to listOf(
+        "module_3" to listOf(
             Quiz(
                 id = "3.1",
                 question = "How do you define a function in Python?",
@@ -280,7 +281,7 @@ class ModuleQuizRepository : QuizRepository {
             )
         ),
 
-        "python_module_4" to listOf(
+        "module_4" to listOf(
             Quiz(
                 id = "4.1",
                 question = "How do you create a list in Python?",
@@ -353,7 +354,7 @@ class ModuleQuizRepository : QuizRepository {
             )
         ),
 
-        "python_module_5" to listOf(
+        "module_5" to listOf(
             Quiz(
                 id = "5.1",
                 question = "How do you define a dictionary in Python?",
@@ -487,18 +488,30 @@ class ModuleQuizRepository : QuizRepository {
      * @return true if this repository can handle the module, false otherwise
      */
     override fun canHandleModule(moduleId: String): Boolean {
-        Log.d("ModuleQuizRepository", "Checking if can handle module ID: $moduleId")
-
-        // Can handle if it's an exact match with our database
+        Log.d(TAG, "Checking if module ID: $moduleId is a Python module")
+        
+        // Check for exact matches first
         if (quizzesByModule.containsKey(moduleId)) {
-            Log.d("ModuleQuizRepository", "Direct match found for module ID: $moduleId")
+            Log.d(TAG, "Direct match found for Python module: $moduleId")
             return true
         }
-
-        // Check if this is a Python module
-        val isPythonModule = moduleId.matches(Regex("^python_module_\\d+$")) // Handles "python_module_1", "python_module_2", etc.
-
-        Log.d("ModuleQuizRepository", "Module ID: $moduleId is Python module: $isPythonModule")
+        
+        // Check for Python-specific patterns
+        val isPythonModule = when {
+            // Check for single digits 1-5 (Python modules)
+            moduleId.matches(Regex("^[1-5]$")) -> true
+            // Check for python_module_X format
+            moduleId.matches(Regex("^python_module_[1-5]$")) -> true
+            // Check for module_X format where X is 1-5 (Python modules)
+            moduleId.matches(Regex("^module_[1-5]$")) -> true
+            // Check for python_X format
+            moduleId.matches(Regex("^python_[1-5]$")) -> true
+            // Check for any ID containing "python" (case insensitive)
+            moduleId.contains("python", ignoreCase = true) -> true
+            else -> false
+        }
+        
+        Log.d(TAG, "Module ID: $moduleId is Python module: $isPythonModule")
         return isPythonModule
     }
 }

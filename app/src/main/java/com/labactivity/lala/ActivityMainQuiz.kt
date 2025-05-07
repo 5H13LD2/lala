@@ -12,11 +12,5 @@ class ActivityMainQuiz : AppCompatActivity() {
 
         // Reference to the button
         val btnTakeQuizzes: Button = findViewById(R.id.btnTakeQuizzes)
-
-        // Set click listener to navigate to MainActivity6
-        btnTakeQuizzes.setOnClickListener {
-            val intent = Intent(this, MainActivity6::class.java)
-            startActivity(intent)
-        }
     }
 }

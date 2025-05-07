@@ -1,5 +1,6 @@
 package com.labactivity.lala.quiz
 
+import android.content.ContentValues.TAG
 import android.util.Log
 
 /**
@@ -20,22 +21,32 @@ object QuizRepositoryFactory {
      * @return The appropriate QuizRepository for the module
      */
     fun getRepositoryForModule(moduleId: String): QuizRepository {
-        Log.d("QuizRepositoryFactory", "Finding repository for module ID: $moduleId")
+        Log.d(TAG, "Finding repository for module ID: $moduleId")
         
-        // Check each repository in order
-        for (repo in repositories) {
-            val canHandle = repo.canHandleModule(moduleId)
-            Log.d("QuizRepositoryFactory", "${repo.javaClass.simpleName}.canHandleModule('$moduleId') = $canHandle")
-            
-            if (canHandle) {
-                Log.d("QuizRepositoryFactory", "Selected repository: ${repo.javaClass.simpleName} for module ID: $moduleId")
-                return repo
-            }
+        // First check SQL repository since it has specific module ID patterns
+        val sqlRepo = SqlModuleQuizRepository()
+        if (sqlRepo.canHandleModule(moduleId)) {
+            Log.d(TAG, "Selected repository: SqlModuleQuizRepository for module ID: $moduleId")
+            return sqlRepo
         }
         
-        // If no specific repository is found, fall back to the Python repository (ModuleQuizRepository)
-        Log.d("QuizRepositoryFactory", "No repository claimed module ID: $moduleId, using fallback")
-        return repositories.last() // Python repository is the last in the list
+        // Then check Java repository
+        val javaRepo = JavaModuleQuizRepository()
+        if (javaRepo.canHandleModule(moduleId)) {
+            Log.d(TAG, "Selected repository: JavaModuleQuizRepository for module ID: $moduleId")
+            return javaRepo
+        }
+        
+        // Finally check Python repository
+        val pythonRepo = ModuleQuizRepository()
+        if (pythonRepo.canHandleModule(moduleId)) {
+            Log.d(TAG, "Selected repository: ModuleQuizRepository (Python) for module ID: $moduleId")
+            return pythonRepo
+        }
+        
+        // If no repository can handle the module, log an error and return SQL as fallback
+        Log.e(TAG, "No repository found for module ID: $moduleId, using SQL repository as fallback")
+        return sqlRepo
     }
     
 
