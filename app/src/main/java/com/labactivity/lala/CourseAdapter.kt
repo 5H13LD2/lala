@@ -35,47 +35,41 @@ class CourseAdapter(private val courseList: List<Course>) :
 
         holder.courseImage.setImageResource(course.imageResId)
         holder.courseTitle.text = course.name
-
         holder.text14.paintFlags = holder.text14.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
+        // Hide practice button and logo for SQL course
         if (course.name.contains("SQL", ignoreCase = true)) {
             holder.btnPractice.visibility = View.GONE
             holder.practiceLogo.visibility = View.GONE
         } else {
-            if (course.name.contains("JAVA", ignoreCase = true)) {
-                holder.btnPractice.visibility = View.GONE
-                holder.practiceLogo.visibility = View.GONE
-            } else {
-                holder.btnPractice.visibility = View.VISIBLE
-                holder.practiceLogo.visibility = View.VISIBLE
-            }
+            holder.btnPractice.visibility = View.VISIBLE
+            holder.practiceLogo.visibility = View.VISIBLE
+        }
 
-            holder.btnContinue.setOnClickListener {
-                val intent = when {
-                    course.name.contains("Python", ignoreCase = true) ->
-                        Intent(context, CoreModule::class.java)
-                    course.name.contains("Java", ignoreCase = true) ->
-                        Intent(context, JavaCoreModule::class.java)
-                    course.name.contains("SQL", ignoreCase = true) ->
-                        Intent(context, SqlCoreModule::class.java)
-                    else -> null
-                }
-                intent?.let { context.startActivity(it) }
+        // ✅ These listeners must always be set, even for SQL
+        holder.btnContinue.setOnClickListener {
+            val intent = when {
+                course.name.contains("Python", ignoreCase = true) ->
+                    Intent(context, CoreModule::class.java)
+                course.name.contains("Java", ignoreCase = true) ->
+                    Intent(context, JavaCoreModule::class.java)
+                course.name.contains("SQL", ignoreCase = true) ->
+                    Intent(context, SqlCoreModule::class.java)
+                else -> null
             }
+            intent?.let { context.startActivity(it) }
+        }
 
-            holder.btnPractice.setOnClickListener {
-                val intent = Intent(context, MainActivity7::class.java)
-                context.startActivity(intent)
-            }
+        holder.btnPractice.setOnClickListener {
+            val intent = Intent(context, MainActivity7::class.java)
+            context.startActivity(intent)
+        }
 
-            // ✅ Navigate to TestQuizRepositoryActivity when btnFlashcard is clicked
-            holder.btnFlashcard.setOnClickListener {
-                val intent = Intent(context, com.labactivity.lala.quiz.TestQuizRepositoryActivity::class.java)
-                context.startActivity(intent)
-            }
+        holder.btnFlashcard.setOnClickListener {
+            val intent = Intent(context, com.labactivity.lala.quiz.TestQuizRepositoryActivity::class.java)
+            context.startActivity(intent)
         }
     }
 
-    // ✅ Correctly placed getItemCount()
     override fun getItemCount(): Int = courseList.size
 }
