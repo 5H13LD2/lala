@@ -33,6 +33,14 @@
     <color name="console_text">#212121</color>
     <color name="gray_text">#757575</color>
 
+    <color name="primary_">#2A36A0</color>
+    <color name="primary_dark_">#1A237E</color>
+    <color name="accent_">#448AFF</color>
+    <color name="white_">#FFFFFF</color>
+    <color name="black_">#000000</color>
+    <color name="gray">#757575</color>
+    <color name="light_gray">#F0F0F0</color>
+    <color name="red">#FF4081</color>
 
 
 </resources>

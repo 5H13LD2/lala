@@ -247,6 +247,10 @@
                                 android:text="@string/sharpen_description"
                                 android:textColor="@android:color/black"
                                 android:textSize="16sp" />
+
+
+
+
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
                 </androidx.constraintlayout.widget.ConstraintLayout>

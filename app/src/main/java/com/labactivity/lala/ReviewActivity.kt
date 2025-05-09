@@ -89,7 +89,7 @@ class QuizReviewAdapter(
         val quiz = quizzes[position]
         
         // Set question number and ID
-        holder.questionIdText.text = "Question ${position + 1} (ID: ${quiz.id})"
+        holder.questionIdText.text = "Question ${position + 1} "
         
         // Set question text
         holder.questionText.text = quiz.question

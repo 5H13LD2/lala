@@ -14,6 +14,16 @@
     <string name="leaderboard_button">Open Leaderboard</string>
     <string name="default_web_client_id">128887566458-u5u00kjmp9uueepri7n8735mpfnopi9m.apps.googleusercontent.com</string>
     <string name="LeaderboardActivity">tangina</string>
+    <string name="python_reviewer">Python Reviewer</string>
+    <string name="back">Back</string>
+    <string name="flashcard">Flashcard</string>
+    <string name="progress_format">3/20</string>
+    <string name="click_to_flip">Click to flip</string>
+    <string name="click_to_flip_back">Click to flip back</string>
+    <string name="previous_card">Previous Card</string>
+    <string name="next_card">Next Card</string>
+    <string name="shuffle_cards">Shuffle Cards</string>
+    <string name="prepared_by_techlaunch">Prepared by TechLaunch just for you!</string>
 
 
     <string name="sharpen_description">

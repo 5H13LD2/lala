@@ -15,6 +15,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lala">
 
+
+        <activity
+            android:name=".FlashcardActivity"
+            android:exported="false" />
+
         <activity
             android:name=".PythonCompilerActivity"
             android:exported="false"
@@ -45,9 +50,6 @@
             android:exported="false" />
         <activity
             android:name=".ReviewActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity6"
             android:exported="false" />
         <activity
             android:name=".SqlCoreModule"

@@ -57,7 +57,7 @@ class PythonCompilerActivity : AppCompatActivity() {
         codeEditText.setText(
             """
            for i in range(5):
-               print(f"Line {i}: Hello, TechLauncher!")
+               print(f"Line {}: Hello, TechLauncher!")
             """.trimIndent()
         )
 

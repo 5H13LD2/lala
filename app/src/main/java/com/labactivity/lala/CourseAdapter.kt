@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 
 class CourseAdapter(private val courseList: List<Course>) :
@@ -67,10 +68,15 @@ class CourseAdapter(private val courseList: List<Course>) :
         }
 
         holder.btnFlashcard.setOnClickListener {
+            // Show a toast when the Flashcard button is clicked
             Toast.makeText(context, "Flashcard clicked", Toast.LENGTH_SHORT).show()
+
+            // Create an intent to start the FlashcardActivity
+            val intent = Intent(context, FlashcardActivity::class.java)
+
+            // Start FlashcardActivity using the correct context
+            context.startActivity(intent)
         }
-
-
     }
 
     override fun getItemCount(): Int = courseList.size

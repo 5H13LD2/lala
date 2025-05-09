@@ -117,7 +117,7 @@ fun createDummyJavaCourse(): Courses {
         ),
         Module(
             id = "java_module_2",
-            title = "Module 2: Control Flow",
+            title = "Module 2: if-else Statements",
             description = "Learn how to control the flow of your Java programs",
             lessons = listOf(
                 Lesson("java_lesson_2_1", "java_module_2", "2.1", "If-Else Statements", "Use conditional logic to make decisions.", "if (x > 10) {\n    System.out.println(\"x is greater than 10\");\n}", "https://youtu.be/zo-xwK10HM0"),
