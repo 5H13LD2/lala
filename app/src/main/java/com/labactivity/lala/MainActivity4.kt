@@ -119,6 +119,8 @@ class MainActivity4 : AppCompatActivity() {
                 else -> false
             }
         }
+
+
     }
 
     private fun setupTechnicalAssessmentSection() {
@@ -213,6 +215,11 @@ class MainActivity4 : AppCompatActivity() {
 
         findViewById<TextView>(R.id.textViewAllAssessments).setOnClickListener {
             Toast.makeText(this, "View all assessments", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.textAllPractice.setOnClickListener {
+            val intent = Intent(this, MainActivity3::class.java)
+            startActivity(intent)
         }
     }
 

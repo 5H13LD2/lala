@@ -22,7 +22,7 @@ class CourseAdapter(private val courseList: List<Course>) :
         val btnFlashcard: Button = view.findViewById(R.id.btnFlashcard)
         val btnPractice: Button = view.findViewById(R.id.btnPractice)
         val practiceLogo: ImageView = view.findViewById(R.id.practicelogo)
-        val text14: TextView = view.findViewById(R.id.text14)
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
@@ -37,7 +37,7 @@ class CourseAdapter(private val courseList: List<Course>) :
 
         holder.courseImage.setImageResource(course.imageResId)
         holder.courseTitle.text = course.name
-        holder.text14.paintFlags = holder.text14.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+
 
         // Hide practice button and logo for SQL course
         if (course.name.contains("SQL", ignoreCase = true)) {

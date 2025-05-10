@@ -218,7 +218,7 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="70dp"
+                    android:layout_marginTop="50dp"
                     android:padding="16dp">
 
                     <TextView
@@ -240,7 +240,7 @@
                         android:id="@+id/textAllPractice"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="All Practice"
+                        android:text="All Courses"
                         android:textColor="@android:color/holo_blue_dark"
                         android:textSize="14sp"
                         android:textStyle="bold"

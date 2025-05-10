@@ -2,7 +2,6 @@ package com.labactivity.lala
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -37,28 +36,7 @@ class MainActivity3 : AppCompatActivity() {
         )
 
         carRecyclerView.adapter = CarAdapter(cars) { selectedCar ->
-            // ✅ Kapag na-click ang card, mag-oopen ng bagong activity
-            val intent = when (selectedCar.name) {
-                "Java" -> {
-                    // Kung Java ang na-click, pumunta sa JavaCoreModule
-                    Intent(this, JavaCoreModule::class.java).apply {
-                        putExtra("CAR_NAME", selectedCar.name)
-                    }
-                }
-                "MySQL" -> {
-                    // Kung MySQL ang na-click, pumunta sa SqlCoreModule
-                    Intent(this, SqlCoreModule::class.java).apply {
-                        putExtra("CAR_NAME", selectedCar.name)
-                    }
-                }
-                else -> {
-                    // Otherwise, go to CoreModule for Python
-                    Intent(this, CoreModule::class.java).apply {
-                        putExtra("CAR_NAME", selectedCar.name)
-                    }
-                }
-            }
-            startActivity(intent)
+
         }
     }
 }

@@ -1,0 +1,17 @@
+<!-- ... existing layout ... -->
+
+<!-- Enroll button for course selection. Used to trigger the enroll dialog. -->
+<Button
+    android:id="@+id/btnEnrollCourse"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Enroll"
+    android:padding="12dp"
+    android:layout_gravity="end"
+    android:backgroundTint="@color/colorPrimary"
+    android:textColor="@android:color/white"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
+    />
+
+<!-- ... existing layout ... --> 
