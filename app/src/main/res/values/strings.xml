@@ -24,6 +24,19 @@
     <string name="next_card">Next Card</string>
     <string name="shuffle_cards">Shuffle Cards</string>
     <string name="prepared_by_techlaunch">Prepared by TechLaunch just for you!</string>
+    <string name="success_message">Great job! You fixed the code!</string>
+    <string name="failure_message">Not quite right yet. Keep trying!</string>
+    <string name="hint_button_description">Get a hint</string>
+    <string name="run_code">Run Code</string>
+    <string name="debug_instructions">Find and fix the bug in the code</string>
+    <string name="expected_output">Expected Output:</string>
+    <string name="your_output">Your Output:</string>
+    <string name="view_all_assessments">View All</string>
+    <string name="technical_assessment">Technical Assessment</string>
+    <string name="fix_the_loop">Fix the Loop</string>
+    <string name="debug_if_else">Debug If-Else Statement</string>
+    <string name="points_earned">+%d points earned!</string>
+
 
 
     <string name="sharpen_description">

@@ -15,6 +15,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lala">
 
+        <activity android:name=".CompilerActivity">
+            <!-- You can also add intent filters or other configurations if necessary -->
+        </activity>
+
 
         <activity
             android:name=".FlashcardActivity"
