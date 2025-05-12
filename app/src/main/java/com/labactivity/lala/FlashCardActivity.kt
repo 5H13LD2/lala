@@ -49,22 +49,22 @@ class FlashcardActivity : AppCompatActivity() {
             Flashcard("What are Python decorators?", "Decorators are a design pattern in Python that allow a user to add new functionality to an existing object without modifying its structure."),
             Flashcard("Explain list comprehension in Python", "List comprehension is a concise way to create lists in Python. It consists of brackets containing an expression followed by a for clause, then zero or more for or if clauses."),
             Flashcard("What is PEP 8?", "PEP 8 is the style guide for Python code, providing coding conventions for the Python code comprising the standard library in the main Python distribution."),
-            Flashcard("What is the difference between lists and tuples?", "Lists are mutable while tuples are immutable. Lists use square brackets [] while tuples use parentheses ().")
+            Flashcard("What is the difference between lists and tuples?", "Lists are mutable while tuples are immutable. Lists use square brackets [] while tuples use parentheses ()."),
             // Other flashcards commented out...
-            // Flashcard("What are Python modules?", "Modules are Python files with a .py extension that implement a set of functions. They can be imported and used in other Python programs."),
-            // Flashcard("What is __init__ in Python?", "__init__ is a special method in Python classes, called a constructor, that is automatically called when a new instance of a class is created."),
-            //  Flashcard("What is a lambda function?", "A lambda function is a small anonymous function defined with the lambda keyword. It can take any number of arguments but can only have one expression."),
-            //  Flashcard("What is a dictionary in Python?", "A dictionary is an unordered collection of key-value pairs. In Python, dictionaries are defined within braces {} with each item being a pair separated by a colon."),
-            // Flashcard("What is the Global Interpreter Lock (GIL)?", "The GIL is a mutex that protects access to Python objects, preventing multiple threads from executing Python bytecode at once."),
-            // Flashcard("What is the difference between == and is?", "== checks if the values of two objects are equal, while 'is' checks if two variables point to the same object in memory."),
-            //Flashcard("What are Python generators?", "Generators are functions that return an iterable generator object. They use the yield statement to return values one at a time, pausing the function's execution between calls."),
-            // Flashcard("What is exception handling in Python?", "Exception handling in Python is done using try-except blocks, allowing you to handle runtime errors gracefully."),
-            //  Flashcard("What is the difference between append() and extend()?", "append() adds a single element to the end of a list, while extend() adds multiple elements from an iterable to the end of a list."),
-            //  Flashcard("What is a context manager in Python?", "A context manager is an object that defines the methods __enter__() and __exit__(). It's typically used with the 'with' statement to ensure resources are properly managed."),
-            //  Flashcard("What is a virtual environment in Python?", "A virtual environment is a self-contained directory tree that contains a Python installation for a particular version of Python, plus a number of additional packages."),
-            // Flashcard("What is duck typing in Python?", "Duck typing is a programming concept where the type or class of an object is less important than the methods it defines. If it walks like a duck and quacks like a duck, then it's a duck."),
-            // Flashcard("What is *args and **kwargs?", "*args allows a function to accept any number of positional arguments. **kwargs allows a function to accept any number of keyword arguments."),
-            // Flashcard("What is the difference between deep and shallow copy?", "A shallow copy creates a new object but keeps references to the original object's elements. A deep copy creates a new object and recursively copies all the elements from the original object."),
+            Flashcard("What are Python modules?", "Modules are Python files with a .py extension that implement a set of functions. They can be imported and used in other Python programs."),
+            Flashcard("What is __init__ in Python?", "__init__ is a special method in Python classes, called a constructor, that is automatically called when a new instance of a class is created."),
+            Flashcard("What is a lambda function?", "A lambda function is a small anonymous function defined with the lambda keyword. It can take any number of arguments but can only have one expression."),
+            Flashcard("What is a dictionary in Python?", "A dictionary is an unordered collection of key-value pairs. In Python, dictionaries are defined within braces {} with each item being a pair separated by a colon."),
+            Flashcard("What is the Global Interpreter Lock (GIL)?", "The GIL is a mutex that protects access to Python objects, preventing multiple threads from executing Python bytecode at once."),
+            Flashcard("What is the difference between == and is?", "== checks if the values of two objects are equal, while 'is' checks if two variables point to the same object in memory."),
+            Flashcard("What are Python generators?", "Generators are functions that return an iterable generator object. They use the yield statement to return values one at a time, pausing the function's execution between calls."),
+            Flashcard("What is exception handling in Python?", "Exception handling in Python is done using try-except blocks, allowing you to handle runtime errors gracefully."),
+            Flashcard("What is the difference between append() and extend()?", "append() adds a single element to the end of a list, while extend() adds multiple elements from an iterable to the end of a list."),
+            Flashcard("What is a context manager in Python?", "A context manager is an object that defines the methods __enter__() and __exit__(). It's typically used with the 'with' statement to ensure resources are properly managed."),
+            Flashcard("What is a virtual environment in Python?", "A virtual environment is a self-contained directory tree that contains a Python installation for a particular version of Python, plus a number of additional packages."),
+            Flashcard("What is duck typing in Python?", "Duck typing is a programming concept where the type or class of an object is less important than the methods it defines. If it walks like a duck and quacks like a duck, then it's a duck."),
+            Flashcard("What is *args and **kwargs?", "*args allows a function to accept any number of positional arguments. **kwargs allows a function to accept any number of keyword arguments."),
+            Flashcard("What is the difference between deep and shallow copy?", "A shallow copy creates a new object but keeps references to the original object's elements. A deep copy creates a new object and recursively copies all the elements from the original object."),
         )
 
         Log.d("FlashcardDebug", "Flashcards loaded: ${flashcards.size} cards")
@@ -91,23 +91,15 @@ class FlashcardActivity : AppCompatActivity() {
 
         // Flashcard flip listeners
         binding.flashcardFront.setOnClickListener {
-            Log.d("FlashcardDebug", "=== FRONT CLICK START ===")
-            Log.d("FlashcardDebug", "Front view clicked")
-            Log.d("FlashcardDebug", "Current state - isFrontVisible: $isFrontVisible")
-            Log.d("FlashcardDebug", "Front visibility: ${binding.flashcardFront.visibility}")
-            Log.d("FlashcardDebug", "Back visibility: ${binding.flashcardBack.visibility}")
-            flipCard()
-            Log.d("FlashcardDebug", "=== FRONT CLICK END ===")
+            if (!isAnimating) {
+                flipCard()
+            }
         }
 
         binding.flashcardBack.setOnClickListener {
-            Log.d("FlashcardDebug", "=== BACK CLICK START ===")
-            Log.d("FlashcardDebug", "Back view clicked")
-            Log.d("FlashcardDebug", "Current state - isFrontVisible: $isFrontVisible")
-            Log.d("FlashcardDebug", "Front visibility: ${binding.flashcardFront.visibility}")
-            Log.d("FlashcardDebug", "Back visibility: ${binding.flashcardBack.visibility}")
-            flipCard()
-            Log.d("FlashcardDebug", "=== BACK CLICK END ===")
+            if (!isAnimating) {
+                flipCard()
+            }
         }
 
         // Navigation buttons
@@ -140,98 +132,85 @@ class FlashcardActivity : AppCompatActivity() {
     }
 
     private fun flipCard() {
-        Log.d("FlashcardDebug", "=== FLIP CARD START ===")
-        Log.d("FlashcardDebug", "Current state - isFrontVisible: $isFrontVisible")
-        Log.d("FlashcardDebug", "Front visibility: ${binding.flashcardFront.visibility}")
-        Log.d("FlashcardDebug", "Back visibility: ${binding.flashcardBack.visibility}")
-
-        // Prevent multiple animations
-        if (isAnimating) {
-            Log.d("FlashcardDebug", "Animation already in progress, ignoring flip request")
-            return
-        }
-
-        // Cancel any ongoing animations
-        frontAnimation.cancel()
-        backAnimation.cancel()
-        Log.d("FlashcardDebug", "Cancelled any ongoing animations")
-
+        if (isAnimating) return
         isAnimating = true
 
+        Log.d("FlashcardDebug", "Flipping card, isFrontVisible: $isFrontVisible")
+
         if (isFrontVisible) {
-            Log.d("FlashcardDebug", "Flipping from FRONT to BACK")
-            // Front is visible, animate to show back
+            // We're showing the front, need to flip to back
+
+            // Make sure both cards are in the correct starting position
+            binding.flashcardFront.visibility = View.VISIBLE
+            binding.flashcardBack.visibility = View.VISIBLE
+
+            // Set up animations
             frontAnimation.setTarget(binding.flashcardFront)
             backAnimation.setTarget(binding.flashcardBack)
 
-            // Set animation listeners before starting animations
+            // Remove any existing listeners to prevent multiple callbacks
+            clearAnimationListeners()
+
+            // Start animations together
+            frontAnimation.start()
+            backAnimation.start()
+
+            // Add completion listener to the last animation that will finish
             frontAnimation.addListener(object : android.animation.Animator.AnimatorListener {
-                override fun onAnimationStart(animation: android.animation.Animator) {
-                    Log.d("FlashcardDebug", "Front animation STARTED")
-                }
+                override fun onAnimationStart(animation: android.animation.Animator) {}
                 override fun onAnimationCancel(animation: android.animation.Animator) {
-                    Log.d("FlashcardDebug", "Front animation CANCELLED")
                     isAnimating = false
                 }
-                override fun onAnimationRepeat(animation: android.animation.Animator) {
-                    Log.d("FlashcardDebug", "Front animation REPEATED")
-                }
+                override fun onAnimationRepeat(animation: android.animation.Animator) {}
                 override fun onAnimationEnd(animation: android.animation.Animator) {
-                    Log.d("FlashcardDebug", "Front animation ENDED")
-                    // Make back view visible after front animation ends
-                    binding.flashcardBack.visibility = View.VISIBLE
                     binding.flashcardFront.visibility = View.GONE
                     isFrontVisible = false
                     isAnimating = false
-                    Log.d("FlashcardDebug", "Set front view to GONE, back view to VISIBLE, isFrontVisible = false")
+                    Log.d("FlashcardDebug", "Flip to back complete")
                 }
             })
-
-            // Start only front animation first
-            frontAnimation.start()
-            Log.d("FlashcardDebug", "Started front animation")
         } else {
-            Log.d("FlashcardDebug", "Flipping from BACK to FRONT")
-            // Back is visible, animate to show front
+            // We're showing the back, need to flip to front
+
+            // Make sure both cards are in the correct starting position
+            binding.flashcardFront.visibility = View.VISIBLE
+            binding.flashcardBack.visibility = View.VISIBLE
+
+            // Set up animations (note the reversed targets)
             frontAnimation.setTarget(binding.flashcardBack)
             backAnimation.setTarget(binding.flashcardFront)
 
-            // Set animation listeners before starting animations
+            // Remove any existing listeners
+            clearAnimationListeners()
+
+            // Start animations
+            frontAnimation.start()
+            backAnimation.start()
+
+            // Add completion listener
             frontAnimation.addListener(object : android.animation.Animator.AnimatorListener {
-                override fun onAnimationStart(animation: android.animation.Animator) {
-                    Log.d("FlashcardDebug", "Back animation STARTED")
-                }
+                override fun onAnimationStart(animation: android.animation.Animator) {}
                 override fun onAnimationCancel(animation: android.animation.Animator) {
-                    Log.d("FlashcardDebug", "Back animation CANCELLED")
                     isAnimating = false
                 }
-                override fun onAnimationRepeat(animation: android.animation.Animator) {
-                    Log.d("FlashcardDebug", "Back animation REPEATED")
-                }
+                override fun onAnimationRepeat(animation: android.animation.Animator) {}
                 override fun onAnimationEnd(animation: android.animation.Animator) {
-                    Log.d("FlashcardDebug", "Back animation ENDED")
-                    // Make front view visible after back animation ends
-                    binding.flashcardFront.visibility = View.VISIBLE
                     binding.flashcardBack.visibility = View.GONE
                     isFrontVisible = true
                     isAnimating = false
-                    Log.d("FlashcardDebug", "Set back view to GONE, front view to VISIBLE, isFrontVisible = true")
+                    Log.d("FlashcardDebug", "Flip to front complete")
                 }
             })
-
-            // Start only back animation first
-            frontAnimation.start()
-            Log.d("FlashcardDebug", "Started back animation")
         }
-        Log.d("FlashcardDebug", "=== FLIP CARD END ===")
+    }
+
+    private fun clearAnimationListeners() {
+        // Remove all existing listeners from animations
+        frontAnimation.removeAllListeners()
+        backAnimation.removeAllListeners()
     }
 
     private fun resetCard() {
-        Log.d("FlashcardDebug", "=== RESET CARD START ===")
-        Log.d("FlashcardDebug", "Current state - isFrontVisible: $isFrontVisible")
-        Log.d("FlashcardDebug", "Front visibility before reset: ${binding.flashcardFront.visibility}")
-        Log.d("FlashcardDebug", "Back visibility before reset: ${binding.flashcardBack.visibility}")
-
         // Cancel any ongoing animations
         frontAnimation.cancel()
         backAnimation.cancel()
@@ -241,15 +220,9 @@ class FlashcardActivity : AppCompatActivity() {
         binding.flashcardFront.visibility = View.VISIBLE
         binding.flashcardBack.visibility = View.GONE
         isFrontVisible = true
-        Log.d("FlashcardDebug", "Reset card to front view")
-
-        Log.d("FlashcardDebug", "Front visibility after reset: ${binding.flashcardFront.visibility}")
-        Log.d("FlashcardDebug", "Back visibility after reset: ${binding.flashcardBack.visibility}")
-        Log.d("FlashcardDebug", "=== RESET CARD END ===")
     }
 
     private fun updateUI() {
-        Log.d("FlashcardDebug", "Updating UI, current index: $currentCardIndex")
         // Update progress indicator
         binding.tvProgress.text = "${currentCardIndex + 1}/${flashcards.size}"
 
