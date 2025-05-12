@@ -154,6 +154,7 @@ class MainActivity4 : AppCompatActivity() {
                 Line 2: Hello, TechLauncher!
                 Line 3: Hello, TechLauncher!
                 Line 4: Hello, TechLauncher!
+              
             """.trimIndent(),
                 hint = "Maybe the variable is missing inside the f-string."
             ),
@@ -174,7 +175,7 @@ class MainActivity4 : AppCompatActivity() {
                 else:
                     print("The number is zero")
             """.trimIndent(),
-                correctOutput = "The number is positive",
+                correctOutput = "The number is positive ",
                 hint = "I-Check mo yung syntax of the if statement.tignan mo kung may kulang!!!?"
             ),
             Challenge(
@@ -193,7 +194,7 @@ class MainActivity4 : AppCompatActivity() {
                 
                 number = 5
                 result = factorial[number]
-                print(f"The factorial of {number} is {result}")
+                print(f"The factorial of {number} is {result} \n\nCongrats you solved the problem!")
             """.trimIndent(),
                 correctOutput = "The factorial of 5 is 120",
                 hint = "How do you call a function in Python? [] is for different data structures."
