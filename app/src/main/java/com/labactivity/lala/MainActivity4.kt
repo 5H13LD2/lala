@@ -1,6 +1,5 @@
 package com.labactivity.lala
 
-import com.labactivity.lala.Challenge
 import android.content.Intent
 import android.graphics.Paint
 import android.graphics.Rect
@@ -43,6 +42,7 @@ class MainActivity4 : AppCompatActivity() {
         setupRecyclerView()
         setupBottomNavigation()
         setupTechnicalAssessmentSection()
+        setupTechnicalInterviewSection() // Added this line to set up the Technical Interview section
     }
 
     private fun toggleDay(dayIndex: Int) {
@@ -119,8 +119,6 @@ class MainActivity4 : AppCompatActivity() {
                 else -> false
             }
         }
-
-
     }
 
     private fun setupTechnicalAssessmentSection() {
@@ -177,7 +175,7 @@ class MainActivity4 : AppCompatActivity() {
                     print("The number is zero")
             """.trimIndent(),
                 correctOutput = "The number is positive",
-                hint = "Check the syntax of the if statement. Is it properly terminated?"
+                hint = "I-Check mo yung syntax of the if statement.tignan mo kung may kulang!!!?"
             ),
             Challenge(
                 id = 3,
@@ -200,15 +198,7 @@ class MainActivity4 : AppCompatActivity() {
                 correctOutput = "The factorial of 5 is 120",
                 hint = "How do you call a function in Python? [] is for different data structures."
             )
-            // You can add more challenges here from your list
         )
-
-        // If you want to use the simple challenges instead (without Python code), use this instead:
-        // val challenges = listOf(
-        //    Challenge("Challenge One", "Easy"),
-        //    Challenge("Challenge Two", "Medium"),
-        //    Challenge("Challenge Three", "Hard")
-        // )
 
         val adapter = TechnicalAssessmentAdapter(this, challenges)
         recyclerView.adapter = adapter
@@ -223,4 +213,39 @@ class MainActivity4 : AppCompatActivity() {
         }
     }
 
+    // Added the setupTechnicalInterviewSection function
+    private fun setupTechnicalInterviewSection() {
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewInterviews)
+
+        // Set up layout manager
+        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        recyclerView.layoutManager = layoutManager
+
+        // Add spacing between items
+        val itemSpacing = resources.getDimensionPixelSize(R.dimen.item_spacing)
+        recyclerView.addItemDecoration(object : RecyclerView.ItemDecoration() {
+            override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
+                outRect.right = itemSpacing
+                outRect.left = itemSpacing
+            }
+        })
+
+        // Create interview topics
+        val topics = listOf(
+            FlashcardTopic(1, "Programming Basics", "Beginner", emptyList()),
+            FlashcardTopic(2, "Data Structures", "Intermediate", emptyList()),
+            FlashcardTopic(3, "Algorithms", "Advanced", emptyList()),
+            FlashcardTopic(4, "Object-Oriented Programming", "Intermediate", emptyList())
+        )
+
+        // Set adapter
+        val adapter = TechnicalInterviewAdapter(this, topics)
+        recyclerView.adapter = adapter
+
+        // Set click listener for "View All" text
+        findViewById<TextView>(R.id.textViewAllInterviews).setOnClickListener {
+            Toast.makeText(this, "View all interview topics", Toast.LENGTH_SHORT).show()
+            // Optionally, launch an activity that shows all topics
+        }
+    }
 }
