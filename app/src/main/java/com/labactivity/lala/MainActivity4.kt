@@ -197,7 +197,7 @@ class MainActivity4 : AppCompatActivity() {
                 print(f"The factorial of {number} is {result} \n\nCongrats you solved the problem!")
             """.trimIndent(),
                 correctOutput = "The factorial of 5 is 120",
-                hint = "How do you call a function in Python? [] is for different data structures."
+                hint = "pano tawagin yung function sa python? [] ganyan ba?."
             )
         )
 
