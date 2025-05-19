@@ -3,6 +3,10 @@ package com.labactivity.lala
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.Editable
+import android.text.InputFilter
+import android.text.Spanned
+import android.text.TextWatcher
 import android.text.method.ScrollingMovementMethod
 import android.view.View
 import android.widget.Button
@@ -11,6 +15,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.NestedScrollView
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
 import java.io.File
@@ -20,12 +25,15 @@ import java.util.concurrent.Executors
 class CompilerActivity : AppCompatActivity() {
 
     private lateinit var codeEditText: EditText
+    private lateinit var lineNumbersTextView: TextView
+    private lateinit var codeScrollView: NestedScrollView
+    private lateinit var lineNumbersScrollView: NestedScrollView
     private lateinit var runButton: Button
     private lateinit var outputTextView: TextView
     private lateinit var inputContainer: LinearLayout
     private lateinit var userInputEditText: EditText
     private lateinit var submitInputButton: Button
-    private lateinit var hintButton: Button  // Changed from FloatingActionButton to Button
+    private lateinit var hintButton: Button
     private val handler = Handler(Looper.getMainLooper())
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
@@ -35,15 +43,14 @@ class CompilerActivity : AppCompatActivity() {
 
     private var challengeTitle: String = ""
     private var correctOutput: String = ""
-    private var hintText: String = ""  // Renamed from 'hint' to 'hintText'
+    private var hintText: String = ""
 
-    // These were declared but not used
     private var pyInputBuffer = ""
     private var waitingForInput = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.compiler2)
+        setContentView(R.layout.compiler_line_numbered)
 
         // Initialize Python if not already started
         if (!Python.isStarted()) {
@@ -57,15 +64,37 @@ class CompilerActivity : AppCompatActivity() {
 
         // Find UI elements
         codeEditText = findViewById(R.id.codeEditText)
+        lineNumbersTextView = findViewById(R.id.lineNumbersTextView)
+        codeScrollView = findViewById(R.id.codeScrollView)
+        lineNumbersScrollView = findViewById(R.id.lineNumbersScrollView)
         runButton = findViewById(R.id.runButton)
         outputTextView = findViewById(R.id.outputTextView)
         inputContainer = findViewById(R.id.inputContainer)
         userInputEditText = findViewById(R.id.userInputEditText)
         submitInputButton = findViewById(R.id.submitInputButton)
-        hintButton = findViewById(R.id.hint)  // Now matches the ID in compiler2.xml
+        hintButton = findViewById(R.id.hint)
+
+        // Set the title TextView
+        val titleTextView = findViewById<TextView>(R.id.titleTextView)
+        titleTextView.text = challengeTitle
 
         // Enable scrolling for output
         outputTextView.movementMethod = ScrollingMovementMethod()
+
+        // Initialize line numbers
+        updateLineNumbers(challengeCode)
+
+        // Set up synchronous scrolling between line numbers and code
+        setupSynchronousScrolling()
+
+        // Set text change listener to update line numbers
+        codeEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                updateLineNumbers(s.toString())
+            }
+        })
 
         codeEditText.setText(challengeCode)
 
@@ -77,7 +106,7 @@ class CompilerActivity : AppCompatActivity() {
         // Set click listener for Submit Input button
         submitInputButton.setOnClickListener {
             val input = userInputEditText.text.toString()
-            submitUserInput(input)  // Fixed: Actually call the submitUserInput method
+            submitUserInput(input)
             userInputEditText.text.clear()
             inputContainer.visibility = View.GONE
             waitingForInput = false
@@ -97,6 +126,24 @@ class CompilerActivity : AppCompatActivity() {
         super.onDestroy()
         stopInputCheck()
         executor.shutdown()
+    }
+
+    private fun setupSynchronousScrolling() {
+        // Sync line numbers scroll with code scroll
+        codeScrollView.setOnScrollChangeListener { _, _, scrollY, _, _ ->
+            lineNumbersScrollView.scrollTo(0, scrollY)
+        }
+    }
+
+    private fun updateLineNumbers(text: String) {
+        val lines = text.split("\n")
+        val lineNumbers = StringBuilder()
+
+        for (i in 1..lines.size) {
+            lineNumbers.append("$i\n")
+        }
+
+        lineNumbersTextView.text = lineNumbers.toString()
     }
 
     private fun executePythonScript() {
@@ -295,7 +342,7 @@ class CompilerActivity : AppCompatActivity() {
         }
     }
 
-    // New function to check if challenge is completed successfully
+    // Check if challenge is completed successfully
     private fun checkChallengeCompletion() {
         try {
             val output = outputFile?.readText()?.trim() ?: ""

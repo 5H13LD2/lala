@@ -40,13 +40,6 @@ class CourseAdapter(private val courseList: List<Course>) :
 
 
         // Hide practice button and logo for SQL course
-        if (course.name.contains("SQL", ignoreCase = true)) {
-            holder.btnPractice.visibility = View.GONE
-            holder.practiceLogo.visibility = View.GONE
-        } else {
-            holder.btnPractice.visibility = View.VISIBLE
-            holder.practiceLogo.visibility = View.VISIBLE
-        }
 
         // ✅ These listeners must always be set, even for SQL
         holder.btnContinue.setOnClickListener {
