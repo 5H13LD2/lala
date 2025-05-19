@@ -29,6 +29,7 @@ class MainActivity3 : AppCompatActivity() {
         val carRecyclerView: RecyclerView = binding.carRecyclerView
         carRecyclerView.layoutManager = LinearLayoutManager(this)
 
+        //Change Var name
         val cars = listOf(
             Car("Python", R.drawable.python, CarColors.PYTHON),
             Car("Java", R.drawable.java, CarColors.JAVA),
