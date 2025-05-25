@@ -37,6 +37,18 @@
     <string name="debug_if_else">Debug If-Else Statement</string>
     <string name="points_earned">+%d points earned!</string>
 
+    //sql compiler tho
+    <string name="sql_compiler_title">SQL Compiler</string>
+    <string name="query_hint">Write your SQL query here...</string>
+    <string name="run_query">Run</string>
+    <string name="test_case">Test Case</string>
+    <string name="correct_output">✅ Correct Output! 🎉</string>
+    <string name="incorrect_output">❌ Incorrect Output</string>
+    <string name="query_error">❌ Query Error: %s</string>
+    <string name="reset">Reset</string>
+    <string name="view_solution">View Solution</string>
+    <string name="sample_table">Sample Table: `%s`</string>
+
 
 
     <string name="sharpen_description">

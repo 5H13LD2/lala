@@ -36,11 +36,17 @@
     <color name="primary_">#2A36A0</color>
     <color name="primary_dark_">#1A237E</color>
     <color name="accent_">#448AFF</color>
-    <color name="white_">#FFFFFF</color>
     <color name="black_">#000000</color>
     <color name="gray">#757575</color>
     <color name="light_gray">#F0F0F0</color>
     <color name="red">#FF4081</color>
+
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="primary_blue">#FF2196F3</color>
 
 
 </resources>

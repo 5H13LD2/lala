@@ -1,7 +1,6 @@
 package com.labactivity.lala
 
 import android.content.Intent
-import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +8,6 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 
 class CourseAdapter(private val courseList: List<Course>) :
@@ -22,7 +20,6 @@ class CourseAdapter(private val courseList: List<Course>) :
         val btnFlashcard: Button = view.findViewById(R.id.btnFlashcard)
         val btnPractice: Button = view.findViewById(R.id.btnPractice)
         val practiceLogo: ImageView = view.findViewById(R.id.practicelogo)
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
@@ -38,10 +35,7 @@ class CourseAdapter(private val courseList: List<Course>) :
         holder.courseImage.setImageResource(course.imageResId)
         holder.courseTitle.text = course.name
 
-
-        // Hide practice button and logo for SQL course
-
-        // ✅ These listeners must always be set, even for SQL
+        // Continue Learning button
         holder.btnContinue.setOnClickListener {
             val intent = when {
                 course.name.contains("Python", ignoreCase = true) ->
@@ -55,19 +49,27 @@ class CourseAdapter(private val courseList: List<Course>) :
             intent?.let { context.startActivity(it) }
         }
 
+        // Practice button (SQL only)
         holder.btnPractice.setOnClickListener {
-            val intent = Intent(context, MainActivity7::class.java)
-            context.startActivity(intent)
+            val intent = when {
+                course.name.contains("SQL", ignoreCase = true) ->
+                    Intent(context, sqlcompiler::class.java)
+                else -> {
+                    Toast.makeText(
+                        context,
+                        "Practice not available for this course yet",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    null
+                }
+            }
+            intent?.let { context.startActivity(it) }
         }
 
+        // Flashcard button
         holder.btnFlashcard.setOnClickListener {
-            // Show a toast when the Flashcard button is clicked
             Toast.makeText(context, "Flashcard clicked", Toast.LENGTH_SHORT).show()
-
-            // Create an intent to start the FlashcardActivity
             val intent = Intent(context, FlashcardActivity::class.java)
-
-            // Start FlashcardActivity using the correct context
             context.startActivity(intent)
         }
     }

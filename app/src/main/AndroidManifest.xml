@@ -14,13 +14,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Lala">
+        <activity
+            android:name=".sqlcompiler"
+            android:exported="true">
+        </activity>
 
         <activity android:name=".CompilerActivity">
-            <!-- You can also add intent filters or other configurations if necessary -->
+
         </activity>
 
         <activity android:name=".TechnicalFlashcardActivity">
-            <!-- You can also add intent filters or other configurations if necessary -->
+
         </activity>
 
 
