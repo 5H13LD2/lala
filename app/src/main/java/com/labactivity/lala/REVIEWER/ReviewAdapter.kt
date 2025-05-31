@@ -4,7 +4,7 @@
     import android.view.ViewGroup
     import android.widget.TextView
     import androidx.recyclerview.widget.RecyclerView
-    import com.labactivity.lala.Question
+    import com.labactivity.lala.quiz.Question
     import com.labactivity.lala.R
 
     class ReviewAdapter(private val questions: List<Question>) :

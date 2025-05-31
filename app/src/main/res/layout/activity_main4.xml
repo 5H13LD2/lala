@@ -37,7 +37,7 @@
                 app:layout_constraintEnd_toEndOf="parent">
 
                 <!-- Monday -->
-                <com.labactivity.lala.DayCircleView
+                <com.labactivity.lala.homepage.DayCircleView
                     android:id="@+id/day_monday"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
@@ -50,7 +50,7 @@
                     android:textSize="16sp"/>
 
                 <!-- Tuesday -->
-                <com.labactivity.lala.DayCircleView
+                <com.labactivity.lala.homepage.DayCircleView
                     android:id="@+id/day_tuesday"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
@@ -63,7 +63,7 @@
                     android:textSize="16sp"/>
 
                 <!-- Wednesday -->
-                <com.labactivity.lala.DayCircleView
+                <com.labactivity.lala.homepage.DayCircleView
                     android:id="@+id/day_wednesday"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
@@ -76,7 +76,7 @@
                     android:textSize="16sp"/>
 
                 <!-- Thursday -->
-                <com.labactivity.lala.DayCircleView
+                <com.labactivity.lala.homepage.DayCircleView
                     android:id="@+id/day_thursday"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
@@ -89,7 +89,7 @@
                     android:textSize="16sp"/>
 
                 <!-- Friday -->
-                <com.labactivity.lala.DayCircleView
+                <com.labactivity.lala.homepage.DayCircleView
                     android:id="@+id/day_friday"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
@@ -102,7 +102,7 @@
                     android:textSize="16sp"/>
 
                 <!-- Saturday -->
-                <com.labactivity.lala.DayCircleView
+                <com.labactivity.lala.homepage.DayCircleView
                     android:id="@+id/day_saturday"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
@@ -115,7 +115,7 @@
                     android:textSize="16sp"/>
 
                 <!-- Sunday -->
-                <com.labactivity.lala.DayCircleView
+                <com.labactivity.lala.homepage.DayCircleView
                     android:id="@+id/day_sunday"
                     android:layout_width="40dp"
                     android:layout_height="40dp"

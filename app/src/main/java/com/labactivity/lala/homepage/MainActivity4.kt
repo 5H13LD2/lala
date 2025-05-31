@@ -1,5 +1,6 @@
 package com.labactivity.lala.homepage
 
+
 import android.content.Intent
 import android.graphics.Paint
 import android.graphics.Rect
@@ -22,6 +23,8 @@ import com.labactivity.lala.PYTHONASSESMENT.TechnicalAssessmentAdapter
 import com.labactivity.lala.PYTHONASSESMENT.TechnicalInterviewAdapter
 import com.labactivity.lala.databinding.ActivityMain4Binding
 import java.util.Calendar
+
+
 
 class MainActivity4 : AppCompatActivity() {
 
