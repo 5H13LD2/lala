@@ -1,6 +1,7 @@
 package com.labactivity.lala
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.labactivity.lala.LEARNINGMATERIAL.Lesson
+import com.labactivity.lala.LEARNINGMATERIAL.Module
+import com.labactivity.lala.LEARNINGMATERIAL.SqlModuleAdapter
+import com.labactivity.lala.homepage.Courses
+import com.labactivity.lala.quiz.DynamicQuizActivity
 
 class SqlCourseFragment : Fragment() {
 
@@ -71,7 +77,7 @@ class SqlCourseFragment : Fragment() {
             onQuizClick = { module ->
                 // Navigate to the quiz for this module
                 Log.d("SqlCourseFragment", "Quiz button clicked for module: ${module.id}")
-                val intent = android.content.Intent(requireContext(), com.labactivity.lala.quiz.DynamicQuizActivity::class.java).apply {
+                val intent = Intent(requireContext(), DynamicQuizActivity::class.java).apply {
                     putExtra("module_id", module.id)
                     putExtra("module_title", module.title)
                 }

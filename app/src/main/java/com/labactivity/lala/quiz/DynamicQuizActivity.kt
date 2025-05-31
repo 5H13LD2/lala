@@ -12,10 +12,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.labactivity.lala.R
-import com.labactivity.lala.ResultActivity
+import com.labactivity.lala.REVIEWER.ResultActivity
 import java.util.concurrent.TimeUnit
-import com.labactivity.lala.quiz.QuizRepository
-import com.labactivity.lala.quiz.QuizRepositoryFactory
 
 class DynamicQuizActivity : AppCompatActivity() {
 

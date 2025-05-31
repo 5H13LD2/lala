@@ -15,30 +15,30 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lala">
         <activity
-            android:name=".sqlcompiler"
+            android:name=".SQLCOMPILER.sqlcompiler"
             android:exported="true">
         </activity>
 
-        <activity android:name=".CompilerActivity">
+        <activity android:name=".PYTHONCOMPILER.CompilerActivity">
 
         </activity>
 
-        <activity android:name=".TechnicalFlashcardActivity">
+        <activity android:name=".TECHNICALREVIEWER.TechnicalFlashcardActivity">
 
         </activity>
 
 
         <activity
-            android:name=".FlashcardActivity"
+            android:name=".FLASHCARD.FlashcardActivity"
             android:exported="false" />
 
         <activity
-            android:name=".PythonCompilerActivity"
+            android:name=".PYTHONCOMPILER.PythonCompilerActivity"
             android:exported="false"
             android:label="Python Compiler" />
 
         <activity
-            android:name=".MainActivity7"
+            android:name=".PYTHONCOMPILER.MainActivity7"
             android:exported="true">
             <intent-filter>
 
@@ -52,25 +52,25 @@
             android:label="Quiz Repository Test" />
 
         <activity
-            android:name=".QuizActivity"
+            android:name=".quiz.QuizActivity"
             android:exported="false" />
         <activity
             android:name=".quiz.DynamicQuizActivity"
             android:exported="false" />
         <activity
-            android:name=".ResultActivity"
+            android:name=".REVIEWER.ResultActivity"
             android:exported="false" />
         <activity
-            android:name=".ReviewActivity"
+            android:name=".REVIEWER.ReviewActivity"
             android:exported="false" />
         <activity
-            android:name=".SqlCoreModule"
+            android:name=".LEARNINGMATERIAL.SqlCoreModule"
             android:exported="false" />
         <activity
-            android:name=".JavaCoreModule"
+            android:name=".LEARNINGMATERIAL.JavaCoreModule"
             android:exported="false" />
         <activity
-            android:name=".CoreModule"
+            android:name=".LEARNINGMATERIAL.CoreModule"
             android:exported="false" />
         <activity
             android:name=".SettingsActivity"
@@ -83,16 +83,16 @@
             android:value="@string/default_web_client_id" />
 
         <activity
-            android:name=".MainActivity4"
+            android:name=".homepage.MainActivity4"
             android:exported="true" />
         <activity
-            android:name=".MainActivity3"
+            android:name=".AVAILABALECOURSEPAGE.MainActivity3"
             android:exported="false" />
         <activity
-            android:name=".MainActivity2"
+            android:name=".REGISTERPAGE.MainActivity2"
             android:exported="true" />
         <activity
-            android:name=".MainActivity"
+            android:name=".LOGINPAGE.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:padding="16dp"
     android:background="@color/white"
-    tools:context=".MainActivity7">
+    tools:context=".PYTHONCOMPILER.MainActivity7">
 
     <ImageView
         android:id="@+id/logoImageView"

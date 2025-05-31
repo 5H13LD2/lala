@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.labactivity.lala.databinding.ActivityProfileMain5Binding
+import com.labactivity.lala.homepage.MainActivity4
 
 class ProfileMainActivity5 : AppCompatActivity() {
 

@@ -5,8 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
+import com.labactivity.lala.LOGINPAGE.MainActivity
 import com.labactivity.lala.databinding.ActivitySettingsBinding
+import com.labactivity.lala.homepage.MainActivity4
 import com.labactivity.lala.quiz.TestQuizRepositoryActivity
 
 class SettingsActivity : AppCompatActivity() {

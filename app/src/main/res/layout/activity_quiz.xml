@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#E6F3FF"
-    tools:context=".QuizActivity">
+    tools:context=".quiz.QuizActivity">
 
     <!-- Timer and Question Counter Section -->
     <LinearLayout
