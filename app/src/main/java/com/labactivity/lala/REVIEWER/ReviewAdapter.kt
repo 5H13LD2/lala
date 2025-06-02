@@ -26,7 +26,6 @@
             val question = questions[position]
             holder.questionText.text = question.text
             holder.correctAnswerText.text = "Correct answer: ${question.options[question.correctAnswerIndex]}"
-            holder.difficultyText.text = "Difficulty: ${question.difficulty.name.toLowerCase().capitalize()}"
         }
 
         override fun getItemCount() = questions.size
