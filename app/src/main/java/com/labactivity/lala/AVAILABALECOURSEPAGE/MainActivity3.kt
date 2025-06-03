@@ -7,9 +7,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.labactivity.lala.quiz.Car
-import com.labactivity.lala.quiz.CarAdapter
-import com.labactivity.lala.quiz.CarColors
 import com.labactivity.lala.R
 import com.labactivity.lala.databinding.ActivityMain3Binding
 

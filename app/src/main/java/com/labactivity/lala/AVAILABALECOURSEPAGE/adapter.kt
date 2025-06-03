@@ -1,4 +1,4 @@
-package com.labactivity.lala.quiz
+package com.labactivity.lala.AVAILABALECOURSEPAGE
 
 import android.app.Dialog
 import android.content.Intent
