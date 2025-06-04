@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.labactivity.lala.AVAILABALECOURSEPAGE.CourseAdapter
 import com.labactivity.lala.AVAILABALECOURSEPAGE.MainActivity3
 import com.labactivity.lala.PYTHONASSESMENT.Challenge
 import com.labactivity.lala.FLASHCARD.FlashcardTopic

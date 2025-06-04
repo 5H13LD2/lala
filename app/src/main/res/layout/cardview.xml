@@ -42,6 +42,20 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+        <TextView
+            android:id="@+id/carDescriptionTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Course Description"
+            android:textSize="14sp"
+            android:textColor="@android:color/black"
+            android:alpha="0.8"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/carNameTextView"
+            app:layout_constraintEnd_toStartOf="@+id/carImageView"
+            tools:text="Learn Java fundamentals and OOP concepts" />
 
         <Button
             android:id="@+id/button"

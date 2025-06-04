@@ -33,11 +33,18 @@ data class Car(
     val description: String = ""
 )
 
-// CarAdapter class
+// CarAdapter class - Fixed to accept MutableList and added updateCourses method
 class CarAdapter(
-    private val cars: List<Car>,
+    private var cars: MutableList<Car>, // Changed to MutableList and var
     private val onItemClick: (Car) -> Unit
 ) : RecyclerView.Adapter<CarAdapter.CarViewHolder>() {
+
+    // Add updateCourses method that MainActivity3 is calling
+    fun updateCourses(newCourses: List<Car>) {
+        cars.clear()
+        cars.addAll(newCourses)
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CarViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -56,11 +63,13 @@ class CarAdapter(
         private val imageView: ImageView = itemView.findViewById(R.id.carImageView)
         private val cardView: MaterialCardView = itemView.findViewById(R.id.cardView)
         private val enrollButton: Button = itemView.findViewById(R.id.button)
+        private val descriptionTextView: TextView = itemView.findViewById(R.id.carDescriptionTextView) // Added this
 
         fun bind(car: Car) {
             nameTextView.text = car.name
             imageView.setImageResource(car.imageResId)
             cardView.setCardBackgroundColor(car.backgroundColor)
+            descriptionTextView.text = car.description // Added this line to bind description
 
             // Set up card click listener - This triggers the navigation from MainActivity3
             cardView.setOnClickListener {
