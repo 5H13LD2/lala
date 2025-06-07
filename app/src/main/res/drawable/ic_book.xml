@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+
+    <!-- Book cover -->
+    <path
+        android:fillColor="@android:color/black"
+        android:pathData="M4,4h16v16h-16z" />
+
+    <!-- Book spine -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M6,4v16"
+        android:strokeColor="@android:color/black"
+        android:strokeWidth="1"/>
+
+    <!-- Book pages lines -->
+    <path
+        android:strokeColor="@android:color/black"
+        android:strokeWidth="0.5"
+        android:pathData="M10,6h8 M10,9h8 M10,12h8 M10,15h8" />
+
+</vector>

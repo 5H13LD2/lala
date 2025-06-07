@@ -14,6 +14,7 @@ import com.labactivity.lala.FLASHCARD.FlashcardActivity
 import com.labactivity.lala.LEARNINGMATERIAL.JavaCoreModule
 import com.labactivity.lala.R
 import com.labactivity.lala.LEARNINGMATERIAL.SqlCoreModule
+import com.labactivity.lala.PYTHONCOMPILER.MainActivity7
 import com.labactivity.lala.SQLCOMPILER.sqlcompiler
 
 class CourseAdapter(private val courseList: List<Course>) :
@@ -60,6 +61,21 @@ class CourseAdapter(private val courseList: List<Course>) :
             val intent = when {
                 course.name.contains("SQL", ignoreCase = true) ->
                     Intent(context, sqlcompiler::class.java)
+                else -> {
+                    Toast.makeText(
+                        context,
+                        "Practice not available for this course yet",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    null
+                }
+            }
+            intent?.let { context.startActivity(it) }
+        }
+        holder.btnPractice.setOnClickListener {
+            val intent = when {
+                course.name.contains("python", ignoreCase = true) ->
+                    Intent(context, MainActivity7::class.java)
                 else -> {
                     Toast.makeText(
                         context,

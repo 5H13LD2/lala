@@ -28,17 +28,18 @@ object CarColors {
     val MYSQL = Color.parseColor("#9D84C9")
 }
 
-// Car data class
+// Updated Car data class to include courseId
 data class Car(
     val name: String,
+    val courseId: String = "", // Added courseId field
     val imageResId: Int,
     val backgroundColor: Int,
     val description: String = ""
 )
 
-// CarAdapter class - Fixed to accept MutableList and added updateCourses method
+// CarAdapter class
 class CarAdapter(
-    private var cars: MutableList<Car>, // Changed to MutableList and var
+    private var cars: MutableList<Car>,
     private val onItemClick: (Car) -> Unit
 ) : RecyclerView.Adapter<CarAdapter.CarViewHolder>() {
 
@@ -50,9 +51,9 @@ class CarAdapter(
         private const val TAG = "CarAdapter"
         private const val USERS_COLLECTION = "users"
         private const val COURSE_TAKEN_FIELD = "courseTaken"
+        private const val COURSES_COLLECTION = "courses"
     }
 
-    // Add updateCourses method that MainActivity3 is calling
     fun updateCourses(newCourses: List<Car>) {
         cars.clear()
         cars.addAll(newCourses)
@@ -76,59 +77,46 @@ class CarAdapter(
         private val imageView: ImageView = itemView.findViewById(R.id.carImageView)
         private val cardView: MaterialCardView = itemView.findViewById(R.id.cardView)
         private val enrollButton: Button = itemView.findViewById(R.id.button)
-        private val descriptionTextView: TextView = itemView.findViewById(R.id.carDescriptionTextView) // Added this
+        private val descriptionTextView: TextView =
+            itemView.findViewById(R.id.carDescriptionTextView)
 
         fun bind(car: Car) {
             nameTextView.text = car.name
             imageView.setImageResource(car.imageResId)
             cardView.setCardBackgroundColor(car.backgroundColor)
-            descriptionTextView.text = car.description // Added this line to bind description
+            descriptionTextView.text = car.description
 
-            // Set up card click listener - This triggers the navigation from MainActivity3
+            // Set up card click listener
             cardView.setOnClickListener {
                 onItemClick(car)
             }
 
             // Set up the Enroll Course button click listener
             enrollButton.setOnClickListener {
-                // Show the custom enrollment confirmation dialog
                 showEnrollmentDialog(car)
             }
         }
 
-        /**
-         * Shows a custom styled enrollment confirmation dialog
-         * Uses our custom dialog layout for styling with blue and white theme
-         */
         private fun showEnrollmentDialog(car: Car) {
             val context = itemView.context
 
-            // Create custom dialog using our custom layout
             val dialog = Dialog(context)
             dialog.setContentView(R.layout.custom_dialog)
-
-            // Make dialog background transparent to see our custom layout's background
             dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-            // Find dialog views
             val btnCancel = dialog.findViewById<Button>(R.id.btnCancel)
             val btnYes = dialog.findViewById<Button>(R.id.btnYes)
             val dialogTitle = dialog.findViewById<TextView>(R.id.dialogTitle)
             val dialogMessage = dialog.findViewById<TextView>(R.id.dialogMessage)
 
-            // Set dialog title and message with current course name
             dialogTitle.text = "Enroll Course"
             dialogMessage.text = "Do you want to add ${car.name} to your account?"
 
-            // Set up cancel button click listener
             btnCancel.setOnClickListener {
-                // Simply dismiss the dialog when Cancel is clicked
                 dialog.dismiss()
             }
 
-            // Set up yes button click listener
             btnYes.setOnClickListener {
-                // Add debug logging for when user confirms enrollment
                 Log.d("CourseEnrollment", "User confirmed enrollment for course: ${car.name}")
 
                 // Save course to Firebase first
@@ -141,29 +129,10 @@ class CarAdapter(
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        // Create the appropriate intent based on the course name
-                        val intent = when (car.name) {
-                            "Java" -> {
-                                Intent(context, JavaCoreModule::class.java).apply {
-                                    putExtra("CAR_NAME", car.name)
-                                }
-                            }
-                            "MySQL" -> {
-                                Intent(context, SqlCoreModule::class.java).apply {
-                                    putExtra("CAR_NAME", car.name)
-                                }
-                            }
-                            else -> {
-                                Intent(context, CoreModule::class.java).apply {
-                                    putExtra("CAR_NAME", car.name)
-                                }
-                            }
-                        }
-
-                        // Start the appropriate activity
+                        // Create the appropriate intent based on the course ID
+                        val intent = getIntentForCourse(context, car)
                         context.startActivity(intent)
                     } else {
-                        // Show error toast
                         Toast.makeText(
                             context,
                             "Failed to enroll in ${car.name}. Please try again.",
@@ -172,74 +141,178 @@ class CarAdapter(
                     }
                 }
 
-                // Dismiss the dialog
                 dialog.dismiss()
             }
 
-            // Show the dialog
             dialog.show()
+        }
+
+        /**
+         * Gets the appropriate intent based on the course ID
+         */
+        private fun getIntentForCourse(context: android.content.Context, car: Car): Intent {
+            return when (car.courseId.lowercase()) {
+                "java_course" -> {
+                    Intent(context, JavaCoreModule::class.java).apply {
+                        putExtra("CAR_NAME", car.name)
+                        putExtra("COURSE_ID", car.courseId)
+                    }
+                }
+
+                "sql_course" -> {
+                    Intent(context, SqlCoreModule::class.java).apply {
+                        putExtra("CAR_NAME", car.name)
+                        putExtra("COURSE_ID", car.courseId)
+                    }
+                }
+                // Handle legacy course names
+                "java" -> {
+                    Intent(context, JavaCoreModule::class.java).apply {
+                        putExtra("CAR_NAME", car.name)
+                        putExtra("COURSE_ID", car.courseId)
+                    }
+                }
+
+                "mysql", "sql" -> {
+                    Intent(context, SqlCoreModule::class.java).apply {
+                        putExtra("CAR_NAME", car.name)
+                        putExtra("COURSE_ID", car.courseId)
+                    }
+                }
+
+                else -> {
+                    Intent(context, CoreModule::class.java).apply {
+                        putExtra("CAR_NAME", car.name)
+                        putExtra("COURSE_ID", car.courseId)
+                    }
+                }
+            }
         }
     }
 
     /**
-     * Saves the enrolled course to the user's courseTaken field in Firebase
-     * @param car The course to enroll in
-     * @param callback Callback with success/failure result
+     * Saves the enrolled course to Firebase
+     * Now saves both course name and courseId for better tracking
      */
     private fun saveEnrolledCourseToFirebase(car: Car, callback: (Boolean) -> Unit) {
         val currentUser = auth.currentUser
 
         if (currentUser == null) {
             Log.e(TAG, "No authenticated user found")
-
             callback(false)
             return
         }
 
         val userId = currentUser.uid
-        Log.d(TAG, "Saving course ${car.name} for user: $userId")
+        Log.d(TAG, "Saving course ${car.name} (${car.courseId}) for user: $userId")
 
-        // Reference to the user's document
+        // Update the enrolledUsers array in the course document
+        updateCourseEnrollment(car.courseId, userId) { courseUpdateSuccess ->
+            if (courseUpdateSuccess) {
+                // Update the user's courseTaken array
+                updateUserCourseTaken(userId, car) { userUpdateSuccess ->
+                    callback(userUpdateSuccess)
+                }
+            } else {
+                callback(false)
+            }
+        }
+    }
+
+    /**
+     * Updates the enrolledUsers array in the course document
+     */
+    private fun updateCourseEnrollment(
+        courseId: String,
+        userId: String,
+        callback: (Boolean) -> Unit
+    ) {
+        firestore.collection(COURSES_COLLECTION)
+            .whereEqualTo("courseId", courseId)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (!documents.isEmpty) {
+                    val courseDoc = documents.first()
+                    courseDoc.reference
+                        .update("enrolledUsers", FieldValue.arrayUnion(userId))
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Successfully added user to course enrolledUsers")
+                            callback(true)
+                        }
+                        .addOnFailureListener { exception ->
+                            Log.e(TAG, "Error updating course enrolledUsers", exception)
+                            callback(false)
+                        }
+                } else {
+                    Log.e(TAG, "Course document not found for courseId: $courseId")
+                    callback(false)
+                }
+            }
+            .addOnFailureListener { exception ->
+                Log.e(TAG, "Error finding course document", exception)
+                callback(false)
+            }
+    }
+
+    private fun createUserDocumentWithCourse(
+        userId: String,
+        courseInfo: HashMap<String, Any?>,
+        callback: (Boolean) -> Unit
+    ) {
         val userDocRef = firestore.collection(USERS_COLLECTION).document(userId)
 
-        // Add the course to the courseTaken array field
-        userDocRef.update(COURSE_TAKEN_FIELD, FieldValue.arrayUnion(car.name))
+        val userData = hashMapOf<String, Any?>(
+            COURSE_TAKEN_FIELD to listOf(courseInfo),
+            "createdAt" to FieldValue.serverTimestamp()
+        )
+
+        userDocRef.set(userData)
             .addOnSuccessListener {
-                Log.d(TAG, "Successfully added ${car.name} to user's courseTaken")
+                Log.d(TAG, "Created user document with course info")
                 callback(true)
+            }
+            .addOnFailureListener { exception ->
+                Log.e(TAG, "Failed to create user document", exception)
+                callback(false)
+            }
+    }
+
+    private fun updateUserCourseTaken(
+        userId: String,
+        car: Car,
+        callback: (Boolean) -> Unit
+    ) {
+        val userDocRef = firestore.collection(USERS_COLLECTION).document(userId)
+
+        val courseInfo = hashMapOf<String, Any?>(
+            "courseId" to car.courseId,
+            "courseName" to car.name,
+            "enrolledAt" to null
+        )
+
+        userDocRef.update(COURSE_TAKEN_FIELD, FieldValue.arrayUnion(courseInfo))
+            .addOnSuccessListener {
+                userDocRef.update("lastEnrollmentTime", FieldValue.serverTimestamp())
+                    .addOnSuccessListener {
+                        Log.d(
+                            TAG,
+                            "Successfully added ${car.name} to user's courseTaken with timestamp"
+                        )
+                        callback(true)
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.w(TAG, "Course added but timestamp update failed", exception)
+                        callback(true)
+                    }
             }
             .addOnFailureListener { exception ->
                 Log.e(TAG, "Error adding course to courseTaken", exception)
 
-                // If the document doesn't exist, create it with the course
                 if (exception.message?.contains("No document to update") == true) {
-                    createUserDocumentWithCourse(userId, car.name, callback)
+                    createUserDocumentWithCourse(userId, courseInfo, callback)
                 } else {
                     callback(false)
                 }
-            }
-    }
-
-    /**
-     * Creates a new user document with the enrolled course
-     * This handles the case where the user document doesn't exist yet
-     */
-    private fun createUserDocumentWithCourse(userId: String, courseName: String, callback: (Boolean) -> Unit) {
-        Log.d(TAG, "Creating new user document for: $userId")
-
-        val userData = hashMapOf(
-            COURSE_TAKEN_FIELD to listOf(courseName)
-        )
-
-        firestore.collection(USERS_COLLECTION).document(userId)
-            .set(userData)
-            .addOnSuccessListener {
-                Log.d(TAG, "Successfully created user document with course: $courseName")
-                callback(true)
-            }
-            .addOnFailureListener { exception ->
-                Log.e(TAG, "Error creating user document", exception)
-                callback(false)
             }
     }
 }
