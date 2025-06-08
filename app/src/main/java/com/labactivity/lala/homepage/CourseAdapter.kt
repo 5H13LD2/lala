@@ -26,7 +26,7 @@ class CourseAdapter(private val courseList: List<Course>) :
         val btnContinue: Button = view.findViewById(R.id.btnContinueLearning)
         val btnFlashcard: Button = view.findViewById(R.id.btnFlashcard)
         val btnPractice: Button = view.findViewById(R.id.btnPractice)
-        val practiceLogo: ImageView = view.findViewById(R.id.practicelogo)
+      //  val practiceLogo: ImageView = view.findViewById(R.id.practicelogo)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {

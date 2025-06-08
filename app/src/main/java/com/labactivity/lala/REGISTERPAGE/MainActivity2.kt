@@ -32,7 +32,6 @@ class MainActivity2 : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         firestore = FirebaseFirestore.getInstance()
 
-        // Google Sign-In options
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(getString(R.string.default_web_client_id))
             .requestEmail()
@@ -40,67 +39,72 @@ class MainActivity2 : AppCompatActivity() {
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
+        // Go to Login Page
         binding.textView2.setOnClickListener {
             startActivity(Intent(this, MainActivity::class.java))
         }
 
-        // Sign up button logic
+        // Sign Up Button
         binding.btnContinue.setOnClickListener {
-            val username = binding.signuser.text.toString()
-            val email = binding.email.text.toString()
-            val password = binding.signinpass.text.toString()
+            val username = binding.signuser.text.toString().trim()
+            val email = binding.email.text.toString().trim()
+            val password = binding.signinpass.text.toString().trim()
 
             if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
-            } else {
-                auth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            val userId = auth.currentUser?.uid
+                return@setOnClickListener
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val userId = auth.currentUser?.uid
+                        if (userId != null) {
                             val user = hashMapOf(
                                 "username" to username,
-                                "email" to email
+                                "email" to email,
+                                "isEnrolled" to false  // ✅ Explicitly set to false upon registration
                             )
 
-                            if (userId != null) {
-                                firestore.collection("users").document(userId)
-                                    .set(user)
-                                    .addOnSuccessListener {
-                                        Toast.makeText(this, "Account created", Toast.LENGTH_SHORT).show()
-                                        startActivity(Intent(this, MainActivity3::class.java))
-                                        finish()
-                                    }
-                                    .addOnFailureListener {
-                                        Toast.makeText(this, "Failed to save user", Toast.LENGTH_SHORT).show()
-                                    }
-                            }
-                        } else {
-                            Toast.makeText(this, "Signup failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                            firestore.collection("users").document(userId)
+                                .set(user)
+                                .addOnSuccessListener {
+                                    Toast.makeText(this, "Account created!", Toast.LENGTH_SHORT).show()
+                                    startActivity(Intent(this, MainActivity3::class.java)) // courses page
+                                    finish()
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(this, "Failed to save user data.", Toast.LENGTH_SHORT).show()
+                                }
                         }
+                    } else {
+                        Toast.makeText(this, "Signup failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                     }
-            }
+                }
         }
 
-        // Google Sign-In button logic
+        // Google Sign-In Button
         binding.btnGoogle.setOnClickListener {
             val signInIntent = googleSignInClient.signInIntent
             launcher.launch(signInIntent)
         }
     }
 
-    // Google Sign-In launcher
+    // Google Sign-In Launcher
     private val launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
         try {
             val account = task.getResult(ApiException::class.java)
             val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+
             auth.signInWithCredential(credential)
                 .addOnCompleteListener { authTask ->
                     if (authTask.isSuccessful) {
                         val userId = auth.currentUser?.uid
                         val user = hashMapOf(
                             "username" to account.displayName,
-                            "email" to account.email
+                            "email" to account.email,
+                            "isEnrolled" to false // ✅ Set to false for new Google users
                         )
 
                         if (userId != null) {
@@ -112,7 +116,7 @@ class MainActivity2 : AppCompatActivity() {
                                     finish()
                                 }
                                 .addOnFailureListener {
-                                    Toast.makeText(this, "Failed to save Google user", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, "Failed to save Google user data", Toast.LENGTH_SHORT).show()
                                 }
                         }
                     } else {

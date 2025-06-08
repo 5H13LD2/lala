@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.labactivity.lala.REGISTERPAGE.MainActivity2
 import com.labactivity.lala.AVAILABALECOURSEPAGE.MainActivity3
 import com.labactivity.lala.databinding.ActivityMainBinding
+import com.labactivity.lala.homepage.MainActivity4
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -48,7 +49,7 @@ class MainActivity : AppCompatActivity() {
                     if (task.isSuccessful) {
                         // Login success
                         Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show()
-                        val intent = Intent(this, MainActivity3::class.java)
+                        val intent = Intent(this, MainActivity4::class.java)
                         startActivity(intent)
                         finish()
                     } else {
