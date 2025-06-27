@@ -1,5 +1,5 @@
 // Enhanced CarAdapter with Dynamic Course Handling
-
+// Java Core Module
 package com.labactivity.lala.AVAILABALECOURSEPAGE
 
 import android.app.Dialog
