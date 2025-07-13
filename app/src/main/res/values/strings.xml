@@ -50,8 +50,8 @@
     <string name="sample_table">Sample Table: `%s`</string>
 
 
-
     <string name="sharpen_description">
         After completing your first COURSE, you will eligible to participate in leaderboard.</string>
     <string name="sharpen_description2">Take Quizzes to earn points!</string>
+    <string name="title_activity_leaderboard">Leaderboard</string>
 </resources>
