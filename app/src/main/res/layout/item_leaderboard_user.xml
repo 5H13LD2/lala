@@ -6,15 +6,28 @@
     android:padding="12dp"
     android:background="?android:attr/selectableItemBackground">
 
+    <!-- Rank number -->
+    <TextView
+        android:id="@+id/rankText"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:text="#1"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textColor="@android:color/darker_gray" />
+
+    <!-- Username -->
     <TextView
         android:id="@+id/usernameText"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:text="Username"
         android:textSize="18sp"
         android:textStyle="bold" />
 
+    <!-- Score -->
     <TextView
         android:id="@+id/scoreText"
         android:layout_width="wrap_content"

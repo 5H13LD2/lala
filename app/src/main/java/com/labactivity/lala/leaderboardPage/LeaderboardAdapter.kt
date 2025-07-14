@@ -13,6 +13,7 @@ class LeaderboardAdapter(private val users: List<User>) :
     class UserViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val usernameText: TextView = view.findViewById(R.id.usernameText)
         val scoreText: TextView = view.findViewById(R.id.scoreText)
+        val rankText: TextView = view.findViewById(R.id.rankText)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
@@ -25,7 +26,9 @@ class LeaderboardAdapter(private val users: List<User>) :
         val user = users[position]
         holder.usernameText.text = user.username
         holder.scoreText.text = "${user.score} pts"
+        holder.rankText.text = "#${position + 1}"
     }
+
 
     override fun getItemCount(): Int = users.size
 }

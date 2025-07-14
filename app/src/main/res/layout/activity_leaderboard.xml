@@ -19,6 +19,8 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Title -->
+
+    <!-- Back button -->
     <TextView
         android:id="@+id/Ranking_txt"
         android:layout_width="wrap_content"
@@ -27,13 +29,13 @@
         android:text="Rankings"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="@+id/view"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="@+id/view"
-        app:layout_constraintHorizontal_bias="0.5" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/view"
+        app:layout_constraintVertical_bias="0.0" />
 
-    <!-- Back button -->
     <ImageButton
         android:id="@+id/imageButton"
         android:layout_width="wrap_content"
