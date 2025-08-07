@@ -9,13 +9,17 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.labactivity.lala.LEARNINGMATERIAL.CoreModule
-import com.labactivity.lala.FLASHCARD.FlashcardActivity
-import com.labactivity.lala.LEARNINGMATERIAL.JavaCoreModule
 import com.labactivity.lala.R
+import com.labactivity.lala.FLASHCARD.FlashcardActivity
+//import com.labactivity.lala.FLASHCARD.JavaFlashcardActivity
+//import com.labactivity.lala.FLASHCARD.PythonFlashcardActivity
+//import com.labactivity.lala.FLASHCARD.SQLFlashcardActivity
+import com.labactivity.lala.LEARNINGMATERIAL.CoreModule
+import com.labactivity.lala.LEARNINGMATERIAL.JavaCoreModule
 import com.labactivity.lala.LEARNINGMATERIAL.SqlCoreModule
 import com.labactivity.lala.PYTHONCOMPILER.MainActivity7
 import com.labactivity.lala.SQLCOMPILER.sqlcompiler
+//import com.labactivity.lala.JAVACP.JavaPracticeActivity  // Create this if not yet available
 
 class CourseAdapter(private val courseList: List<Course>) :
     RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
@@ -26,7 +30,6 @@ class CourseAdapter(private val courseList: List<Course>) :
         val btnContinue: Button = view.findViewById(R.id.btnContinueLearning)
         val btnFlashcard: Button = view.findViewById(R.id.btnFlashcard)
         val btnPractice: Button = view.findViewById(R.id.btnPractice)
-      //  val practiceLogo: ImageView = view.findViewById(R.id.practicelogo)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
@@ -45,54 +48,40 @@ class CourseAdapter(private val courseList: List<Course>) :
         // Continue Learning button
         holder.btnContinue.setOnClickListener {
             val intent = when {
-                course.name.contains("Python", ignoreCase = true) ->
-                    Intent(context, CoreModule::class.java)
-                course.name.contains("Java", ignoreCase = true) ->
-                    Intent(context, JavaCoreModule::class.java)
-                course.name.contains("SQL", ignoreCase = true) ->
-                    Intent(context, SqlCoreModule::class.java)
+                course.name.contains("Python", ignoreCase = true) -> Intent(context, CoreModule::class.java)
+                course.name.contains("Java", ignoreCase = true) -> Intent(context, JavaCoreModule::class.java)
+                course.name.contains("SQL", ignoreCase = true) -> Intent(context, SqlCoreModule::class.java)
                 else -> null
-            }
-            intent?.let { context.startActivity(it) }
-        }
-
-        // Practice button (SQL only)
-        holder.btnPractice.setOnClickListener {
-            val intent = when {
-                course.name.contains("SQL", ignoreCase = true) ->
-                    Intent(context, sqlcompiler::class.java)
-                else -> {
-                    Toast.makeText(
-                        context,
-                        "Practice not available for this course yet",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    null
-                }
-            }
-            intent?.let { context.startActivity(it) }
-        }
-        holder.btnPractice.setOnClickListener {
-            val intent = when {
-                course.name.contains("python", ignoreCase = true) ->
-                    Intent(context, MainActivity7::class.java)
-                else -> {
-                    Toast.makeText(
-                        context,
-                        "Practice not available for this course yet",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    null
-                }
             }
             intent?.let { context.startActivity(it) }
         }
 
         // Flashcard button
         holder.btnFlashcard.setOnClickListener {
-            Toast.makeText(context, "Flashcard clicked", Toast.LENGTH_SHORT).show()
-            val intent = Intent(context, FlashcardActivity::class.java)
-            context.startActivity(intent)
+            val intent = when {
+                course.name.contains("Python", ignoreCase = true) -> Intent(context, FlashcardActivity::class.java)
+             //   course.name.contains("Java", ignoreCase = true) -> Intent(context, JavaFlashcardActivity::class.java)
+               // course.name.contains("SQL", ignoreCase = true) -> Intent(context, SQLFlashcardActivity::class.java)
+                else -> {
+                    Toast.makeText(context, "Flashcards not available for this course yet", Toast.LENGTH_SHORT).show()
+                    null
+                }
+            }
+            intent?.let { context.startActivity(it) }
+        }
+
+        // Practice button
+        holder.btnPractice.setOnClickListener {
+            val intent = when {
+                course.name.contains("Python", ignoreCase = true) -> Intent(context, MainActivity7::class.java)
+              //  course.name.contains("Java", ignoreCase = true) -> Intent(context, JavaPracticeActivity::class.java)
+                course.name.contains("SQL", ignoreCase = true) -> Intent(context, sqlcompiler::class.java)
+                else -> {
+                    Toast.makeText(context, "Practice not available for this course yet", Toast.LENGTH_SHORT).show()
+                    null
+                }
+            }
+            intent?.let { context.startActivity(it) }
         }
     }
 
