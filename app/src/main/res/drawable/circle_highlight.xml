@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- transparent center -->
+    <solid android:color="@android:color/transparent" />
+
+    <!-- Outer metallic stroke -->
+    <stroke
+        android:width="4dp"
+        android:color="#FFD24F" />
+
+    <!-- give a tiny outer glow using a gradient overlay on stroke -->
+    <size android:width="0dp" android:height="0dp" />
+</shape>

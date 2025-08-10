@@ -22,13 +22,18 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="135dp"
-        android:layout_height="119dp"
+        android:layout_height="135dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="32dp"
+        android:background="@drawable/circle_shape"
+        android:clipToOutline="true"
         android:contentDescription="App Logo"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toTopOf="@+id/welcome_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/top_black"
-        app:srcCompat="@drawable/logo2" />
+        app:srcCompat="@drawable/logo" />
+
 
     <!-- Welcome text -->
     <TextView

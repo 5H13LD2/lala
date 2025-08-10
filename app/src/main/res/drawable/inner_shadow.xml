@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- Use semi-transparent black to simulate soft inner shadow -->
+    <solid android:color="#00000000"/>
+
+    <!-- thick transparent stroke to keep center visible, and an outer blur-like darker stroke -->
+    <stroke android:width="14dp" android:color="#22000000"/>
+</shape>
