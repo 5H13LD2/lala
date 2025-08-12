@@ -15,65 +15,75 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lala">
 
+        <!-- Splash Screen (Entry Point) -->
         <activity
-            android:name=".LeaderboardMainActivity"
+            android:name=".SplashScreen.SplashActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-
-
-        </activity>
-
-
-        <activity
-            android:name=".SQLCOMPILER.sqlcompiler"
-            android:exported="true">
-        </activity>
-
-        <activity android:name=".PYTHONCOMPILER.CompilerActivity">
-
-        </activity>
-
-        <activity android:name=".TECHNICALREVIEWER.TechnicalFlashcardActivity">
-
-        </activity>
-
-
-        <activity
-            android:name=".FLASHCARD.FlashcardActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".PYTHONCOMPILER.PythonCompilerActivity"
-            android:exported="false"
-            android:label="Python Compiler" />
-
-        <activity
-            android:name=".PYTHONCOMPILER.MainActivity7"
-            android:exported="true">
             <intent-filter>
-
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- Login Page -->
+        <activity
+            android:name=".LOGINPAGE.MainActivity"
+            android:exported="true" />
+
+        <!-- Leaderboard -->
+        <activity
+            android:name=".LeaderboardMainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+
+        <!-- SQL Compiler -->
+        <activity
+            android:name=".SQLCOMPILER.sqlcompiler"
+            android:exported="true" />
+
+        <!-- Python Compiler -->
+        <activity
+            android:name=".PYTHONCOMPILER.CompilerActivity" />
+        <activity
+            android:name=".PYTHONCOMPILER.PythonCompilerActivity"
+            android:exported="false"
+            android:label="Python Compiler" />
+        <activity
+            android:name=".PYTHONCOMPILER.MainActivity7"
+            android:exported="true" />
+
+        <!-- Technical Reviewer -->
+        <activity
+            android:name=".TECHNICALREVIEWER.TechnicalFlashcardActivity" />
+
+        <!-- Flashcard -->
+        <activity
+            android:name=".FLASHCARD.FlashcardActivity"
+            android:exported="false" />
+
+        <!-- Quiz Activities -->
         <activity
             android:name=".quiz.TestQuizRepositoryActivity"
             android:exported="false"
             android:label="Quiz Repository Test" />
-
         <activity
             android:name=".quiz.QuizActivity"
             android:exported="false" />
         <activity
             android:name=".quiz.DynamicQuizActivity"
             android:exported="false" />
+
+        <!-- Reviewer -->
         <activity
             android:name=".REVIEWER.ResultActivity"
             android:exported="false" />
         <activity
             android:name=".REVIEWER.ReviewActivity"
             android:exported="false" />
+
+        <!-- Learning Materials -->
         <activity
             android:name=".LEARNINGMATERIAL.SqlCoreModule"
             android:exported="false" />
@@ -83,34 +93,36 @@
         <activity
             android:name=".LEARNINGMATERIAL.CoreModule"
             android:exported="false" />
+
+        <!-- Settings -->
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
+
+        <!-- Profile -->
         <activity
             android:name=".ProfileMainActivity5"
-            android:exported="false" /> <!-- Google Sign-In Meta-Data -->
+            android:exported="false" />
+
+        <!-- Google Sign-In -->
         <meta-data
             android:name="com.google.android.gms.auth.api.signin"
             android:value="@string/default_web_client_id" />
 
+        <!-- Homepage -->
         <activity
             android:name=".homepage.MainActivity4"
             android:exported="true" />
+
+        <!-- Available Course Page -->
         <activity
             android:name=".AVAILABALECOURSEPAGE.MainActivity3"
             android:exported="false" />
+
+        <!-- Register Page -->
         <activity
             android:name=".REGISTERPAGE.MainActivity2"
             android:exported="true" />
-        <activity
-            android:name=".LOGINPAGE.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>

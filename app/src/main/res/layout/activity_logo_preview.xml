@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Center card to give soft shadow/elevation like a Photoshop mock -->
+    <!-- Logo Card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/logoCard"
         android:layout_width="320dp"
@@ -16,11 +16,11 @@
         app:cardElevation="14dp"
         app:cardUseCompatPadding="true"
         app:cardPreventCornerOverlap="false"
-        android:layout_marginTop="8dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/titleGroup"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_chainStyle="packed">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -48,7 +48,7 @@
 
             <!-- Soft inner shadow layer -->
             <View
-                android:layout_width="match_parent"
+                android:layout_width="308dp"
                 android:layout_height="match_parent"
                 android:background="@drawable/inner_shadow"
                 android:clickable="false" />
@@ -56,17 +56,18 @@
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Title and tagline under the logo with subtle text-shadow -->
+    <!-- Title and tagline under the logo -->
     <LinearLayout
         android:id="@+id/titleGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintTop_toBottomOf="@id/logoCard"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:gravity="center_horizontal"
         android:layout_marginTop="18dp"
-        android:gravity="center_horizontal">
+        app:layout_constraintTop_toBottomOf="@id/logoCard"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <TextView
             android:id="@+id/title"
