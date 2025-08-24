@@ -9,8 +9,9 @@ import com.labactivity.lala.LOGINPAGE.MainActivity
 import com.labactivity.lala.databinding.ActivitySettingsBinding
 import com.labactivity.lala.homepage.MainActivity4
 import com.labactivity.lala.quiz.TestQuizRepositoryActivity
+import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsActivity : BaseActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
 

@@ -7,8 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.labactivity.lala.LEADERBOARDPAGE.Leaderboard
 import com.labactivity.lala.databinding.ActivityProfileMain5Binding
 import com.labactivity.lala.homepage.MainActivity4
+import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
 
-class ProfileMainActivity5 : AppCompatActivity() {
+class ProfileMainActivity5 : BaseActivity() {
 
     private lateinit var binding: ActivityProfileMain5Binding
 
