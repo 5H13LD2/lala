@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.labactivity.lala.LEADERBOARDPAGE.Leaderboard
 import com.labactivity.lala.databinding.ActivityProfileMain5Binding
 import com.labactivity.lala.homepage.MainActivity4
 
@@ -24,10 +25,10 @@ class ProfileMainActivity5 : AppCompatActivity() {
             finish()
         }
 
-        // Click listener for Leaderboard (corrected the log tag)
+        // Click listener for Leaderboard
         binding.Leaderboard.setOnClickListener {
             Log.d("ProfileMainActivity5", "Leaderboard clicked")
-            val intent = Intent(this, LeaderboardMainActivity::class.java)
+            val intent = Intent(this, Leaderboard::class.java)
             startActivity(intent)
             finish()
         }

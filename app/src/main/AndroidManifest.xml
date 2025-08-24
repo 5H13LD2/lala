@@ -123,6 +123,11 @@
         <activity
             android:name=".REGISTERPAGE.MainActivity2"
             android:exported="true" />
+
+        <!-- Leaderboard Page -->
+        <activity
+            android:name=".LEADERBOARDPAGE.Leaderboard"
+            android:exported="false" />
     </application>
 
 </manifest>

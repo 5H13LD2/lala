@@ -5,7 +5,6 @@ import android.graphics.Paint
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -16,9 +15,10 @@ import com.labactivity.lala.ProfileMainActivity5
 import com.labactivity.lala.R
 import com.labactivity.lala.SettingsActivity
 import com.labactivity.lala.databinding.ActivityMain4Binding
+import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
 import java.util.Calendar
 
-class MainActivity4 : AppCompatActivity() {
+class MainActivity4 : BaseActivity() {   // <-- inherit from BaseActivity
 
     private lateinit var binding: ActivityMain4Binding
     private lateinit var dayViews: Array<DayCircleView>

@@ -1,4 +1,4 @@
-package com.labactivity.lala
+package com.labactivity.lala.LEADERBOARDPAGE
 
 import android.os.Bundle
 import android.util.Log
@@ -8,10 +8,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.labactivity.lala.leaderboardPage.LeaderboardAdapter
-import com.labactivity.lala.leaderboardPage.User
+import com.labactivity.lala.R
 
-class leaderboard : AppCompatActivity() {
+class Leaderboard : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: LeaderboardAdapter
