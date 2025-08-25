@@ -1,24 +1,21 @@
 package com.labactivity.lala.homepage
 
-import android.content.Intent
 import android.graphics.Paint
 import android.os.Bundle
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.labactivity.lala.AVAILABALECOURSEPAGE.MainActivity3
-import com.labactivity.lala.PYTHONASSESMENT.TechnicalAssessmentAdapter
 import com.labactivity.lala.PYTHONASSESMENT.PYTHONASSESMENT
 import com.labactivity.lala.ProfileMainActivity5
 import com.labactivity.lala.R
 import com.labactivity.lala.SettingsActivity
 import com.labactivity.lala.databinding.ActivityMain4Binding
 import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
+import com.labactivity.lala.UTILS.setupWithSafeNavigation   // ✅ IMPORT UTILITY
 import java.util.Calendar
 
-class MainActivity4 : BaseActivity() {   // <-- inherit from BaseActivity
+class MainActivity4 : BaseActivity() {   // ✅ INHERIT FROM BASEACTIVITY
 
     private lateinit var binding: ActivityMain4Binding
     private lateinit var dayViews: Array<DayCircleView>
@@ -28,7 +25,9 @@ class MainActivity4 : BaseActivity() {   // <-- inherit from BaseActivity
         binding = ActivityMain4Binding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setup days
+        // ==============================================
+        // SETUP DAY CIRCLE VIEW (M T W TH F SAT SUN)
+        // ==============================================
         dayViews = arrayOf(
             binding.dayMonday,
             binding.dayTuesday,
@@ -41,18 +40,28 @@ class MainActivity4 : BaseActivity() {   // <-- inherit from BaseActivity
         dayViews.forEachIndexed { index, view -> view.setOnClickListener { toggleDay(index) } }
         updateDayStates()
 
-        // Setup sections
+        // ==============================================
+        // SETUP COURSE RECYCLER VIEW (PYTHON, JAVA, SQL)
+        // ==============================================
         setupRecyclerView()
+
+        // ==============================================
+        // SETUP BOTTOM NAVIGATION WITH SAFE NAVIGATION
+        // ==============================================
         setupBottomNavigation()
 
-        // Bind assessments to the assessments RecyclerView
+        // ==============================================
+        // BIND ASSESSMENTS TO RECYCLER VIEW
+        // ==============================================
         PYTHONASSESMENT.TechnicalAssesment(
             this,
             findViewById(R.id.recyclerViewAssessments),
             findViewById(R.id.textViewAllAssessments)
         )
 
-        // Bind interviews to the interviews RecyclerView
+        // ==============================================
+        // BIND INTERVIEWS TO RECYCLER VIEW
+        // ==============================================
         PYTHONASSESMENT.TechnicalInterview(
             this,
             findViewById(R.id.recyclerViewInterviews),
@@ -61,10 +70,16 @@ class MainActivity4 : BaseActivity() {   // <-- inherit from BaseActivity
         )
     }
 
+    // ==============================================
+    // TOGGLE DAY CLICK STATE
+    // ==============================================
     private fun toggleDay(dayIndex: Int) {
         dayViews[dayIndex].setChecked(!dayViews[dayIndex].isChecked())
     }
 
+    // ==============================================
+    // UPDATE CURRENT DAY HIGHLIGHT
+    // ==============================================
     private fun updateDayStates() {
         dayViews.forEach { it.setChecked(false) }
 
@@ -83,6 +98,9 @@ class MainActivity4 : BaseActivity() {   // <-- inherit from BaseActivity
         if (index != -1) dayViews[index].setChecked(true)
     }
 
+    // ==============================================
+    // SETUP COURSE RECYCLERVIEW (HORIZONTAL)
+    // ==============================================
     private fun setupRecyclerView() {
         val courseList = listOf(
             Course("Python Basics", R.drawable.python),
@@ -99,31 +117,21 @@ class MainActivity4 : BaseActivity() {   // <-- inherit from BaseActivity
         recyclerView.adapter = CourseAdapter(courseList)
     }
 
+    // ==============================================
+    // SETUP BOTTOM NAVIGATION (USING UTILITY)
+    // ==============================================
     private fun setupBottomNavigation() {
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-        bottomNavigationView.setOnItemSelectedListener { item ->
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    Toast.makeText(this, "Home Clicked", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity4::class.java))
-                    true
-                }
-                R.id.nav_profile -> {
-                    Toast.makeText(this, "Profile Clicked", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, ProfileMainActivity5::class.java))
-                    true
-                }
-                R.id.nav_settings -> {
-                    Toast.makeText(this, "Settings Clicked", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                    true
-                }
-                R.id.nav_notifications -> {
-                    Toast.makeText(this, "Notifications Clicked", Toast.LENGTH_SHORT).show()
-                    true
-                }
-                else -> false
-            }
-        }
+
+        bottomNavigationView.setupWithSafeNavigation(
+            this,
+            MainActivity4::class.java,   // ✅ CURRENT ACTIVITY
+            mapOf(
+                R.id.nav_home to MainActivity4::class.java,
+                R.id.nav_profile to ProfileMainActivity5::class.java,
+                R.id.nav_settings to SettingsActivity::class.java
+                // R.id.nav_notifications -> WALA PANG TARGET ACTIVITY
+            )
+        )
     }
 }
