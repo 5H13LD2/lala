@@ -15,8 +15,6 @@ import com.labactivity.lala.FLASHCARD.FlashcardActivity
 //import com.labactivity.lala.FLASHCARD.PythonFlashcardActivity
 //import com.labactivity.lala.FLASHCARD.SQLFlashcardActivity
 import com.labactivity.lala.LEARNINGMATERIAL.CoreModule
-import com.labactivity.lala.LEARNINGMATERIAL.JavaCoreModule
-import com.labactivity.lala.LEARNINGMATERIAL.SqlCoreModule
 import com.labactivity.lala.PYTHONCOMPILER.MainActivity7
 import com.labactivity.lala.SQLCOMPILER.sqlcompiler
 //import com.labactivity.lala.JAVACP.JavaPracticeActivity  // Create this if not yet available
@@ -49,8 +47,8 @@ class CourseAdapter(private val courseList: List<Course>) :
         holder.btnContinue.setOnClickListener {
             val intent = when {
                 course.name.contains("Python", ignoreCase = true) -> Intent(context, CoreModule::class.java)
-                course.name.contains("Java", ignoreCase = true) -> Intent(context, JavaCoreModule::class.java)
-                course.name.contains("SQL", ignoreCase = true) -> Intent(context, SqlCoreModule::class.java)
+                course.name.contains("Java", ignoreCase = true) -> Intent(context, CoreModule::class.java)
+                course.name.contains("SQL", ignoreCase = true) -> Intent(context, CoreModule::class.java)
                 else -> null
             }
             intent?.let { context.startActivity(it) }

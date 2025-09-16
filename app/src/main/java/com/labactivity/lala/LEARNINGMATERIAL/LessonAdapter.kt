@@ -16,14 +16,24 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.labactivity.lala.R
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 
 class LessonAdapter(
     private val context: Context,
-    private val lessons: List<Lesson>,
+    private val lessons: MutableList<Lesson>,  // make this mutable
     private val completedLessonIds: MutableSet<String>,
     private val onLessonClick: (Lesson) -> Unit,
     private val onLessonCompleted: (String) -> Unit
 ) : RecyclerView.Adapter<LessonAdapter.LessonViewHolder>() {
+
+    private val TAG = "LessonAdapter"
+
+    fun updateLessons(newLessons: List<Lesson>) {
+        lessons.clear()
+        lessons.addAll(newLessons)
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LessonViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.item_lesson, parent, false)
@@ -31,8 +41,7 @@ class LessonAdapter(
     }
 
     override fun onBindViewHolder(holder: LessonViewHolder, position: Int) {
-        val lesson = lessons[position]
-        holder.bind(lesson)
+        holder.bind(lessons[position])
     }
 
     override fun getItemCount(): Int = lessons.size
@@ -49,35 +58,53 @@ class LessonAdapter(
         private val btnMarkAsDone: MaterialButton = itemView.findViewById(R.id.btnMarkAsDone)
         private val ivCheckmark: ImageView = itemView.findViewById(R.id.ivCheckmark)
 
+        private var currentLesson: Lesson? = null
+        private var isExpanded = false
+
         fun bind(lesson: Lesson) {
+            currentLesson = lesson
+            
+            setupBasicInfo(lesson)
+            setupCompletionState(lesson)
+            setupExpandableContent(lesson)
+            setupClickListeners(lesson)
+        }
+
+        private fun setupBasicInfo(lesson: Lesson) {
             tvLessonNumber.text = lesson.number
             tvLessonTitle.text = lesson.title
             tvLessonExplanation.text = lesson.explanation
             tvCodeExample.text = lesson.codeExample
+        }
 
-            // Get current completion state of this lesson
+        private fun setupCompletionState(lesson: Lesson) {
             val isCompleted = completedLessonIds.contains(lesson.id)
-
-            // Update the button and checkmark based on completion state
             updateCompletionUI(isCompleted)
+        }
 
-            btnMarkAsDone.setOnClickListener {
-                toggleLessonCompletion(lesson)
-            }
+        private fun setupExpandableContent(lesson: Lesson) {
+            isExpanded = lesson.isExpanded
+            updateExpandState(isExpanded)
+        }
 
+        private fun setupClickListeners(lesson: Lesson) {
+            btnMarkAsDone.setOnClickListener { toggleLessonCompletion(lesson) }
+            
             lessonHeader.setOnClickListener {
-                lesson.isExpanded = !lesson.isExpanded
-                updateExpandState(lesson.isExpanded)
+                isExpanded = !isExpanded
+                lesson.isExpanded = isExpanded
+                updateExpandState(isExpanded)
             }
 
-            // Set the expanded state based on the lesson's current state
-            updateExpandState(lesson.isExpanded)
-
-            // Handle video card clicks
             videoCard.setOnClickListener {
                 if (lesson.videoUrl.isNotEmpty()) {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(lesson.videoUrl))
-                    context.startActivity(intent)
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(lesson.videoUrl))
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error opening video URL", e)
+                        Toast.makeText(context, "Unable to open video", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }
@@ -85,40 +112,41 @@ class LessonAdapter(
         private fun toggleLessonCompletion(lesson: Lesson) {
             val isCompleted = completedLessonIds.contains(lesson.id)
             if (isCompleted) {
-                completedLessonIds.remove(lesson.id)  // Unmark as completed
-                Log.d("Lesson", "Lesson unmarked: ${lesson.id}")
+                completedLessonIds.remove(lesson.id)
             } else {
-                completedLessonIds.add(lesson.id)  // Mark as completed
-                Log.d("Lesson", "Lesson marked as done: ${lesson.id}")
+                completedLessonIds.add(lesson.id)
             }
-
-            // Update the UI based on the new completion state
+            
             updateCompletionUI(!isCompleted)
-
-            // Log the updated state of completed lessons
-            Log.d("Completed Lessons", "Updated list: $completedLessonIds")
-
-            // Notify the adapter to refresh the UI
-            notifyItemChanged(adapterPosition)
-
-            // Call the completion callback
             onLessonCompleted(lesson.id)
+            Log.d(TAG, "Lesson ${lesson.id} completion toggled. Completed: ${!isCompleted}")
         }
 
         private fun updateCompletionUI(isCompleted: Boolean) {
             ivCheckmark.visibility = if (isCompleted) View.VISIBLE else View.GONE
             btnMarkAsDone.text = if (isCompleted) "Completed" else "Mark as Done"
+            btnMarkAsDone.setBackgroundColor(
+                ContextCompat.getColor(
+                    context,
+                    if (isCompleted) R.color.success_green else R.color.primary
+                )
+            )
         }
 
         private fun updateExpandState(isExpanded: Boolean) {
-            ivLessonExpand.rotation = if (isExpanded) 180f else 0f
-            if (isExpanded) {
-                lessonContent.visibility = View.VISIBLE
-                lessonContent.startAnimation(AnimationUtils.loadAnimation(context,
-                    R.anim.slide_down
-                ))
-            } else {
-                lessonContent.visibility = View.GONE
+            try {
+                ivLessonExpand.rotation = if (isExpanded) 180f else 0f
+                lessonContent.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                
+                if (isExpanded) {
+                    lessonContent.startAnimation(
+                        AnimationUtils.loadAnimation(context, R.anim.slide_down)
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating expand state", e)
+                // Fallback to basic visibility
+                lessonContent.visibility = if (isExpanded) View.VISIBLE else View.GONE
             }
         }
     }

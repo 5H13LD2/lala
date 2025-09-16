@@ -31,13 +31,6 @@
             android:name=".LOGINPAGE.MainActivity"
             android:exported="true" />
 
-        <!-- Leaderboard -->
-        <activity
-            android:name=".LeaderboardMainActivity"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-
         <!-- SQL Compiler -->
         <activity
             android:name=".SQLCOMPILER.sqlcompiler"
@@ -116,7 +109,7 @@
 
         <!-- Available Course Page -->
         <activity
-            android:name=".AVAILABALECOURSEPAGE.MainActivity3"
+            android:name=".AVAILABLECOURSEPAGE.MainActivity3"
             android:exported="false" />
 
         <!-- Register Page -->

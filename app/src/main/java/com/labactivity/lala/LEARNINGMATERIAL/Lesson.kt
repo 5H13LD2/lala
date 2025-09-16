@@ -1,13 +1,12 @@
-// Create a file named Lesson.kt
 package com.labactivity.lala.LEARNINGMATERIAL
 
 data class Lesson(
-    val id: String,
-    val moduleId: String,
+    val id: String,         // Use 'id' everywhere for consistency
     val number: String,
     val title: String,
-    val explanation: String,
+    val description: String,
     val codeExample: String,
+    val explanation: String,
     val videoUrl: String,
     var isExpanded: Boolean = false
 )

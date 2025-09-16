@@ -1,11 +1,10 @@
-// Create a file named Module.kt
 package com.labactivity.lala.LEARNINGMATERIAL
 
 data class Module(
     val id: String,
     val title: String,
     val description: String,
-    val lessons: List<Lesson>,
+    val lessons: MutableList<Lesson> = mutableListOf(),  // Make mutable
     var isExpanded: Boolean = false
 ) {
     fun getProgressPercentage(completedLessonIds: Set<String>): Int {

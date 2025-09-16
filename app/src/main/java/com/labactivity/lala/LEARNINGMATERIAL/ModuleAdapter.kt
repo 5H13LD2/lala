@@ -2,8 +2,8 @@ package com.labactivity.lala.LEARNINGMATERIAL
 
 import android.content.Context
 import android.content.Intent
-import android.view.LayoutInflater
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -15,26 +15,19 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
-import com.labactivity.lala.quiz.QuizScoreManager
 import com.labactivity.lala.R
 import com.labactivity.lala.quiz.DynamicQuizActivity
-//DONT EDIT THIS FILE
+import com.labactivity.lala.quiz.QuizScoreManager
+import android.widget.Toast
+
 class ModuleAdapter(
     private val context: Context,
     private val modules: List<Module>,
     private val completedLessonIds: MutableSet<String>,
-    private val onLessonCompleted: (String) -> Unit,
-    private val onLessonClick: (Lesson) -> Unit = { /* Default empty implementation */ },
-    private val onQuizClick: (Module) -> Unit = { module ->
-        // Default implementation to launch DynamicQuizActivity
-        val intent = Intent(context, DynamicQuizActivity::class.java).apply {
-            putExtra("module_id", module.id)
-            putExtra("module_title", module.title)
-        }
-        context.startActivity(intent)
-    }
+    private val onLessonCompleted: (String) -> Unit
 ) : RecyclerView.Adapter<ModuleAdapter.ModuleViewHolder>() {
 
+    private val TAG = "ModuleAdapter"
     private val quizScoreManager = QuizScoreManager(context)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ModuleViewHolder {
@@ -43,8 +36,7 @@ class ModuleAdapter(
     }
 
     override fun onBindViewHolder(holder: ModuleViewHolder, position: Int) {
-        val module = modules[position]
-        holder.bind(module)
+        holder.bind(modules[position])
     }
 
     override fun getItemCount(): Int = modules.size
@@ -59,89 +51,127 @@ class ModuleAdapter(
         private val btnTakeQuizzes: Button = itemView.findViewById(R.id.btnTakeQuizzes)
         private val tvQuizScore: TextView = itemView.findViewById(R.id.tvQuizScore)
 
+        private var currentModule: Module? = null
+        private var lessonAdapter: LessonAdapter? = null
+
         fun bind(module: Module) {
-            // Set module title with score indicator if available
-            setModuleTitleWithScoreIndicator(module)
+            currentModule = module
             
+            setModuleTitleWithScoreIndicator(module)
             tvModuleDescription.text = module.description
 
-            // Set up progress indicator
-            val progressPercentage = module.getProgressPercentage(completedLessonIds)
-            Log.d("Module", "Module Progress: $progressPercentage%")
-            moduleProgress.progress = progressPercentage
+            // Calculate and update progress
+            updateModuleProgress(module)
 
-            // Set up lessons RecyclerView
-            rvLessons.layoutManager = LinearLayoutManager(context)
-            val lessonAdapter = LessonAdapter(
-                context, 
-                module.lessons, 
-                completedLessonIds,
-                onLessonClick = onLessonClick, 
-                onLessonCompleted = { lessonId ->
-                    onLessonCompleted(lessonId)  // Notify parent fragment of the completed lesson
-                    notifyItemChanged(adapterPosition)  // Refresh the progress for this module
-                    Log.d("Module", "Completed Lessons: $completedLessonIds")
-                }
-            )
-            rvLessons.adapter = lessonAdapter
-
-            // Set up the Take Quiz button
-            btnTakeQuizzes.setOnClickListener {
-                Log.d("ModuleAdapter", "Quiz button clicked for module: ${module.id} - ${module.title}")
-                onQuizClick(module)
+            // Setup lessons RecyclerView if not already setup
+            if (lessonAdapter == null) {
+                setupLessonsRecyclerView(module)
+            } else {
+                lessonAdapter?.updateLessons(module.lessons)
             }
 
-            // Initialize expanded state
-            updateExpandState(module.isExpanded)
+            // Quiz button
+            setupQuizButton(module)
 
-            // Set click listener for expanding/collapsing
+            // Expanded state
+            updateExpandState(module.isExpanded)
             moduleHeader.setOnClickListener {
                 module.isExpanded = !module.isExpanded
                 updateExpandState(module.isExpanded)
             }
         }
 
+        private fun updateModuleProgress(module: Module) {
+            try {
+                val progress = calculateProgress(module)
+                moduleProgress.progress = progress
+                Log.d(TAG, "Module ${module.id} progress: $progress%")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error calculating progress for module ${module.id}", e)
+                moduleProgress.progress = 0
+            }
+        }
+
+        private fun calculateProgress(module: Module): Int {
+            if (module.lessons.isEmpty()) return 0
+            val completed = module.lessons.count { lesson -> 
+                completedLessonIds.contains(lesson.id)
+            }
+            return (completed * 100) / module.lessons.size
+        }
+
+        private fun setupLessonsRecyclerView(module: Module) {
+            rvLessons.layoutManager = LinearLayoutManager(context)
+            lessonAdapter = LessonAdapter(
+                context,
+                module.lessons,
+                completedLessonIds,
+                onLessonClick = { /* Handle lesson click if needed */ },
+                onLessonCompleted = { lessonId ->
+                    onLessonCompleted(lessonId)
+                    updateModuleProgress(module)
+                }
+            )
+            rvLessons.adapter = lessonAdapter
+        }
+
+        private fun setupQuizButton(module: Module) {
+            btnTakeQuizzes.setOnClickListener {
+                try {
+                    val intent = Intent(context, DynamicQuizActivity::class.java).apply {
+                        putExtra("module_id", module.id)
+                        putExtra("module_title", module.title)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error launching quiz for module ${module.id}", e)
+                    Toast.makeText(context, "Unable to start quiz", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
         private fun setModuleTitleWithScoreIndicator(module: Module) {
-            // Check if we have a score for this module
-            val scorePair = quizScoreManager.getQuizScore(module.id)
-            
-            if (scorePair != null) {
-                val (score, total) = scorePair
-                val isPassing = quizScoreManager.isPassing(module.id)
-                
-                // Create a SpannableString for colored square indicator
-                val statusEmoji = if (isPassing) "🟩 " else "🟥 "
-                val scoreText = "  ${if (isPassing) "✅" else ""} "
-                
-                // Set the module title with status indicator
-                tvModuleTitle.text = statusEmoji + module.title + scoreText
-                
-                // Apply color to the score text
-                val textColor = if (isPassing) 
-                    ContextCompat.getColor(context, R.color.success_green)
-                else 
-                    ContextCompat.getColor(context, R.color.error_red)
-                
-                tvQuizScore.text = "Score: $score/$total"
-                tvQuizScore.setTextColor(textColor)
-                tvQuizScore.visibility = View.VISIBLE
-            } else {
-                // No score yet, just show the title
+            try {
+                val scorePair = quizScoreManager.getQuizScore(module.id)
+                if (scorePair != null) {
+                    val (score, total) = scorePair
+                    val isPassing = quizScoreManager.isPassing(module.id)
+                    val statusEmoji = if (isPassing) "🟩 " else "🟥 "
+                    tvModuleTitle.text = statusEmoji + module.title
+                    tvQuizScore.text = "Score: $score/$total"
+                    tvQuizScore.setTextColor(
+                        if (isPassing) ContextCompat.getColor(context, R.color.success_green)
+                        else ContextCompat.getColor(context, R.color.error_red)
+                    )
+                    tvQuizScore.visibility = View.VISIBLE
+                } else {
+                    tvModuleTitle.text = module.title
+                    tvQuizScore.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error setting module title with score", e)
                 tvModuleTitle.text = module.title
                 tvQuizScore.visibility = View.GONE
             }
         }
 
         private fun updateExpandState(isExpanded: Boolean) {
-            ivModuleExpand.rotation = if (isExpanded) 180f else 0f
-            if (isExpanded) {
-                rvLessons.visibility = View.VISIBLE
-                btnTakeQuizzes.visibility = View.VISIBLE
-                val animation = AnimationUtils.loadAnimation(context, R.anim.slide_down)
-                rvLessons.startAnimation(animation)
-            } else {
-                rvLessons.visibility = View.GONE
-                btnTakeQuizzes.visibility = View.GONE
+            try {
+                ivModuleExpand.rotation = if (isExpanded) 180f else 0f
+                rvLessons.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                btnTakeQuizzes.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                
+                if (isExpanded) {
+                    rvLessons.startAnimation(
+                        AnimationUtils.loadAnimation(context, R.anim.slide_down)
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating expand state", e)
+                // Fallback to basic visibility changes
+                rvLessons.visibility = if (isExpanded) View.VISIBLE else View.GONE
+                btnTakeQuizzes.visibility = if (isExpanded) View.VISIBLE else View.GONE
             }
         }
     }

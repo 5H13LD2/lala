@@ -1,21 +1,25 @@
 package com.labactivity.lala.homepage
 
+import android.content.Intent
 import android.graphics.Paint
 import android.os.Bundle
+import android.util.Log
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
 import com.labactivity.lala.PYTHONASSESMENT.PYTHONASSESMENT
 import com.labactivity.lala.ProfileMainActivity5
 import com.labactivity.lala.R
 import com.labactivity.lala.SettingsActivity
 import com.labactivity.lala.databinding.ActivityMain4Binding
 import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
-import com.labactivity.lala.UTILS.setupWithSafeNavigation   // ✅ IMPORT UTILITY
+import com.labactivity.lala.UTILS.setupWithSafeNavigation
 import java.util.Calendar
 
-class MainActivity4 : BaseActivity() {   // ✅ INHERIT FROM BASEACTIVITY
+class MainActivity4 : BaseActivity() {
 
     private lateinit var binding: ActivityMain4Binding
     private lateinit var dayViews: Array<DayCircleView>
@@ -24,6 +28,19 @@ class MainActivity4 : BaseActivity() {   // ✅ INHERIT FROM BASEACTIVITY
         super.onCreate(savedInstanceState)
         binding = ActivityMain4Binding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // ==============================================
+        // ALL COURSES BUTTON → punta sa MainActivity3
+        // ==============================================
+        binding.textAllPractice.setOnClickListener {
+            Log.d("MainActivity4", "✅ textAllPractice clicked!")
+            Toast.makeText(this, "Opening All Courses...", Toast.LENGTH_SHORT).show()
+
+            val intent = Intent(this, MainActivity3::class.java)
+            startActivity(intent)
+
+            Log.d("MainActivity4", "➡️ Intent to MainActivity3 triggered!")
+        }
 
         // ==============================================
         // SETUP DAY CIRCLE VIEW (M T W TH F SAT SUN)
@@ -37,7 +54,9 @@ class MainActivity4 : BaseActivity() {   // ✅ INHERIT FROM BASEACTIVITY
             binding.daySaturday,
             binding.daySunday
         )
-        dayViews.forEachIndexed { index, view -> view.setOnClickListener { toggleDay(index) } }
+        dayViews.forEachIndexed { index, view ->
+            view.setOnClickListener { toggleDay(index) }
+        }
         updateDayStates()
 
         // ==============================================
@@ -46,7 +65,7 @@ class MainActivity4 : BaseActivity() {   // ✅ INHERIT FROM BASEACTIVITY
         setupRecyclerView()
 
         // ==============================================
-        // SETUP BOTTOM NAVIGATION WITH SAFE NAVIGATION
+        // SETUP BOTTOM NAVIGATION
         // ==============================================
         setupBottomNavigation()
 
@@ -55,18 +74,19 @@ class MainActivity4 : BaseActivity() {   // ✅ INHERIT FROM BASEACTIVITY
         // ==============================================
         PYTHONASSESMENT.TechnicalAssesment(
             this,
-            findViewById(R.id.recyclerViewAssessments),
-            findViewById(R.id.textViewAllAssessments)
+            binding.recyclerViewAssessments,
+            binding.textViewAllAssessments
         )
 
         // ==============================================
         // BIND INTERVIEWS TO RECYCLER VIEW
+        // ⚠️ HUWAG nang gamitin textAllPractice dito
         // ==============================================
         PYTHONASSESMENT.TechnicalInterview(
             this,
-            findViewById(R.id.recyclerViewInterviews),
-            binding.textAllPractice,
-            findViewById(R.id.textViewAllInterviews)
+            binding.recyclerViewInterviews,
+            binding.textViewAllInterviews,
+            binding.textViewAllInterviews
         )
     }
 
@@ -108,8 +128,8 @@ class MainActivity4 : BaseActivity() {   // ✅ INHERIT FROM BASEACTIVITY
             Course("SQL Basics", R.drawable.sql)
         )
 
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-        val textMyLibrary = findViewById<TextView>(R.id.textMyLibrary)
+        val recyclerView: RecyclerView = binding.recyclerView
+        val textMyLibrary: TextView = binding.textMyLibrary
         textMyLibrary.paintFlags = textMyLibrary.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
         recyclerView.layoutManager =
@@ -121,16 +141,15 @@ class MainActivity4 : BaseActivity() {   // ✅ INHERIT FROM BASEACTIVITY
     // SETUP BOTTOM NAVIGATION (USING UTILITY)
     // ==============================================
     private fun setupBottomNavigation() {
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        val bottomNavigationView: BottomNavigationView = binding.bottomNavigationView
 
         bottomNavigationView.setupWithSafeNavigation(
             this,
-            MainActivity4::class.java,   // ✅ CURRENT ACTIVITY
+            MainActivity4::class.java,
             mapOf(
                 R.id.nav_home to MainActivity4::class.java,
                 R.id.nav_profile to ProfileMainActivity5::class.java,
                 R.id.nav_settings to SettingsActivity::class.java
-                // R.id.nav_notifications -> WALA PANG TARGET ACTIVITY
             )
         )
     }

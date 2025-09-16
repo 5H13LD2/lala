@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.google.firebase.auth.FirebaseAuth
-import com.labactivity.lala.AVAILABALECOURSEPAGE.MainActivity3
+import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
 import com.labactivity.lala.REGISTERPAGE.MainActivity2
 import com.labactivity.lala.databinding.ActivityMainBinding
 import com.labactivity.lala.homepage.MainActivity4

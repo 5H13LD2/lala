@@ -1,32 +1,61 @@
 package com.labactivity.lala.LEARNINGMATERIAL
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.util.Log
 import android.view.ViewGroup
 import android.widget.TextView
-import android.content.SharedPreferences
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.progressindicator.LinearProgressIndicator
+import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.R
-import com.labactivity.lala.homepage.Courses
-import com.labactivity.lala.quiz.DynamicQuizActivity
+import android.widget.Toast
 
 class CourseFragment : Fragment() {
 
-    private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var rvModules: RecyclerView
-    private lateinit var progressIndicator: LinearProgressIndicator
-    private lateinit var moduleAdapter: ModuleAdapter
+    private var courseId: String = ""  // Changed from lateinit to default value
+    private val modules = mutableListOf<Module>()
+    private var completedLessonIds: MutableSet<String> = mutableSetOf()  // Initialize directly
+    private val TAG = "CourseFragment"
 
-    private val completedLessonIds = mutableSetOf<String>()
-    private lateinit var course: Courses
+    companion object {
+        private const val ARG_COURSE_ID = "courseId"
+
+        fun newInstance(courseId: String): CourseFragment {
+            return CourseFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_COURSE_ID, courseId)
+                }
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        courseId = arguments?.getString(ARG_COURSE_ID).also { 
+            Log.d(TAG, "Retrieved courseId from arguments: $it")
+        } ?: run {
+            Log.e(TAG, "No courseId provided in arguments!")
+            Toast.makeText(requireContext(), "Error: Course not found", Toast.LENGTH_SHORT).show()
+            requireActivity().finish()
+            return
+        }
+
+        if (courseId.isEmpty()) {
+            Log.e(TAG, "Empty courseId provided!")
+            Toast.makeText(requireContext(), "Error: Invalid course", Toast.LENGTH_SHORT).show()
+            requireActivity().finish()
+            return
+        }
+
+        // Load completed lessons early
+        loadCompletedLessons()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -36,143 +65,192 @@ class CourseFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "onViewCreated started with courseId: $courseId")
 
-        // Initialize sharedPreferences
-        sharedPreferences = requireContext().getSharedPreferences("course_preferences", Context.MODE_PRIVATE)
+        setupViews(view)
+        loadCourseData()
+    }
 
-        // Initialize views
-        rvModules = view.findViewById(R.id.rvModules)
-        progressIndicator = view.findViewById(R.id.progressIndicator)
-        val toolbar: MaterialToolbar = view.findViewById(R.id.toolbar)
+    private fun setupViews(view: View) {
         val tvCourseDescription: TextView = view.findViewById(R.id.tvCourseDescription)
+        val rvModules: RecyclerView = view.findViewById(R.id.rvModules)
+        val progressIndicator: LinearProgressIndicator = view.findViewById(R.id.progressIndicator)
 
-        // Load saved completed lessons
-        loadCompletedLessons()
-
-        // Initialize course data
-        course = createDummyCourse()
-
-        // Set up course info
-        toolbar.title = course.title
-        tvCourseDescription.text = course.description
-
-        // Set up RecyclerView
+        // Setup RecyclerView
         rvModules.layoutManager = LinearLayoutManager(requireContext())
-        moduleAdapter = ModuleAdapter(
+        val moduleAdapter = ModuleAdapter(
             requireContext(),
-            course.modules,
+            modules,
             completedLessonIds,
             onLessonCompleted = { lessonId ->
+                Log.d(TAG, "Lesson completed: $lessonId")
                 completedLessonIds.add(lessonId)
-                saveCompletedLessons()  // Save the updated completed lessons
-                updateCoursesProgress() // Update the course progress UI
-            },
-            onLessonClick = { lesson ->
-                // Handle lesson click (e.g., open lesson detail)
-                // For now, just log the click
-                Log.d("CourseFragment", "Lesson clicked: ${lesson.title}")
-            },
-            onQuizClick = { module ->
-                // Navigate to the quiz for this module
-                Log.d("CourseFragment", "Quiz button clicked for module: ${module.id}")
-                val intent = Intent(requireContext(), DynamicQuizActivity::class.java).apply {
-                    putExtra("module_id", module.id)
-                    putExtra("module_title", module.title)
-                }
-                startActivity(intent)
+                saveCompletedLessons()
+                updateCourseProgress(progressIndicator)
             }
         )
         rvModules.adapter = moduleAdapter
 
-        // Initialize course progress
-        updateCoursesProgress()
+        // Store adapter reference for updates
+        this.moduleAdapter = moduleAdapter
     }
 
-    private fun updateCoursesProgress() {
-        val totalLessons = course.modules.sumOf { it.lessons.size }
-        val completedCount = completedLessonIds.size
-        val progressPercentage = if (totalLessons > 0) (completedCount * 100) / totalLessons else 0
-        progressIndicator.progress = progressPercentage
+    private lateinit var moduleAdapter: ModuleAdapter
+
+    private fun loadCourseData() {
+        val progressIndicator = view?.findViewById<LinearProgressIndicator>(R.id.progressIndicator)
+        val tvCourseDescription = view?.findViewById<TextView>(R.id.tvCourseDescription)
+
+        // Fetch course data
+        fetchCourse { title, description ->
+            Log.d(TAG, "Course fetched - Title: $title, Description length: ${description.length}")
+            tvCourseDescription?.text = description
+            
+            fetchModulesAndLessons {
+                Log.d(TAG, "Modules and lessons fetch completed. Modules count: ${modules.size}")
+                moduleAdapter.notifyDataSetChanged()
+                progressIndicator?.let { updateCourseProgress(it) }
+            }
+        }
+    }
+
+    private fun fetchCourse(onFetched: (String, String) -> Unit) {
+        Log.d(TAG, "Starting fetchCourse for courseId: $courseId")
+        FirebaseFirestore.getInstance().collection("courses")
+            .document(courseId)
+            .get()
+            .addOnSuccessListener { doc ->
+                if (!doc.exists()) {
+                    Log.e(TAG, "Course document doesn't exist!")
+                    return@addOnSuccessListener
+                }
+                val title = doc.getString("title") ?: ""
+                val description = doc.getString("description") ?: ""
+                Log.d(TAG, "Course data fetched successfully")
+                onFetched(title, description)
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error fetching course", e)
+            }
+    }
+
+    private fun fetchModulesAndLessons(onComplete: () -> Unit) {
+        Log.d(TAG, "Starting fetchModulesAndLessons")
+        val firestore = FirebaseFirestore.getInstance()
+        
+        // Clear existing modules before fetching
+        modules.clear()
+        
+        firestore.collection("courses")
+            .document(courseId)
+            .collection("modules")
+            .get()
+            .addOnSuccessListener { moduleSnapshot ->
+                Log.d(TAG, "Module snapshot received. Empty? ${moduleSnapshot.isEmpty}")
+                
+                if (moduleSnapshot.isEmpty) {
+                    Log.d(TAG, "No modules found for course $courseId")
+                    onComplete()
+                    return@addOnSuccessListener
+                }
+
+                val moduleDocuments = moduleSnapshot.documents
+                Log.d(TAG, "Found ${moduleDocuments.size} modules")
+                var completedModules = 0
+
+                moduleDocuments.forEach { moduleDoc ->
+                    Log.d(TAG, "Processing module: ${moduleDoc.id}")
+                    val module = Module(
+                        id = moduleDoc.id,
+                        title = moduleDoc.getString("title") ?: "Untitled Module",
+                        description = moduleDoc.getString("description") ?: "",
+                        lessons = mutableListOf()
+                    )
+
+                    firestore.collection("courses")
+                        .document(courseId)
+                        .collection("modules")
+                        .document(module.id)
+                        .collection("lessons")
+                        .get()
+                        .addOnSuccessListener { lessonSnapshot ->
+                            Log.d(TAG, "Lessons snapshot received for module ${module.id}. Count: ${lessonSnapshot.size()}")
+                            
+                            val lessons = lessonSnapshot.documents.mapNotNull { lessonDoc ->
+                                try {
+                                    Lesson(
+                                        id = lessonDoc.id,
+                                        number = lessonDoc.getString("number") ?: "0",
+                                        title = lessonDoc.getString("title") ?: "Untitled Lesson",
+                                        description = lessonDoc.getString("description") ?: "",
+                                        codeExample = lessonDoc.getString("codeExample") ?: "",
+                                        explanation = lessonDoc.getString("explanation") ?: "",
+                                        videoUrl = lessonDoc.getString("videoUrl") ?: ""
+                                    )
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Error parsing lesson ${lessonDoc.id}", e)
+                                    null
+                                }
+                            }
+                            
+                            Log.d(TAG, "Successfully parsed ${lessons.size} lessons for module ${module.id}")
+                            module.lessons.addAll(lessons)
+                            
+                            synchronized(modules) {
+                                modules.add(module)
+                                completedModules++
+                                
+                                Log.d(TAG, "Added module ${module.id}. Progress: $completedModules/${moduleDocuments.size}")
+                                
+                                if (completedModules == moduleDocuments.size) {
+                                    Log.d(TAG, "All modules loaded. Total: ${modules.size}")
+                                    onComplete()
+                                }
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error fetching lessons for module ${module.id}", e)
+                            synchronized(modules) {
+                                completedModules++
+                                if (completedModules == moduleDocuments.size) {
+                                    Log.e(TAG, "Completing with errors. Loaded modules: ${modules.size}")
+                                    onComplete()
+                                }
+                            }
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error fetching modules", e)
+                onComplete()
+            }
+    }
+
+    private fun updateCourseProgress(progressIndicator: LinearProgressIndicator) {
+        val totalLessons = modules.sumOf { it.lessons.size }
+        val completed = completedLessonIds.size
+        val progress = if (totalLessons > 0) (completed * 100) / totalLessons else 0
+        progressIndicator.progress = progress
     }
 
     private fun loadCompletedLessons() {
-        val completedLessons = sharedPreferences.getStringSet("completed_lessons", emptySet())
-        Log.d("CourseFragment", "Completed Lessons Loaded: ${completedLessons?.size}")
-        completedLessonIds.addAll(completedLessons ?: emptySet())
+        try {
+            val prefs = requireContext().getSharedPreferences("course_prefs", Context.MODE_PRIVATE)
+            completedLessonIds = (prefs.getStringSet(courseId, emptySet()) ?: emptySet()).toMutableSet()
+            Log.d(TAG, "Loaded ${completedLessonIds.size} completed lessons for course: $courseId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error loading completed lessons", e)
+            completedLessonIds = mutableSetOf() // Fallback to empty set
+        }
     }
 
     private fun saveCompletedLessons() {
-        sharedPreferences.edit().putStringSet("completed_lessons", completedLessonIds).apply()
-        Log.d("CourseFragment", "Completed Lessons Saved: ${completedLessonIds.size}")
-    }
-
-    private fun createDummyCourse(): Courses {
-        return Courses(
-            id = "python_101",
-            title = "Python Course",
-            description = "Master Python programming with our comprehensive course. Learn at your own pace through interactive modules and practical examples.",
-            modules = listOf(
-                Module(
-                    id = "module_1",
-                    title = "Module 1: Fundamentals of Python",
-                    description = "Learn the basics of Python programming language",
-                    lessons = listOf(
-                        Lesson("lesson_1_1", "module_1", "1.1", "Introduction to Python", "Get started with Python and its uses.", "print(\"Hello, World!\")", "https://youtu.be/kqtD5dpn9C8"),
-                        Lesson("lesson_1_2", "module_1", "1.2", "Variables and Data Types", "Understand different data types and how to use variables.", "x = 5\nprint(type(x))", "https://youtu.be/ohCDWZgNIU0"),
-                        Lesson("lesson_1_3", "module_1", "1.3", "Basic Input/Output", "Learn how to get input and display output.", "name = input(\"Enter your name: \")\nprint(\"Hello\", name)", "https://youtu.be/fYlnfvKVDoM"),
-                        Lesson("lesson_1_4", "module_1", "1.4", "Comments in Python", "Add comments to explain your code.", "# This is a comment\nprint(\"Hello\")", "https://youtu.be/MEz1J9wYqZ8")
-                    ),
-                    isExpanded = false
-                ),
-                Module(
-                    id = "module_2",
-                    title = "Module 2: Control Flow",
-                    description = "Master conditionals, loops, and flow control in Python",
-                    lessons = listOf(
-                        Lesson("lesson_2_1", "module_2", "2.1", "Conditional Statements", "Use if-else statements in Python.", "if x > 0:\n    print(\"Positive\")", "https://youtu.be/f4KOjWS_KZs"),
-                        Lesson("lesson_2_2", "module_2", "2.2", "Loops", "Learn about for and while loops.", "for i in range(5):\n    print(i)", "https://youtu.be/6iF8Xb7Z3wQ"),
-                        Lesson("lesson_2_3", "module_2", "2.3", "Nested Conditions", "Understand how to nest conditions.", "if x > 0:\n    if x < 10:\n        print(\"Single digit positive\")", "https://youtu.be/L0CgkD9yYwM"),
-                        Lesson("lesson_2_4", "module_2", "2.4", "Break and Continue", "Control loop execution flow.", "for i in range(10):\n    if i == 5:\n        break", "https://youtu.be/Y7Vm_uozTnY")
-                    ),
-                    isExpanded = false
-                ),
-                Module(
-                    id = "module_3",
-                    title = "Module 3: Functions & Recursion",
-                    description = "Defining and calling functions",
-                    lessons = listOf(
-                        Lesson("lesson_3_1", "module_3", "3.1", "Defining Functions", "Learn how to create functions.", "def greet():\n    print(\"Hello!\")", "https://youtu.be/NSbOtYzIQI0"),
-                        Lesson("lesson_3_2", "module_3", "3.2", "Recursion", "Understand recursive functions.", "def factorial(n):\n    return 1 if n == 0 else n * factorial(n-1)", "https://youtu.be/sv4hpv5Hl1I"),
-                        Lesson("lesson_3_3", "module_3", "3.3", "Function Arguments", "Pass arguments to functions.", "def greet(name):\n    print(\"Hello, \" + name)", "https://youtu.be/9Os0o3wzS_I"),
-                        Lesson("lesson_3_4", "module_3", "3.4", "Return Values", "Functions that return values.", "def add(a, b):\n    return a + b", "https://youtu.be/5m3D1jLUaEw")
-                    ),
-                    isExpanded = false
-                ),
-                Module(
-                    id = "module_4",
-                    title = "Module 4: Data Structures",
-                    description = "Explore lists, tuples, dictionaries, and sets",
-                    lessons = listOf(
-                        Lesson("lesson_4_1", "module_4", "4.1", "Lists and Tuples", "Learn how to use lists and tuples.", "my_list = [1, 2, 3]\nmy_tuple = (1, 2, 3)", "https://youtu.be/W8KRzm-HUcc"),
-                        Lesson("lesson_4_2", "module_4", "4.2", "Dictionaries and Sets", "Understand dictionaries and sets.", "my_dict = {'a': 1, 'b': 2}\nmy_set = {1, 2, 3}", "https://youtu.be/daefaLgNkw0"),
-                        Lesson("lesson_4_3", "module_4", "4.3", "List Comprehension", "Write concise loops using list comprehension.", "[x*x for x in range(5)]", "https://youtu.be/3dt4OGnU5sM"),
-                        Lesson("lesson_4_4", "module_4", "4.4", "Nested Data Structures", "Work with complex data like lists of dictionaries.", "students = [{'name': 'A', 'score': 90}, {'name': 'B', 'score': 85}]", "https://youtu.be/9vKqVkMQHKk")
-                    ),
-                    isExpanded = false
-                ),
-                Module(
-                    id = "module_5",
-                    title = "Module 5: File Handling & Exceptions",
-                    description = "Read/write files and handle errors",
-                    lessons = listOf(
-                        Lesson("lesson_5_1", "module_5", "5.1", "Reading and Writing Files", "Learn file I/O operations.", "with open('file.txt', 'r') as f:\n    print(f.read())", "https://youtu.be/Uh2ebFW8OYM"),
-                        Lesson("lesson_5_2", "module_5", "5.2", "Exception Handling", "Handle errors gracefully.", "try:\n    x = 1 / 0\nexcept ZeroDivisionError:\n    print(\"Cannot divide by zero!\")", "https://youtu.be/NIWwJbo-9_8"),
-                        Lesson("lesson_5_3", "module_5", "5.3", "Working with CSV", "Read and write CSV files in Python.", "import csv\nwith open('data.csv') as file:\n    reader = csv.reader(file)", "https://youtu.be/NlD7xT0IS9s"),
-                        Lesson("lesson_5_4", "module_5", "5.4", "Try-Except-Finally", "Use finally block in error handling.", "try:\n    print(\"Try block\")\nfinally:\n    print(\"Finally block\")", "https://youtu.be/_3b0eWNpRzI")
-                    ),
-                    isExpanded = false
-                )
-            )
-        )
+        try {
+            val prefs = requireContext().getSharedPreferences("course_prefs", Context.MODE_PRIVATE)
+            prefs.edit().putStringSet(courseId, completedLessonIds).apply()
+            Log.d(TAG, "Saved ${completedLessonIds.size} completed lessons for course: $courseId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving completed lessons", e)
+        }
     }
 }

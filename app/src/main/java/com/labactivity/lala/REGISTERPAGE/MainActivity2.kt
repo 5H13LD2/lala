@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.LOGINPAGE.MainActivity
-import com.labactivity.lala.AVAILABALECOURSEPAGE.MainActivity3
+import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
 import com.labactivity.lala.R
 import com.labactivity.lala.databinding.ActivityMain2Binding
 
