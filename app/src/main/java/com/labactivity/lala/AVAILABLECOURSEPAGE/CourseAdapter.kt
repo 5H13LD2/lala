@@ -27,16 +27,43 @@ class CourseAdapter(
     private val auth = FirebaseAuth.getInstance()
 
     companion object {
-        private const val TAG = "CourseAdapter"
+        private const val TAG = "AvailableCourseAdapter"
         private const val USERS_COLLECTION = "users"
         private const val COURSE_TAKEN_FIELD = "courseTaken"
     }
 
     fun updateCourses(newCourses: List<Course>) {
-        courses.clear()
-        courses.addAll(newCourses)
-        notifyDataSetChanged()
-        Log.d(TAG, "📚 Adapter updated with ${newCourses.size} courses")
+        // Filter out courses that user is already enrolled in
+        auth.currentUser?.let { user ->
+            firestore.collection(USERS_COLLECTION)
+                .document(user.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    val enrolledCourses = document.get(COURSE_TAKEN_FIELD) as? List<Map<String, Any>> ?: listOf()
+                    val enrolledCourseIds = enrolledCourses.map { it["courseId"] as String }.toSet()
+                    
+                    val availableCourses = newCourses.filterNot { 
+                        enrolledCourseIds.contains(it.courseId) 
+                    }
+                    
+                    courses.clear()
+                    courses.addAll(availableCourses)
+                    notifyDataSetChanged()
+                    Log.d(TAG, "Available courses updated. Showing ${courses.size} courses")
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Error fetching enrolled courses", e)
+                    // Still show all courses if we can't fetch enrolled ones
+                    courses.clear()
+                    courses.addAll(newCourses)
+                    notifyDataSetChanged()
+                }
+        } ?: run {
+            // If no user is logged in, show all courses
+            courses.clear()
+            courses.addAll(newCourses)
+            notifyDataSetChanged()
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
@@ -58,37 +85,65 @@ class CourseAdapter(
             return
         }
 
-        val userRef = firestore.collection(USERS_COLLECTION).document(user.uid)
+        // First check if already enrolled
+        firestore.collection(USERS_COLLECTION)
+            .document(user.uid)
+            .get()
+            .addOnSuccessListener { document ->
+                val enrolledCourses = document.get(COURSE_TAKEN_FIELD) as? List<Map<String, Any>> ?: listOf()
+                if (enrolledCourses.any { it["courseId"] == course.courseId }) {
+                    Log.d(TAG, "User already enrolled in ${course.name}")
+                    callback(true)
+                    return@addOnSuccessListener
+                }
 
-        // Enrollment data na puwede sa arrayUnion (walang serverTimestamp)
-        val enrollmentData = hashMapOf(
-            "courseId" to course.courseId,
-            "courseName" to course.name,
-            "category" to course.category,
-            "difficulty" to course.difficulty,
-            "enrolledAt" to System.currentTimeMillis() // client timestamp
-        )
+                val enrollmentData = hashMapOf(
+                    "courseId" to course.courseId,
+                    "courseName" to course.name,
+                    "category" to course.category,
+                    "difficulty" to course.difficulty,
+                    "enrolledAt" to System.currentTimeMillis()
+                )
 
-        userRef.update(COURSE_TAKEN_FIELD, FieldValue.arrayUnion(enrollmentData))
-            .addOnSuccessListener {
-                Log.d(TAG, "✅ User enrolled in ${course.name}")
-                callback(true)
+                val userRef = firestore.collection(USERS_COLLECTION).document(user.uid)
+                
+                if (document.exists()) {
+                    userRef.update(COURSE_TAKEN_FIELD, FieldValue.arrayUnion(enrollmentData))
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Successfully enrolled in ${course.name}")
+                            removeEnrolledCourse(course)
+                            callback(true)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Failed to update enrollment", e)
+                            callback(false)
+                        }
+                } else {
+                    userRef.set(hashMapOf(COURSE_TAKEN_FIELD to listOf(enrollmentData)))
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Created new user document and enrolled in ${course.name}")
+                            removeEnrolledCourse(course)
+                            callback(true)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Failed to create user document", e)
+                            callback(false)
+                        }
+                }
             }
             .addOnFailureListener { e ->
-                // Kung wala pang document, i-set na lang
-                val initialData = hashMapOf(
-                    COURSE_TAKEN_FIELD to listOf(enrollmentData)
-                )
-                userRef.set(initialData)
-                    .addOnSuccessListener {
-                        Log.d(TAG, "✅ User enrolled in ${course.name} (new doc)")
-                        callback(true)
-                    }
-                    .addOnFailureListener { ex ->
-                        Log.e(TAG, "❌ Failed to enroll user", ex)
-                        callback(false)
-                    }
+                Log.e(TAG, "Failed to check enrollment status", e)
+                callback(false)
             }
+    }
+
+    private fun removeEnrolledCourse(course: Course) {
+        val position = courses.indexOfFirst { it.courseId == course.courseId }
+        if (position != -1) {
+            courses.removeAt(position)
+            notifyItemRemoved(position)
+            Log.d(TAG, "Removed enrolled course from available courses list")
+        }
     }
 
     inner class CourseViewHolder(itemView: android.view.View) : RecyclerView.ViewHolder(itemView) {

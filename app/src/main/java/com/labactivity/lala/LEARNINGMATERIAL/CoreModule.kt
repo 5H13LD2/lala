@@ -1,13 +1,15 @@
 package com.labactivity.lala.LEARNINGMATERIAL
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.R
 import com.labactivity.lala.databinding.ActivityCoreModuleBinding
-import com.google.firebase.firestore.FirebaseFirestore
-import android.widget.Toast
+import com.labactivity.lala.homepage.MainActivity4
 
 class CoreModule : AppCompatActivity() {
     private lateinit var binding: ActivityCoreModuleBinding
@@ -62,5 +64,11 @@ class CoreModule : AppCompatActivity() {
                 Toast.makeText(this, "Error loading course", Toast.LENGTH_SHORT).show()
                 finish()
             }
+
+        // Add button click logic to go to MainActivity4
+        binding.button2.setOnClickListener {
+            val intent = Intent(this, MainActivity4::class.java)
+            startActivity(intent)
+        }
     }
 }

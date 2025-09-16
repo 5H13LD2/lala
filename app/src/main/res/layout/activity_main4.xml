@@ -242,7 +242,7 @@
                     android:id="@+id/textAllPractice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="All Courses"
+                    android:text="View Available Courses"
                     android:textColor="@android:color/holo_blue_dark"
                     android:textSize="14sp"
                     android:textStyle="bold" />

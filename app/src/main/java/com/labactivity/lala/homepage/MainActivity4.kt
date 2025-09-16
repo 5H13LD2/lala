@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
+import com.labactivity.lala.AVAILABLECOURSEPAGE.Course  // Import the correct Course class
 import com.labactivity.lala.PYTHONASSESMENT.PYTHONASSESMENT
 import com.labactivity.lala.ProfileMainActivity5
 import com.labactivity.lala.R
@@ -123,9 +124,30 @@ class MainActivity4 : BaseActivity() {
     // ==============================================
     private fun setupRecyclerView() {
         val courseList = listOf(
-            Course("Python Basics", R.drawable.python),
-            Course("Java Fundamentals", R.drawable.java),
-            Course("SQL Basics", R.drawable.sql)
+            Course(
+                courseId = "python_basics",
+                name = "Python Basics",
+                imageResId = R.drawable.python,
+                description = "Learn Python programming from scratch",
+                category = "Programming",
+                difficulty = "Beginner"
+            ),
+            Course(
+                courseId = "java_fundamentals",
+                name = "Java Fundamentals",
+                imageResId = R.drawable.java,
+                description = "Master Java programming fundamentals",
+                category = "Programming",
+                difficulty = "Beginner"
+            ),
+            Course(
+                courseId = "sql_basics",
+                name = "SQL Basics",
+                imageResId = R.drawable.sql,
+                description = "Learn database management with SQL",
+                category = "Database",
+                difficulty = "Beginner"
+            )
         )
 
         val recyclerView: RecyclerView = binding.recyclerView
@@ -134,7 +156,7 @@ class MainActivity4 : BaseActivity() {
 
         recyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        recyclerView.adapter = CourseAdapter(courseList)
+        recyclerView.adapter = CourseAdapter(courseList.toMutableList())
     }
 
     // ==============================================
