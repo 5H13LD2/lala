@@ -118,9 +118,24 @@ class ModuleAdapter(
         private fun setupQuizButton(module: Module) {
             btnTakeQuizzes.setOnClickListener {
                 try {
+                    if (!module.isValidModuleId()) {
+                        Log.e(TAG, "Invalid module ID format: ${module.id}")
+                        Toast.makeText(context, "Invalid module format", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    // Extract quiz ID from module ID (e.g., "sql_module_1" -> "sql_quiz")
+                    val quizId = "${module.id.split("_").firstOrNull()}_quiz"
+
+                    Log.d(TAG, "Starting quiz:")
+                    Log.d(TAG, "  Module ID: ${module.id}")
+                    Log.d(TAG, "  Quiz ID: $quizId")
+                    Log.d(TAG, "  Title: ${module.title}")
+                    
                     val intent = Intent(context, DynamicQuizActivity::class.java).apply {
-                        putExtra("module_id", module.id)
+                        putExtra("module_id", module.id.trim())
                         putExtra("module_title", module.title)
+                        putExtra("quiz_id", quizId)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
                     context.startActivity(intent)
@@ -136,7 +151,7 @@ class ModuleAdapter(
                 val scorePair = quizScoreManager.getQuizScore(module.id)
                 if (scorePair != null) {
                     val (score, total) = scorePair
-                    val isPassing = quizScoreManager.isPassing(module.id)
+                    val isPassing = quizScoreManager.hasPassedQuiz(module.id)
                     val statusEmoji = if (isPassing) "🟩 " else "🟥 "
                     tvModuleTitle.text = statusEmoji + module.title
                     tvQuizScore.text = "Score: $score/$total"

@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.labactivity.lala.LOGINPAGE.MainActivity
 import com.labactivity.lala.databinding.ActivitySettingsBinding
 import com.labactivity.lala.homepage.MainActivity4
-import com.labactivity.lala.quiz.TestQuizRepositoryActivity
+
 import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
 
 class SettingsActivity : BaseActivity() {
@@ -59,12 +59,7 @@ class SettingsActivity : BaseActivity() {
         }
 
 
-        binding.subscribeLayout.setOnClickListener {
-            // Navigate to subscription screen
-            Toast.makeText(this, "Developer tools clicked", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, TestQuizRepositoryActivity::class.java)
-            startActivity(intent)
-        }
+
 
         binding.logoutButton.setOnClickListener {
             Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show()
