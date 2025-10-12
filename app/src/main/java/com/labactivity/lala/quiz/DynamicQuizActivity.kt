@@ -227,22 +227,7 @@ class DynamicQuizActivity : AppCompatActivity() {
                 }
             }
             .addOnFailureListener { exception ->
-                Log.e(TAG, "═══════════════════════════════════════")
-                Log.e(TAG, "loadQuizQuestions: ✗ Firestore query FAILED")
-                Log.e(TAG, "═══════════════════════════════════════")
-                Log.e(TAG, "Exception type: ${exception.javaClass.simpleName}")
-                Log.e(TAG, "Error message: ${exception.message}")
-                Log.e(TAG, "Stack trace:", exception)
-                Log.e(TAG, "─────────────────────────────────────")
-                Log.e(TAG, "Troubleshooting steps:")
-                Log.e(TAG, "  1. Check Firestore Console for the collection path")
-                Log.e(TAG, "  2. Verify Firestore security rules allow read access")
-                Log.e(TAG, "  3. Create composite index if needed:")
-                Log.e(TAG, "     Collection: course_quiz/$quizId/questions")
-                Log.e(TAG, "     Fields: module_id (ASC) + order (ASC)")
-                Log.e(TAG, "  4. Check device internet connection")
-                Log.e(TAG, "  5. Verify Firebase project is correctly configured")
-                Log.e(TAG, "═══════════════════════════════════════")
+
 
                 runOnUiThread {
                     Toast.makeText(

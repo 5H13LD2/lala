@@ -102,6 +102,10 @@ android {
         implementation("androidx.cardview:cardview:1.0.0")
         implementation("com.google.android.gms:play-services-auth:21.0.0")
 
+        // Coroutines
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
+
         //SQL COMPILER
         implementation ("androidx.core:core-ktx:1.12.0")
         implementation ("androidx.appcompat:appcompat:1.6.1")

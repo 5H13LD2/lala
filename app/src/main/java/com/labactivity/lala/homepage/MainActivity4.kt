@@ -175,4 +175,13 @@ class MainActivity4 : BaseActivity() {
             )
         )
     }
+
+    // ==============================================
+    // REFRESH ASSESSMENTS WHEN USER RETURNS
+    // ==============================================
+    override fun onResume() {
+        super.onResume()
+        // Refresh assessments to show updated status
+        PYTHONASSESMENT.refreshChallenges(this, binding.recyclerViewAssessments)
+    }
 }
