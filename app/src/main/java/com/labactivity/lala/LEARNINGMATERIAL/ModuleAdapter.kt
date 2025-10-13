@@ -36,8 +36,17 @@ class ModuleAdapter(
     }
 
     override fun onBindViewHolder(holder: ModuleViewHolder, position: Int) {
-        holder.bind(modules[position])
+        val module = modules[position]
+        holder.bind(module)
+
+        // 🔹 Cascading animation
+        holder.itemView.alpha = 0f
+        val animation = AnimationUtils.loadAnimation(context, R.anim.fade_slide_up)
+        animation.startOffset = (position * 100).toLong() // delay per item (100ms per module)
+        holder.itemView.startAnimation(animation)
+        holder.itemView.alpha = 1f
     }
+
 
     override fun getItemCount(): Int = modules.size
 

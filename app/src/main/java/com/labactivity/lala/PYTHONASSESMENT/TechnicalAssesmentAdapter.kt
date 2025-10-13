@@ -14,72 +14,104 @@ import com.labactivity.lala.R
 
 class TechnicalAssessmentAdapter(
     private val context: Context,
-    private val challenges: List<Challenge>
-) : RecyclerView.Adapter<TechnicalAssessmentAdapter.ChallengeViewHolder>() {
+    private var challenges: List<Challenge> = listOf(),
+    private var isLoading: Boolean = true // bagong variable
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChallengeViewHolder {
-        val view = LayoutInflater.from(context)
-            .inflate(R.layout.item_assesment_card, parent, false)
-        return ChallengeViewHolder(view)
+    private val VIEW_TYPE_LOADING = 0
+    private val VIEW_TYPE_ITEM = 1
+
+    override fun getItemViewType(position: Int): Int {
+        return if (isLoading) VIEW_TYPE_LOADING else VIEW_TYPE_ITEM
     }
 
-    override fun onBindViewHolder(holder: ChallengeViewHolder, position: Int) {
-        val challenge = challenges[position]
-
-        holder.titleTextView.text = challenge.title
-        holder.difficultyTextView.text = challenge.difficulty
-
-        // Show preview line
-        if (challenge.codePreview.isNotEmpty()) {
-            holder.codePreviewTextView.text = challenge.codePreview
-            holder.codePreviewTextView.visibility = View.VISIBLE
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == VIEW_TYPE_LOADING) {
+            val view = LayoutInflater.from(context)
+                .inflate(R.layout.item_assessment_skeleton, parent, false)
+            SkeletonViewHolder(view)
         } else {
-            holder.codePreviewTextView.visibility = View.GONE
+            val view = LayoutInflater.from(context)
+                .inflate(R.layout.item_assesment_card, parent, false)
+            ChallengeViewHolder(view)
         }
+    }
 
-        // Color by difficulty
-        val difficultyColor = when (challenge.difficulty) {
-            "Easy" -> ContextCompat.getColor(context, android.R.color.holo_green_dark)
-            "Medium" -> ContextCompat.getColor(context, android.R.color.holo_orange_dark)
-            else -> ContextCompat.getColor(context, android.R.color.holo_red_dark)
-        }
-        holder.difficultyTextView.setTextColor(difficultyColor)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is SkeletonViewHolder) {
+            // Clear any existing animations first to prevent frame tracking issues
+            holder.skeletonTitle.clearAnimation()
+            holder.skeletonDifficulty.clearAnimation()
+            holder.skeletonCodePreview.clearAnimation()
 
-        // 🔹 Change color if already taken
-        // 🔹 Change color if already taken
-        val isTaken = challenge.status == "taken"
-        if (isTaken) {
-            holder.itemView.alpha = 0.7f
-            holder.itemView.setBackgroundColor(
-                ContextCompat.getColor(context, R.color.primary_dark) // darker tone
-            )
-        } else {
-            holder.itemView.alpha = 1f
-            holder.itemView.setBackgroundColor(
-                ContextCompat.getColor(context, R.color.success_green) // available/active color
-            )
-        }
+            // Apply shimmer animation with staggered delays to reduce frame conflicts
+            val baseAnimation = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.shimmer)
+            holder.skeletonTitle.startAnimation(baseAnimation)
 
+            val delayedAnim1 = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.shimmer)
+            delayedAnim1.startOffset = 200
+            holder.skeletonDifficulty.startAnimation(delayedAnim1)
 
-        // 🔹 Click behavior
-        holder.itemView.setOnClickListener {
-            if (isTaken) {
-                // Show dialog if assessment is already taken
-                AlertDialog.Builder(context)
-                    .setTitle("Assessment Already Taken")
-                    .setMessage("This assessment is already taken. Do you want to retry?")
-                    .setPositiveButton("Retry") { _, _ ->
-                        openCompiler(challenge)
-                    }
-                    .setNegativeButton("Cancel", null)
-                    .show()
+            val delayedAnim2 = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.shimmer)
+            delayedAnim2.startOffset = 400
+            holder.skeletonCodePreview.startAnimation(delayedAnim2)
+
+        } else if (holder is ChallengeViewHolder && !isLoading) {
+            val challenge = challenges[position]
+            holder.titleTextView.text = challenge.title
+            holder.difficultyTextView.text = challenge.difficulty
+            if (challenge.codePreview.isNotEmpty()) {
+                holder.codePreviewTextView.text = challenge.codePreview
+                holder.codePreviewTextView.visibility = View.VISIBLE
             } else {
-                openCompiler(challenge)
+                holder.codePreviewTextView.visibility = View.GONE
+            }
+
+            val difficultyColor = when (challenge.difficulty) {
+                "Easy" -> ContextCompat.getColor(context, android.R.color.holo_green_dark)
+                "Medium" -> ContextCompat.getColor(context, android.R.color.holo_orange_dark)
+                else -> ContextCompat.getColor(context, android.R.color.holo_red_dark)
+            }
+            holder.difficultyTextView.setTextColor(difficultyColor)
+
+            val isTaken = challenge.status == "taken"
+            holder.itemView.alpha = if (isTaken) 0.7f else 1f
+            holder.itemView.setBackgroundColor(
+                if (isTaken)
+                    ContextCompat.getColor(context, R.color.primary_dark)
+                else
+                    ContextCompat.getColor(context, R.color.success_green)
+            )
+
+            val animation = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.fade_slide_up)
+            holder.itemView.startAnimation(animation)
+
+            holder.itemView.setOnClickListener {
+                if (isTaken) {
+                    AlertDialog.Builder(context)
+                        .setTitle("Assessment Already Taken")
+                        .setMessage("This assessment is already taken. Do you want to retry?")
+                        .setPositiveButton("Retry") { _, _ ->
+                            openCompiler(challenge)
+                        }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                } else {
+                    openCompiler(challenge)
+                }
             }
         }
     }
 
-    override fun getItemCount(): Int = challenges.size
+    override fun getItemCount(): Int {
+        return if (isLoading) 5 else challenges.size // show 5 skeletons
+    }
+
+    fun setChallenges(newChallenges: List<Challenge>) {
+        challenges = newChallenges
+        isLoading = false
+        notifyDataSetChanged()
+    }
 
     private fun openCompiler(challenge: Challenge) {
         val intent = Intent(context, CompilerActivity::class.java).apply {
@@ -96,5 +128,11 @@ class TechnicalAssessmentAdapter(
         val titleTextView: TextView = itemView.findViewById(R.id.textAssessmentTitle)
         val difficultyTextView: TextView = itemView.findViewById(R.id.textDifficulty)
         val codePreviewTextView: TextView = itemView.findViewById(R.id.textCodePreview)
+    }
+
+    class SkeletonViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val skeletonTitle: View = itemView.findViewById(R.id.skeletonTitle)
+        val skeletonDifficulty: View = itemView.findViewById(R.id.skeletonDifficulty)
+        val skeletonCodePreview: View = itemView.findViewById(R.id.skeletonCodePreview)
     }
 }

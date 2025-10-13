@@ -100,19 +100,28 @@ class CourseFragment : Fragment() {
     private fun loadCourseData() {
         val progressIndicator = view?.findViewById<LinearProgressIndicator>(R.id.progressIndicator)
         val tvCourseDescription = view?.findViewById<TextView>(R.id.tvCourseDescription)
+        val rvModules = view?.findViewById<RecyclerView>(R.id.rvModules)
 
         // Fetch course data
         fetchCourse { title, description ->
             Log.d(TAG, "Course fetched - Title: $title, Description length: ${description.length}")
             tvCourseDescription?.text = description
-            
+
             fetchModulesAndLessons {
                 Log.d(TAG, "Modules and lessons fetch completed. Modules count: ${modules.size}")
+
                 moduleAdapter.notifyDataSetChanged()
                 progressIndicator?.let { updateCourseProgress(it) }
+
+                // 🔹 Apply smooth pop-up animation for modules
+                rvModules?.let { recyclerView ->
+                    val animation = android.view.animation.AnimationUtils.loadAnimation(requireContext(), R.anim.fade_slide_up)
+                    recyclerView.startAnimation(animation)
+                }
             }
         }
     }
+
 
     private fun fetchCourse(onFetched: (String, String) -> Unit) {
         Log.d(TAG, "Starting fetchCourse for courseId: $courseId")
