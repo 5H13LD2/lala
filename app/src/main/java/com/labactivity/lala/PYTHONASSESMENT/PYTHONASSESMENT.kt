@@ -28,47 +28,57 @@ object PYTHONASSESMENT {
             false
         )
 
-        // Load challenges dynamically from Firestore
-        loadChallenges(context, recyclerView)
+        // 🔹 Create adapter with loading state (shows skeletons by default)
+        val adapter = TechnicalAssessmentAdapter(context)
+        recyclerView.adapter = adapter
 
+        // 🔹 Load challenges from Firestore (with shimmer/skeleton first)
+        loadChallenges(adapter)
+
+        // 🔹 Optional click listener for "View All"
         viewAllAssessments.setOnClickListener {
-            // Placeholder action; replace with navigation if needed
             it.isSelected = true
         }
     }
 
-    private fun loadChallenges(context: Context, recyclerView: RecyclerView) {
+    private fun loadChallenges(adapter: TechnicalAssessmentAdapter) {
         CoroutineScope(Dispatchers.Main).launch {
             try {
                 Log.d(TAG, "Loading challenges from Firestore...")
-                
-                // Show loading state (optional)
-                recyclerView.adapter = TechnicalAssessmentAdapter(context, emptyList())
 
-                // Fetch challenges in background
+                // 🔸 Fetch challenges asynchronously
                 val challenges = withContext(Dispatchers.IO) {
                     assessmentService.getChallengesForUser()
                 }
 
-                Log.d(TAG, "Loaded ${challenges.size} challenges")
-                
-                // Update adapter with fetched challenges
-                recyclerView.adapter = TechnicalAssessmentAdapter(context, challenges)
-                
+                Log.d(TAG, "✅ Loaded ${challenges.size} challenges")
+
+                // 🔸 Update adapter with 5 second delay (shows skeleton for 5 seconds minimum)
+                adapter.setChallengesWithDelay(challenges, 5000)
+
             } catch (e: Exception) {
-                Log.e(TAG, "Error loading challenges", e)
-                // Show empty state or error state
-                recyclerView.adapter = TechnicalAssessmentAdapter(context, emptyList())
+                Log.e(TAG, "❌ Error loading challenges", e)
+                // Fallback: empty list with delay
+                adapter.setChallengesWithDelay(emptyList(), 5000)
             }
         }
     }
 
     /**
-     * Refreshes the challenges list
-     * Can be called when user returns to the page or manually refreshes
+     * 🔄 Refreshes the challenges list.
+     * Can be called when user returns to the page or manually refreshes.
      */
     fun refreshChallenges(context: Context, recyclerView: RecyclerView) {
-        loadChallenges(context, recyclerView)
+        val adapter = recyclerView.adapter
+        if (adapter is TechnicalAssessmentAdapter) {
+            // Re-show skeletons
+            val skeletonAdapter = TechnicalAssessmentAdapter(context)
+            recyclerView.adapter = skeletonAdapter
+            loadChallenges(skeletonAdapter)
+        } else {
+            // First-time setup
+            TechnicalAssesment(context, recyclerView, TextView(context))
+        }
     }
 
     fun TechnicalInterview(
@@ -102,4 +112,4 @@ object PYTHONASSESMENT {
         textAllPractice.setOnClickListener { it.isSelected = true }
         viewAllInterviews.setOnClickListener { it.isSelected = true }
     }
-} 
+}

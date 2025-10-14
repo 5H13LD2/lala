@@ -15,7 +15,7 @@ import com.labactivity.lala.R
 class TechnicalAssessmentAdapter(
     private val context: Context,
     private var challenges: List<Challenge> = listOf(),
-    private var isLoading: Boolean = true // bagong variable
+    private var isLoading: Boolean = true
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val VIEW_TYPE_LOADING = 0
@@ -39,27 +39,13 @@ class TechnicalAssessmentAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is SkeletonViewHolder) {
-            // Clear any existing animations first to prevent frame tracking issues
-            holder.skeletonTitle.clearAnimation()
-            holder.skeletonDifficulty.clearAnimation()
-            holder.skeletonCodePreview.clearAnimation()
-
-            // Apply shimmer animation with staggered delays to reduce frame conflicts
-            val baseAnimation = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.shimmer)
-            holder.skeletonTitle.startAnimation(baseAnimation)
-
-            val delayedAnim1 = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.shimmer)
-            delayedAnim1.startOffset = 200
-            holder.skeletonDifficulty.startAnimation(delayedAnim1)
-
-            val delayedAnim2 = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.shimmer)
-            delayedAnim2.startOffset = 400
-            holder.skeletonCodePreview.startAnimation(delayedAnim2)
-
+            // Start shimmer animation only once when view is created
+            holder.startShimmerAnimation(context)
         } else if (holder is ChallengeViewHolder && !isLoading) {
             val challenge = challenges[position]
             holder.titleTextView.text = challenge.title
             holder.difficultyTextView.text = challenge.difficulty
+
             if (challenge.codePreview.isNotEmpty()) {
                 holder.codePreviewTextView.text = challenge.codePreview
                 holder.codePreviewTextView.visibility = View.VISIBLE
@@ -83,8 +69,14 @@ class TechnicalAssessmentAdapter(
                     ContextCompat.getColor(context, R.color.success_green)
             )
 
-            val animation = android.view.animation.AnimationUtils.loadAnimation(context, R.anim.fade_slide_up)
-            holder.itemView.startAnimation(animation)
+            // Animate only if not already animated
+            if (holder.itemView.animation == null) {
+                val animation = android.view.animation.AnimationUtils.loadAnimation(
+                    context,
+                    R.anim.fade_slide_up
+                )
+                holder.itemView.startAnimation(animation)
+            }
 
             holder.itemView.setOnClickListener {
                 if (isTaken) {
@@ -104,13 +96,22 @@ class TechnicalAssessmentAdapter(
     }
 
     override fun getItemCount(): Int {
-        return if (isLoading) 5 else challenges.size // show 5 skeletons
+        return if (isLoading) 5 else challenges.size
     }
 
     fun setChallenges(newChallenges: List<Challenge>) {
         challenges = newChallenges
         isLoading = false
         notifyDataSetChanged()
+    }
+
+    fun setChallengesWithDelay(newChallenges: List<Challenge>, delayMillis: Long = 5000) {
+        // Keep showing skeleton for specified delay
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            challenges = newChallenges
+            isLoading = false
+            notifyDataSetChanged()
+        }, delayMillis)
     }
 
     private fun openCompiler(challenge: Challenge) {
@@ -134,5 +135,29 @@ class TechnicalAssessmentAdapter(
         val skeletonTitle: View = itemView.findViewById(R.id.skeletonTitle)
         val skeletonDifficulty: View = itemView.findViewById(R.id.skeletonDifficulty)
         val skeletonCodePreview: View = itemView.findViewById(R.id.skeletonCodePreview)
+        private var isAnimating = false
+
+        fun startShimmerAnimation(context: Context) {
+            // Only start animation once
+            if (!isAnimating) {
+                isAnimating = true
+
+                val animation = android.view.animation.AnimationUtils.loadAnimation(
+                    context,
+                    R.anim.shimmer
+                )
+
+                skeletonTitle.startAnimation(animation)
+                skeletonDifficulty.startAnimation(animation)
+                skeletonCodePreview.startAnimation(animation)
+            }
+        }
+
+        fun stopShimmerAnimation() {
+            skeletonTitle.clearAnimation()
+            skeletonDifficulty.clearAnimation()
+            skeletonCodePreview.clearAnimation()
+            isAnimating = false
+        }
     }
 }
