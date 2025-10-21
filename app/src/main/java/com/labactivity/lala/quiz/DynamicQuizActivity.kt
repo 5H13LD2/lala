@@ -113,15 +113,6 @@ class DynamicQuizActivity : AppCompatActivity() {
     }
 
     private fun loadQuizQuestions() {
-        Log.d(TAG, "═══════════════════════════════════════")
-        Log.d(TAG, "loadQuizQuestions: Starting Firestore query")
-        Log.d(TAG, "═══════════════════════════════════════")
-        Log.d(TAG, "Query details:")
-        Log.d(TAG, "  Collection path: course_quiz/$quizId/questions")
-        Log.d(TAG, "  Filter: module_id == '$moduleId'")
-        Log.d(TAG, "  Order by: order ASC")
-        Log.d(TAG, "─────────────────────────────────────")
-
         firestore.collection("course_quiz")
             .document(quizId)
             .collection("questions")
@@ -134,14 +125,6 @@ class DynamicQuizActivity : AppCompatActivity() {
                 Log.d(TAG, "─────────────────────────────────────")
 
                 if (documents.isEmpty) {
-                    Log.e(TAG, "loadQuizQuestions: ✗ WARNING - No documents found!")
-                    Log.e(TAG, "Possible causes:")
-                    Log.e(TAG, "  1. module_id '$moduleId' doesn't exist in any questions")
-                    Log.e(TAG, "  2. quiz_id '$quizId' doesn't exist")
-                    Log.e(TAG, "  3. No questions added to this module yet")
-                    Log.e(TAG, "  4. Firestore rules preventing read access")
-                    Log.e(TAG, "  5. Missing composite index (module_id + order)")
-
                     runOnUiThread {
                         Toast.makeText(
                             this,
@@ -153,63 +136,24 @@ class DynamicQuizActivity : AppCompatActivity() {
                     return@addOnSuccessListener
                 }
 
+                val allQuestions = mutableListOf<Quiz>()
+
                 documents.forEachIndexed { index, document ->
-                    Log.d(TAG, "─────────────────────────────────────")
-                    Log.d(TAG, "Processing document #${index + 1}:")
-                    Log.d(TAG, "  Document ID: ${document.id}")
-                    Log.d(TAG, "  Document path: ${document.reference.path}")
-
-                    // Log all fields in the document
-                    Log.d(TAG, "  Raw document data:")
-                    document.data?.forEach { (key, value) ->
-                        Log.d(TAG, "    $key: $value (${value?.javaClass?.simpleName})")
-                    }
-
                     try {
                         val quiz = document.toObject(Quiz::class.java)
 
-                        // Validate parsed quiz object
-                        Log.d(TAG, "  ✓ Parsed Quiz object:")
-                        Log.d(TAG, "    question: ${quiz.question}")
-                        Log.d(TAG, "    options: ${quiz.options}")
-                        Log.d(TAG, "    correctOptionIndex: ${quiz.correctOptionIndex}")
-                        Log.d(TAG, "    difficulty: ${quiz.difficulty}")
-                        Log.d(TAG, "    order: ${quiz.order}")
-                        Log.d(TAG, "    module_id: ${quiz.module_id}")
-
-                        // Validation checks
-                        if (quiz.question.isEmpty()) {
-                            Log.w(TAG, "    ⚠ WARNING: Question text is empty!")
+                        if (quiz.question.isEmpty() || quiz.options.size < 2) {
+                            Log.w(TAG, "⚠ Invalid quiz data at index $index")
+                        } else {
+                            allQuestions.add(quiz)
                         }
-                        if (quiz.options.size < 2) {
-                            Log.w(TAG, "    ⚠ WARNING: Less than 2 options (${quiz.options.size})")
-                        }
-                        if (quiz.correctOptionIndex < 0 || quiz.correctOptionIndex >= quiz.options.size) {
-                            Log.w(TAG, "    ⚠ WARNING: Invalid correctOptionIndex (${quiz.correctOptionIndex})")
-                        }
-                        if (quiz.module_id != moduleId) {
-                            Log.w(TAG, "    ⚠ WARNING: module_id mismatch!")
-                            Log.w(TAG, "      Expected: '$moduleId'")
-                            Log.w(TAG, "      Got: '${quiz.module_id}'")
-                        }
-
-                        quizList.add(quiz)
-                        Log.d(TAG, "  ✓ Successfully added to quizList")
 
                     } catch (e: Exception) {
-                        Log.e(TAG, "  ✗ ERROR parsing document to Quiz object", e)
-                        Log.e(TAG, "    Exception: ${e.javaClass.simpleName}")
-                        Log.e(TAG, "    Message: ${e.message}")
+                        Log.e(TAG, "✗ ERROR parsing document to Quiz object", e)
                     }
                 }
 
-                Log.d(TAG, "─────────────────────────────────────")
-                Log.d(TAG, "loadQuizQuestions: Parsing complete")
-                Log.d(TAG, "  Total documents: ${documents.size()}")
-                Log.d(TAG, "  Successfully parsed: ${quizList.size}")
-                Log.d(TAG, "  Failed to parse: ${documents.size() - quizList.size}")
-
-                if (quizList.isEmpty()) {
+                if (allQuestions.isEmpty()) {
                     Log.e(TAG, "loadQuizQuestions: ✗ ERROR - All documents failed to parse!")
                     runOnUiThread {
                         Toast.makeText(this, "Error loading quiz questions", Toast.LENGTH_LONG).show()
@@ -218,7 +162,11 @@ class DynamicQuizActivity : AppCompatActivity() {
                     return@addOnSuccessListener
                 }
 
-                Log.d(TAG, "loadQuizQuestions: ✓ Starting quiz with ${quizList.size} questions")
+                // ✅ Shuffle and take 20 random questions
+                quizList.clear()
+                quizList.addAll(allQuestions.shuffled().take(20))
+
+                Log.d(TAG, "loadQuizQuestions: ✓ Loaded ${quizList.size} random questions")
                 Log.d(TAG, "═══════════════════════════════════════")
 
                 runOnUiThread {
@@ -227,8 +175,6 @@ class DynamicQuizActivity : AppCompatActivity() {
                 }
             }
             .addOnFailureListener { exception ->
-
-
                 runOnUiThread {
                     Toast.makeText(
                         this,
@@ -240,6 +186,7 @@ class DynamicQuizActivity : AppCompatActivity() {
             }
     }
 
+
     private fun displayQuestion() {
         if (currentQuestionIndex >= quizList.size) {
             Log.w(TAG, "displayQuestion: Attempted to display question beyond quiz size")
@@ -248,12 +195,7 @@ class DynamicQuizActivity : AppCompatActivity() {
 
         val quiz = quizList[currentQuestionIndex]
 
-        Log.d(TAG, "─────────────────────────────────────")
-        Log.d(TAG, "displayQuestion: Showing question ${currentQuestionIndex + 1}/${quizList.size}")
-        Log.d(TAG, "  Question: ${quiz.question}")
-        Log.d(TAG, "  Options: ${quiz.options}")
-        Log.d(TAG, "  Correct index: ${quiz.correctOptionIndex}")
-        Log.d(TAG, "  Difficulty: ${quiz.difficulty}")
+
 
         // Update UI
         questionCounter.text = "Question ${currentQuestionIndex + 1} of ${quizList.size}"
@@ -307,9 +249,7 @@ class DynamicQuizActivity : AppCompatActivity() {
                 val quiz = quizList[currentQuestionIndex]
                 val isCorrect = selectedOptionIndex == quiz.correctOptionIndex
 
-                Log.d(TAG, "  User selected: Option ${selectedOptionIndex + 1}")
-                Log.d(TAG, "  Correct answer: Option ${quiz.correctOptionIndex + 1}")
-                Log.d(TAG, "  Result: ${if (isCorrect) "✓ CORRECT" else "✗ INCORRECT"}")
+
             }
         } else {
             Log.d(TAG, "  ⊘ No option selected (will be marked as skipped)")
@@ -388,17 +328,7 @@ class DynamicQuizActivity : AppCompatActivity() {
             }
         }
 
-        Log.d(TAG, "─────────────────────────────────────")
-        Log.d(TAG, "Final Results:")
-        Log.d(TAG, "  Total questions: ${quizList.size}")
-        Log.d(TAG, "  ✓ Correct: $correctCount")
-        Log.d(TAG, "  ✗ Incorrect: $incorrectCount")
-        Log.d(TAG, "  ⊘ Skipped: $skippedCount")
-        Log.d(TAG, "  Score: $correctCount/${quizList.size}")
-        Log.d(TAG, "  Percentage: ${(correctCount * 100.0 / quizList.size).toInt()}%")
-        Log.d(TAG, "  Pass threshold: 70%")
-        Log.d(TAG, "  Status: ${if (correctCount >= quizList.size * 0.7) "PASSED ✓" else "FAILED ✗"}")
-        Log.d(TAG, "═══════════════════════════════════════")
+
 
         countDownTimer?.cancel()
 
