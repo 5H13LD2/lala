@@ -12,12 +12,18 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
 import com.labactivity.lala.AVAILABLECOURSEPAGE.Course  // Import the correct Course class
 import com.labactivity.lala.PYTHONASSESMENT.PYTHONASSESMENT
+import com.labactivity.lala.PYTHONASSESMENT.AllAssessmentsActivity
+import com.labactivity.lala.PYTHONASSESMENT.AllInterviewsActivity
 import com.labactivity.lala.ProfileMainActivity5
 import com.labactivity.lala.R
 import com.labactivity.lala.SettingsActivity
 import com.labactivity.lala.databinding.ActivityMain4Binding
 import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
 import com.labactivity.lala.UTILS.setupWithSafeNavigation
+import com.labactivity.lala.UTILS.AnimationUtils.animateCardPress
+import com.labactivity.lala.UTILS.AnimationUtils.animateChildren
+import com.labactivity.lala.UTILS.AnimationUtils.slideUpFadeIn
+import com.labactivity.lala.UTILS.AnimationUtils.animateItems
 import java.util.Calendar
 
 class MainActivity4 : BaseActivity() {
@@ -31,7 +37,13 @@ class MainActivity4 : BaseActivity() {
         setContentView(binding.root)
 
         // ==============================================
+        // ANIMATE UI ELEMENTS ON SCREEN LOAD
+        // ==============================================
+        animateInitialLoad()
+
+        // ==============================================
         // ALL COURSES BUTTON → punta sa MainActivity3
+        // With smooth animation
         // ==============================================
         binding.textAllPractice.setOnClickListener {
             Log.d("MainActivity4", "✅ textAllPractice clicked!")
@@ -41,6 +53,11 @@ class MainActivity4 : BaseActivity() {
             startActivity(intent)
 
             Log.d("MainActivity4", "➡️ Intent to MainActivity3 triggered!")
+        }
+
+        // Add card press animation
+        binding.cardViewPractice.animateCardPress {
+            binding.textAllPractice.performClick()
         }
 
         // ==============================================
@@ -79,9 +96,14 @@ class MainActivity4 : BaseActivity() {
             binding.textViewAllAssessments
         )
 
+        // Add navigation to AllAssessmentsActivity
+        binding.textViewAllAssessments.setOnClickListener {
+            val intent = Intent(this, AllAssessmentsActivity::class.java)
+            startActivity(intent)
+        }
+
         // ==============================================
         // BIND INTERVIEWS TO RECYCLER VIEW
-        // ⚠️ HUWAG nang gamitin textAllPractice dito
         // ==============================================
         PYTHONASSESMENT.TechnicalInterview(
             this,
@@ -89,6 +111,12 @@ class MainActivity4 : BaseActivity() {
             binding.textViewAllInterviews,
             binding.textViewAllInterviews
         )
+
+        // Add navigation to AllInterviewsActivity
+        binding.textViewAllInterviews.setOnClickListener {
+            val intent = Intent(this, AllInterviewsActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     // ==============================================
@@ -183,5 +211,46 @@ class MainActivity4 : BaseActivity() {
         super.onResume()
         // Refresh assessments to show updated status
         PYTHONASSESMENT.refreshChallenges(this, binding.recyclerViewAssessments)
+    }
+
+    // ==============================================
+    // ANIMATION: INITIAL SCREEN LOAD
+    // Animates all major sections with staggered delays
+    // ==============================================
+    private fun animateInitialLoad() {
+        // Hide all elements initially
+        binding.daySelectorContainer.alpha = 0f
+        binding.recyclerView.alpha = 0f
+        binding.recyclerViewAssessments.alpha = 0f
+        binding.recyclerViewInterviews.alpha = 0f
+        binding.cardViewPractice.alpha = 0f
+
+        // Animate day selector with slide up
+        binding.daySelectorContainer.slideUpFadeIn(duration = 400, startDelay = 100)
+
+        // Animate Recent Course section
+        binding.recyclerView.slideUpFadeIn(duration = 400, startDelay = 200)
+
+        // Animate Technical Assessment section
+        binding.recyclerViewAssessments.slideUpFadeIn(duration = 400, startDelay = 300)
+
+        // Animate Technical Interview section
+        binding.recyclerViewInterviews.slideUpFadeIn(duration = 400, startDelay = 400)
+
+        // Animate Practice Card
+        binding.cardViewPractice.slideUpFadeIn(duration = 400, startDelay = 500)
+
+        // Animate RecyclerView items after the view is laid out
+        binding.recyclerView.post {
+            binding.recyclerView.animateItems(itemDelay = 80, itemDuration = 300)
+        }
+
+        binding.recyclerViewAssessments.post {
+            binding.recyclerViewAssessments.animateItems(itemDelay = 80, itemDuration = 300)
+        }
+
+        binding.recyclerViewInterviews.post {
+            binding.recyclerViewInterviews.animateItems(itemDelay = 80, itemDuration = 300)
+        }
     }
 }

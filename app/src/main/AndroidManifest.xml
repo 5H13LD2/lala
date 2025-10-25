@@ -25,6 +25,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".PYTHONASSESMENT.AllAssessmentsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".PYTHONASSESMENT.AllInterviewsActivity"
+            android:exported="true" />
 
         <!-- Login Page -->
         <activity
@@ -56,14 +62,8 @@
             android:name=".FLASHCARD.FlashcardActivity"
             android:exported="false" />
 
-        <!-- Quiz Activities -->
-        <activity
-            android:name=".quiz.TestQuizRepositoryActivity"
-            android:exported="false"
-            android:label="Quiz Repository Test" />
-        <activity
-            android:name=".quiz.QuizActivity"
-            android:exported="false" />
+
+
         <activity
             android:name=".quiz.DynamicQuizActivity"
             android:exported="false" />
@@ -76,13 +76,7 @@
             android:name=".REVIEWER.ReviewActivity"
             android:exported="false" />
 
-        <!-- Learning Materials -->
-        <activity
-            android:name=".LEARNINGMATERIAL.SqlCoreModule"
-            android:exported="false" />
-        <activity
-            android:name=".LEARNINGMATERIAL.JavaCoreModule"
-            android:exported="false" />
+
         <activity
             android:name=".LEARNINGMATERIAL.CoreModule"
             android:exported="false" />

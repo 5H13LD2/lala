@@ -15,7 +15,7 @@ import com.labactivity.lala.R
 class TechnicalAssessmentAdapter(
     private val context: Context,
     private var challenges: List<Challenge> = listOf(),
-    private var isLoading: Boolean = true
+    var isLoading: Boolean = true  // Changed to 'var' and made public for AllAssessmentsActivity
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val VIEW_TYPE_LOADING = 0

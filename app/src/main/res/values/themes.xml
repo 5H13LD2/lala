@@ -1,9 +1,161 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
+    <!-- ========================================= -->
+    <!-- BASE APPLICATION THEME -->
+    <!-- ========================================= -->
     <style name="Base.Theme.Lala" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Brand Colors -->
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+
+        <!-- Accent Colors -->
+        <item name="colorSecondary">@color/accent</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Background Colors -->
+        <item name="android:colorBackground">@color/light_background</item>
+        <item name="colorSurface">@color/white</item>
+
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/primary</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
+    <!-- Main App Theme -->
     <style name="Theme.Lala" parent="Base.Theme.Lala" />
+
+    <!-- ========================================= -->
+    <!-- TEXT STYLES -->
+    <!-- ========================================= -->
+
+    <!-- Heading Text -->
+    <style name="TextAppearance.Lala.Heading" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textSize">@dimen/text_size_heading</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- Section Title -->
+    <style name="TextAppearance.Lala.Title" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">@dimen/text_size_title</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- Body Text -->
+    <style name="TextAppearance.Lala.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">@dimen/text_size_body</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- Link / Caption Text -->
+    <style name="TextAppearance.Lala.Link" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">@dimen/text_size_caption</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/primary</item>
+    </style>
+
+    <!-- ========================================= -->
+    <!-- WIDGET STYLES -->
+    <!-- ========================================= -->
+
+    <!-- Base Widget Style -->
+    <style name="Widget.Lala" parent=""/>
+
+    <!-- ========================================= -->
+    <!-- CARD STYLES -->
+    <!-- ========================================= -->
+
+    <!-- Default Card -->
+    <style name="Widget.Lala.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="contentPadding">@dimen/spacing_md</item>
+    </style>
+
+    <!-- Practice Card (for special sections) -->
+    <style name="Widget.Lala.Card.Practice" parent="Widget.Lala.Card">
+        <item name="android:layout_height">160dp</item>
+    </style>
+
+    <!-- ========================================= -->
+    <!-- SECTION HEADER -->
+    <!-- ========================================= -->
+    <style name="Widget.Lala.SectionHeader">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_md</item>
+    </style>
+
+    <!-- ========================================= -->
+    <!-- RECYCLERVIEW STYLES -->
+    <!-- ========================================= -->
+
+    <!-- Base RecyclerView Style -->
+    <style name="Widget.Lala.RecyclerView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="Widget.Lala.RecyclerView.Horizontal" parent="Widget.Lala.RecyclerView">
+        <item name="android:clipToPadding">false</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_xl</item>
+    </style>
+
+    <style name="Widget.Lala.RecyclerView.Vertical" parent="Widget.Lala.RecyclerView">
+        <item name="android:nestedScrollingEnabled">false</item>
+        <item name="android:layout_marginBottom">@dimen/spacing_xl</item>
+    </style>
+
+    <!-- ========================================= -->
+    <!-- TABLE STYLES (for SQL Compiler) -->
+    <!-- ========================================= -->
+
+    <!-- Table Header Style -->
+    <style name="TableHeaderStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:background">@color/primary_blue</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minWidth">80dp</item>
+    </style>
+
+    <!-- Table Cell Style -->
+    <style name="TableCellStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:background">@android:drawable/dialog_holo_light_frame</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minWidth">80dp</item>
+    </style>
+
+    <!-- ========================================= -->
+    <!-- QUERY EDITOR STYLE -->
+    <!-- ========================================= -->
+
+    <!-- Query EditText Style -->
+    <style name="QueryEditTextStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:background">@android:drawable/edit_text</item>
+    </style>
+    <style name="Toolbar.TitleText" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
 </resources>

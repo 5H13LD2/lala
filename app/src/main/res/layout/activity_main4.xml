@@ -19,8 +19,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:paddingTop="32dp">
+            android:padding="@dimen/spacing_md"
+            android:paddingTop="@dimen/spacing_xl">
 
             <!-- Day Selector -->
             <LinearLayout
@@ -29,8 +29,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginBottom="24dp"
-                android:layout_marginTop="35dp">
+                android:layout_marginBottom="@dimen/spacing_lg"
+                android:layout_marginTop="@dimen/spacing_xl">
 
                 <com.labactivity.lala.homepage.DayCircleView
                     android:id="@+id/day_monday"
@@ -119,165 +119,123 @@
 
             <!-- Recent Course & My Library Section -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                style="@style/Widget.Lala.SectionHeader">
 
                 <TextView
                     android:id="@+id/textRecentCourse"
+                    style="@style/TextAppearance.Lala.Title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Recent Course"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black" />
+                    android:text="Recent Course" />
 
                 <TextView
                     android:id="@+id/textMyLibrary"
+                    style="@style/TextAppearance.Lala.Title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="My Library"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/black"
                     android:gravity="end" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:layout_marginBottom="32dp" />
+                style="@style/Widget.Lala.RecyclerView.Vertical" />
 
             <!-- Technical Assessment Section -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                style="@style/Widget.Lala.SectionHeader">
 
                 <TextView
                     android:id="@+id/textTechAssessmentTitle"
+                    style="@style/TextAppearance.Lala.Title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Technical Assessment"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:text="Technical Assessment" />
 
                 <TextView
                     android:id="@+id/textViewAllAssessments"
+                    style="@style/TextAppearance.Lala.Link"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="View All"
-                    android:textColor="@android:color/holo_blue_dark"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:text="View All" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewAssessments"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:orientation="horizontal"
-                android:layout_marginBottom="32dp" />
+                style="@style/Widget.Lala.RecyclerView.Horizontal"
+                android:orientation="horizontal" />
 
             <!-- Technical Interview Section -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                style="@style/Widget.Lala.SectionHeader">
 
                 <TextView
+                    style="@style/TextAppearance.Lala.Title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Technical Interview"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:textColor="@android:color/black" />
+                    android:text="Technical Interview" />
 
                 <TextView
                     android:id="@+id/textViewAllInterviews"
+                    style="@style/TextAppearance.Lala.Link"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="View All"
-                    android:textColor="@android:color/holo_blue_dark"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:text="View All" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewInterviews"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:layout_marginBottom="32dp" />
+                style="@style/Widget.Lala.RecyclerView.Horizontal" />
 
             <!-- Sharpen Your Skills Section -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
+                style="@style/Widget.Lala.SectionHeader">
 
                 <TextView
                     android:id="@+id/textSharpenTitle"
+                    style="@style/TextAppearance.Lala.Title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Sharpen Your Skills"
-                    android:textColor="@android:color/black"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:text="Sharpen Your Skills" />
 
                 <TextView
                     android:id="@+id/textAllPractice"
+                    style="@style/TextAppearance.Lala.Link"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="View Available Courses"
-                    android:textColor="@android:color/holo_blue_dark"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:text="View Available Courses" />
             </LinearLayout>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardViewPractice"
+                style="@style/Widget.Lala.Card.Practice"
                 android:layout_width="match_parent"
-                android:layout_height="160dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="@dimen/spacing_md">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:padding="16dp"
+                    android:padding="@dimen/spacing_md"
                     android:gravity="center">
 
                     <TextView
+                        style="@style/TextAppearance.Lala.Heading"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/sharpen_description2"
-                        android:textColor="@android:color/black"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginBottom="@dimen/spacing_sm" />
 
                     <TextView
+                        style="@style/TextAppearance.Lala.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/sharpen_description"
-                        android:textColor="@android:color/black"
-                        android:textSize="16sp"
                         android:gravity="center" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

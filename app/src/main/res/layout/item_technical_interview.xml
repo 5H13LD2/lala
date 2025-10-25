@@ -3,37 +3,36 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardViewTopic"
-    android:layout_width="180dp"
+    style="@style/Widget.Lala.Card"
+    android:layout_width="match_parent"
     android:layout_height="120dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp"
-    android:layout_margin="4dp">
+    android:layout_margin="@dimen/spacing_sm">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:padding="@dimen/spacing_md"
         android:gravity="center">
 
         <TextView
             android:id="@+id/textTopicTitle"
+            style="@style/TextAppearance.Lala.Body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Topic Title"
-            android:textSize="16sp"
             android:textStyle="bold"
-            android:gravity="center"
-            android:textColor="@color/black"/>
+            android:gravity="center" />
 
         <TextView
             android:id="@+id/textTopicDifficulty"
+            style="@style/TextAppearance.Lala.Body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Difficulty"
-            android:textSize="14sp"
+            android:textSize="@dimen/text_size_caption"
             android:gravity="center"
-            android:layout_marginTop="8dp"
-            android:textColor="@android:color/darker_gray"/>
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:textColor="@color/text_secondary" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

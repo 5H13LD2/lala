@@ -2,63 +2,64 @@
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="220dp"
+    style="@style/Widget.Lala.Card"
+    android:layout_width="match_parent"
     android:layout_height="140dp"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    android:layout_margin="@dimen/spacing_sm">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="@dimen/spacing_md">
 
         <TextView
             android:id="@+id/textAssessmentTitle"
+            style="@style/TextAppearance.Lala.Body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Fix the Loop"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black" />
+            android:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="4dp">
+            android:layout_marginTop="@dimen/spacing_xs">
 
             <TextView
+                style="@style/TextAppearance.Lala.Body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Difficulty: "
-                android:textSize="12sp" />
+                android:textSize="@dimen/text_size_small" />
 
             <TextView
                 android:id="@+id/textDifficulty"
+                style="@style/TextAppearance.Lala.Body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Easy"
                 android:textColor="@android:color/holo_green_dark"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_size_small"
                 android:textStyle="bold" />
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="@dimen/spacing_sm"
+            android:layout_marginBottom="@dimen/spacing_sm"
             android:background="#E0E0E0" />
 
         <TextView
             android:id="@+id/textCodePreview"
+            style="@style/TextAppearance.Lala.Body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text='for i in range(5): print(f"Line : Hello")'
-            android:textSize="14sp"
-            android:textColor="#263238"
+            android:textSize="@dimen/text_size_caption"
+            android:textColor="@color/code_background"
             android:fontFamily="monospace"
             android:maxLines="2"
             android:ellipsize="end" />
