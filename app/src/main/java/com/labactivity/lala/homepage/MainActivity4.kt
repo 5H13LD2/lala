@@ -262,6 +262,12 @@ class MainActivity4 : BaseActivity() {
         val textMyLibrary: TextView = binding.textMyLibrary
         textMyLibrary.paintFlags = textMyLibrary.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
+        // Add click listener to "My Library" text
+        textMyLibrary.setOnClickListener {
+            val intent = Intent(this, com.labactivity.lala.MYLIBRARY.MyLibraryActivity::class.java)
+            startActivity(intent)
+        }
+
         recyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         recyclerView.adapter = CourseAdapter(courseList.toMutableList())

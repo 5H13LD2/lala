@@ -181,11 +181,129 @@ class ModuleProgressManager(private val context: Context) {
                         "completed_count", completedCount
                     ).addOnSuccessListener {
                         Log.d(TAG, "Updated module progress in Firebase")
+                        // Update course-level statistics
+                        updateCourseProgress(courseId)
                     }.addOnFailureListener { e ->
                         Log.e(TAG, "Error updating module progress", e)
                     }
                 }
             }
+    }
+
+    /**
+     * Update course-level progress statistics by aggregating all module progress
+     */
+    private fun updateCourseProgress(courseId: String) {
+        val userId = auth.currentUser?.uid ?: return
+
+        val courseProgressRef = firestore.collection("user_progress")
+            .document(userId)
+            .collection("courses")
+            .document(courseId)
+
+        val modulesRef = courseProgressRef.collection("modules")
+
+        // Get all modules for this course from the main courses collection
+        firestore.collection("courses")
+            .document(courseId)
+            .collection("modules")
+            .get()
+            .addOnSuccessListener { courseModulesSnapshot ->
+                val totalModules = courseModulesSnapshot.size()
+
+                // Count total lessons across ALL modules in the course
+                var totalLessonsInEntireCourse = 0
+                var processedModulesCount = 0
+
+                // First, calculate total lessons in the entire course
+                val moduleIds = mutableListOf<String>()
+                courseModulesSnapshot.documents.forEach { moduleDoc ->
+                    val moduleId = moduleDoc.id
+                    moduleIds.add(moduleId)
+
+                    // Get lesson count for each module
+                    firestore.collection("courses")
+                        .document(courseId)
+                        .collection("modules")
+                        .document(moduleId)
+                        .collection("lessons")
+                        .get()
+                        .addOnSuccessListener { lessonsSnapshot ->
+                            totalLessonsInEntireCourse += lessonsSnapshot.size()
+                            processedModulesCount++
+
+                            // Once we've counted lessons in all modules, calculate user progress
+                            if (processedModulesCount == totalModules) {
+                                calculateUserProgress(
+                                    userId,
+                                    courseId,
+                                    courseProgressRef,
+                                    modulesRef,
+                                    totalModules,
+                                    totalLessonsInEntireCourse
+                                )
+                            }
+                        }
+                }
+            }
+    }
+
+    /**
+     * Calculate user's actual progress for a course
+     */
+    private fun calculateUserProgress(
+        userId: String,
+        courseId: String,
+        courseProgressRef: com.google.firebase.firestore.DocumentReference,
+        modulesRef: com.google.firebase.firestore.CollectionReference,
+        totalModules: Int,
+        totalLessonsInEntireCourse: Int
+    ) {
+        // Get user's module progress
+        modulesRef.get().addOnSuccessListener { userModulesSnapshot ->
+            var completedLessonsInCourse = 0
+            var completedModules = 0
+
+            userModulesSnapshot.documents.forEach { moduleDoc ->
+                val progress = moduleDoc.getLong("progress")?.toInt() ?: 0
+                val completedCount = moduleDoc.getLong("completed_count")?.toInt() ?: 0
+
+                completedLessonsInCourse += completedCount
+
+                // Count module as completed if 100%
+                if (progress >= 100) {
+                    completedModules++
+                }
+            }
+
+            // Calculate overall course progress based on ALL lessons in the course
+            val overallProgress = if (totalLessonsInEntireCourse > 0) {
+                (completedLessonsInCourse * 100) / totalLessonsInEntireCourse
+            } else {
+                0
+            }
+
+            Log.d(TAG, "Course $courseId: $overallProgress% ($completedLessonsInCourse/$totalLessonsInEntireCourse lessons, $completedModules/$totalModules modules)")
+
+            // Update course-level document
+            val courseData = hashMapOf(
+                "course_id" to courseId,
+                "total_modules" to totalModules,
+                "completed_modules" to completedModules,
+                "total_lessons" to totalLessonsInEntireCourse,
+                "completed_lessons" to completedLessonsInCourse,
+                "overall_progress" to overallProgress,
+                "last_updated" to FieldValue.serverTimestamp()
+            )
+
+            courseProgressRef.set(courseData)
+                .addOnSuccessListener {
+                    Log.d(TAG, "Updated course-level progress for $courseId")
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Error updating course-level progress", e)
+                }
+        }
     }
 
     /**

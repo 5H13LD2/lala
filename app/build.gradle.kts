@@ -48,7 +48,7 @@ android {
             ("C:/Users/jerico/AppData/Local/Programs/Python/Python312/python.exe")
 
             pip {
-             //   install("numpy")
+               install("numpy")
             }
 
             sourceSets {

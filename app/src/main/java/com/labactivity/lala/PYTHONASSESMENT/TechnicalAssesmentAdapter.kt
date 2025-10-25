@@ -54,8 +54,8 @@ class TechnicalAssessmentAdapter(
             }
 
             val difficultyColor = when (challenge.difficulty) {
-                "Easy" -> ContextCompat.getColor(context, android.R.color.holo_green_dark)
-                "Medium" -> ContextCompat.getColor(context, android.R.color.holo_orange_dark)
+                "Easy" -> ContextCompat.getColor(context, android.R.color.white)
+                "Medium" -> ContextCompat.getColor(context, android.R.color.white)
                 else -> ContextCompat.getColor(context, android.R.color.holo_red_dark)
             }
             holder.difficultyTextView.setTextColor(difficultyColor)
@@ -66,7 +66,7 @@ class TechnicalAssessmentAdapter(
                 if (isTaken)
                     ContextCompat.getColor(context, R.color.primary_dark)
                 else
-                    ContextCompat.getColor(context, R.color.success_green)
+                    ContextCompat.getColor(context, R.color.white)
             )
 
             // Animate only if not already animated
