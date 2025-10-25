@@ -22,6 +22,44 @@
             android:padding="@dimen/spacing_md"
             android:paddingTop="@dimen/spacing_xl">
 
+            <!-- Streak Badge -->
+            <LinearLayout
+                android:id="@+id/streakBadgeContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/streak_badge_background"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:layout_marginBottom="@dimen/spacing_lg"
+                android:elevation="4dp">
+
+                <ImageView
+                    android:id="@+id/iconStreakBadge"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_lightning_bolt"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/textStreakCount"
+                    style="@style/TextAppearance.Lala.Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="4dp" />
+
+                <TextView
+                    style="@style/TextAppearance.Lala.Body"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="day streak"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_caption" />
+            </LinearLayout>
+
             <!-- Day Selector -->
             <LinearLayout
                 android:id="@+id/day_selector_container"
@@ -30,7 +68,7 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:layout_marginBottom="@dimen/spacing_lg"
-                android:layout_marginTop="@dimen/spacing_xl">
+                android:layout_marginTop="@dimen/spacing_md">
 
                 <com.labactivity.lala.homepage.DayCircleView
                     android:id="@+id/day_monday"

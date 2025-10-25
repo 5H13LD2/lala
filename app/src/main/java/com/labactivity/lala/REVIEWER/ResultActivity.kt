@@ -1,10 +1,12 @@
 package com.labactivity.lala.REVIEWER
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.labactivity.lala.quiz.Quiz
 import com.labactivity.lala.quiz.QuizScoreManager
 import com.labactivity.lala.R
 
@@ -22,6 +24,15 @@ class ResultActivity : AppCompatActivity() {
         val total = intent.getIntExtra("TOTAL", 0)
         val moduleId = intent.getStringExtra("MODULE_ID") ?: ""
         val moduleTitle = intent.getStringExtra("MODULE_TITLE") ?: ""
+        val quizId = intent.getStringExtra("QUIZ_ID") ?: "technical_quiz"
+
+        // Get quiz questions from intent
+        val quizQuestions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableArrayListExtra("QUIZ_QUESTIONS", Quiz::class.java) ?: arrayListOf()
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableArrayListExtra<Quiz>("QUIZ_QUESTIONS") ?: arrayListOf()
+        }
 
         // Save the score if not already saved
         if (moduleId.isNotEmpty()) {
@@ -47,8 +58,11 @@ class ResultActivity : AppCompatActivity() {
         reviewAnswersButton.setOnClickListener {
             val intent = Intent(this, ReviewActivity::class.java)
             intent.putExtra("SCORE", score)
+            intent.putExtra("TOTAL", total)
             intent.putExtra("MODULE_ID", moduleId)
             intent.putExtra("MODULE_TITLE", moduleTitle)
+            intent.putExtra("QUIZ_ID", quizId)
+            intent.putParcelableArrayListExtra("QUIZ_QUESTIONS", quizQuestions)
             startActivity(intent)
         }
 
@@ -57,6 +71,7 @@ class ResultActivity : AppCompatActivity() {
             val intent = Intent(this, com.labactivity.lala.quiz.DynamicQuizActivity::class.java).apply {
                 putExtra("module_id", moduleId)
                 putExtra("module_title", moduleTitle)
+                putExtra("quiz_id", quizId)
             }
             startActivity(intent)
             finish()

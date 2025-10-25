@@ -18,10 +18,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textStyle="italic"
+            android:textStyle="bold"
             android:textColor="@color/primary"
             android:layout_marginBottom="8dp"
-            android:text="Question 1 (ID: 1.1)" />
+            android:text="Question 1" />
 
         <TextView
             android:id="@+id/question_text"
@@ -33,19 +33,35 @@
             android:text="What is the correct way to create a variable in Python?" />
 
         <TextView
-            android:id="@+id/correct_answer_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Options:"
             android:textSize="14sp"
-            android:textColor="@color/success_green"
+            android:textStyle="bold"
             android:layout_marginBottom="8dp"
-            android:text="Correct answer: x = 5" />
+            android:layout_marginTop="4dp" />
+
+        <LinearLayout
+            android:id="@+id/options_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="12dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E0E0E0"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="12dp" />
 
         <TextView
-            android:id="@+id/difficulty_text"
+            android:id="@+id/explanation_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:text="Difficulty: Easy" />
+            android:textColor="@android:color/black"
+            android:lineSpacingExtra="4dp"
+            android:text="Explanation: The 'def' keyword is used to define a function in Python." />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

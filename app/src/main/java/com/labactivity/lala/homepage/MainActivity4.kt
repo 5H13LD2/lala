@@ -24,6 +24,10 @@ import com.labactivity.lala.UTILS.AnimationUtils.animateCardPress
 import com.labactivity.lala.UTILS.AnimationUtils.animateChildren
 import com.labactivity.lala.UTILS.AnimationUtils.slideUpFadeIn
 import com.labactivity.lala.UTILS.AnimationUtils.animateItems
+import com.labactivity.lala.UTILS.AnimationUtils.pulse
+import com.labactivity.lala.UTILS.AnimationUtils.scaleIn
+import com.labactivity.lala.UTILS.StreakManager
+import com.labactivity.lala.UTILS.AssessmentResultTracker
 import java.util.Calendar
 
 class MainActivity4 : BaseActivity() {
@@ -75,6 +79,15 @@ class MainActivity4 : BaseActivity() {
         dayViews.forEachIndexed { index, view ->
             view.setOnClickListener { toggleDay(index) }
         }
+
+        // ==============================================
+        // SETUP STREAK BADGE
+        // ==============================================
+        setupStreakBadge()
+
+        // ==============================================
+        // UPDATE DAY STATES WITH QUIZ RESULTS
+        // ==============================================
         updateDayStates()
 
         // ==============================================
@@ -127,11 +140,31 @@ class MainActivity4 : BaseActivity() {
     }
 
     // ==============================================
-    // UPDATE CURRENT DAY HIGHLIGHT
+    // UPDATE CURRENT DAY HIGHLIGHT + QUIZ RESULTS
     // ==============================================
     private fun updateDayStates() {
-        dayViews.forEach { it.setChecked(false) }
+        // Get quiz results for the week
+        val weekResults = AssessmentResultTracker.getWeekResults(this)
 
+        // Update each day with its status and water animation
+        dayViews.forEachIndexed { index, view ->
+            view.setChecked(false)
+
+            val dailyResult = weekResults[index]
+            if (dailyResult != null && dailyResult.totalCount > 0) {
+                // Set water fill animation based on results
+                view.setDayStatus(
+                    status = dailyResult.getStatus(),
+                    fillPercentage = dailyResult.getFillPercentage(),
+                    animate = true
+                )
+            } else {
+                // No activity for this day
+                view.setDayStatus(DayStatus.NONE, 0f, animate = false)
+            }
+        }
+
+        // Check current day
         val calendar = Calendar.getInstance()
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
         val index = when (dayOfWeek) {
@@ -145,6 +178,53 @@ class MainActivity4 : BaseActivity() {
             else -> -1
         }
         if (index != -1) dayViews[index].setChecked(true)
+    }
+
+    // ==============================================
+    // SETUP STREAK BADGE
+    // ==============================================
+    private fun setupStreakBadge() {
+        // Record activity (this updates streak if user hasn't been active today)
+        val streak = StreakManager.recordActivity(this)
+
+        // Update UI
+        binding.textStreakCount.text = streak.toString()
+
+        // Animate badge if milestone reached
+        if (StreakManager.shouldAnimateStreak(streak)) {
+            binding.iconStreakBadge.pulse(duration = 1000, repeatCount = 3)
+            binding.streakBadgeContainer.scaleIn(duration = 500, startDelay = 200)
+        }
+
+        // Make badge clickable to show stats
+        binding.streakBadgeContainer.setOnClickListener {
+            showStreakStats()
+        }
+    }
+
+    // ==============================================
+    // SHOW STREAK STATISTICS DIALOG
+    // ==============================================
+    private fun showStreakStats() {
+        val currentStreak = StreakManager.getCurrentStreak(this)
+        val longestStreak = StreakManager.getLongestStreak(this)
+        val totalDays = StreakManager.getTotalDaysActive(this)
+        val totalAssessments = AssessmentResultTracker.getTotalAssessmentsTaken(this)
+        val passedAssessments = AssessmentResultTracker.getTotalPassedAssessments(this)
+
+        val message = """
+            🔥 Current Streak: $currentStreak days
+            🏆 Longest Streak: $longestStreak days
+            📅 Total Active Days: $totalDays
+            ✍️ Total Assessments: $totalAssessments
+            ✅ Passed: $passedAssessments
+        """.trimIndent()
+
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Your Progress")
+            .setMessage(message)
+            .setPositiveButton("Keep Going!") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     // ==============================================
@@ -219,14 +299,18 @@ class MainActivity4 : BaseActivity() {
     // ==============================================
     private fun animateInitialLoad() {
         // Hide all elements initially
+        binding.streakBadgeContainer.alpha = 0f
         binding.daySelectorContainer.alpha = 0f
         binding.recyclerView.alpha = 0f
         binding.recyclerViewAssessments.alpha = 0f
         binding.recyclerViewInterviews.alpha = 0f
         binding.cardViewPractice.alpha = 0f
 
+        // Animate streak badge first
+        binding.streakBadgeContainer.scaleIn(duration = 500, startDelay = 50)
+
         // Animate day selector with slide up
-        binding.daySelectorContainer.slideUpFadeIn(duration = 400, startDelay = 100)
+        binding.daySelectorContainer.slideUpFadeIn(duration = 400, startDelay = 150)
 
         // Animate Recent Course section
         binding.recyclerView.slideUpFadeIn(duration = 400, startDelay = 200)

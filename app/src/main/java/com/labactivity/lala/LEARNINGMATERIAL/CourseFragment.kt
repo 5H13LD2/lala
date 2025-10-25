@@ -21,6 +21,7 @@ class CourseFragment : Fragment() {
     private val modules = mutableListOf<Module>()
     private var completedLessonIds: MutableSet<String> = mutableSetOf()  // Initialize directly
     private val TAG = "CourseFragment"
+    private lateinit var progressManager: ModuleProgressManager
 
     companion object {
         private const val ARG_COURSE_ID = "courseId"
@@ -53,7 +54,10 @@ class CourseFragment : Fragment() {
             return
         }
 
-        // Load completed lessons early
+        // Initialize progress manager
+        progressManager = ModuleProgressManager(requireContext())
+
+        // Load completed lessons early from Firebase
         loadCompletedLessons()
     }
 
@@ -68,8 +72,24 @@ class CourseFragment : Fragment() {
         Log.d(TAG, "onViewCreated started with courseId: $courseId")
 
         setupViews(view)
-        loadCourseData()
+
+        // Wait for completed lessons to load before loading course data
+        // This ensures the UI shows the correct completion state
+        waitForCompletedLessonsAndLoadData()
     }
+
+    private fun waitForCompletedLessonsAndLoadData() {
+        // Check if lessons are already loaded
+        if (lessonsLoaded) {
+            loadCourseData()
+        } else {
+            // Wait a bit and check again (the callback will trigger loadCourseData)
+            Log.d(TAG, "Waiting for completed lessons to load from Firebase...")
+        }
+    }
+
+    private var lessonsLoaded = false
+    private var courseDataLoading = false
 
     private fun setupViews(view: View) {
         val tvCourseDescription: TextView = view.findViewById(R.id.tvCourseDescription)
@@ -82,10 +102,25 @@ class CourseFragment : Fragment() {
             requireContext(),
             modules,
             completedLessonIds,
-            onLessonCompleted = { lessonId ->
-                Log.d(TAG, "Lesson completed: $lessonId")
-                completedLessonIds.add(lessonId)
-                saveCompletedLessons()
+            onLessonCompleted = { lessonId, moduleId, isCompleted ->
+                Log.d(TAG, "Lesson $lessonId for module $moduleId completed: $isCompleted")
+
+                if (isCompleted) {
+                    completedLessonIds.add(lessonId)
+                    progressManager.saveCompletedLesson(courseId, moduleId, lessonId) { success ->
+                        if (success) {
+                            Log.d(TAG, "Lesson progress saved to Firebase")
+                        }
+                    }
+                } else {
+                    completedLessonIds.remove(lessonId)
+                    progressManager.removeCompletedLesson(courseId, moduleId, lessonId) { success ->
+                        if (success) {
+                            Log.d(TAG, "Lesson progress removed from Firebase")
+                        }
+                    }
+                }
+
                 updateCourseProgress(progressIndicator)
             }
         )
@@ -98,9 +133,18 @@ class CourseFragment : Fragment() {
     private lateinit var moduleAdapter: ModuleAdapter
 
     private fun loadCourseData() {
+        // Prevent loading course data multiple times
+        if (courseDataLoading) {
+            Log.d(TAG, "Course data already loading, skipping duplicate call")
+            return
+        }
+        courseDataLoading = true
+
         val progressIndicator = view?.findViewById<LinearProgressIndicator>(R.id.progressIndicator)
         val tvCourseDescription = view?.findViewById<TextView>(R.id.tvCourseDescription)
         val rvModules = view?.findViewById<RecyclerView>(R.id.rvModules)
+
+        Log.d(TAG, "Loading course data with ${completedLessonIds.size} completed lessons")
 
         // Fetch course data
         fetchCourse { title, description ->
@@ -153,6 +197,7 @@ class CourseFragment : Fragment() {
         firestore.collection("courses")
             .document(courseId)
             .collection("modules")
+            .orderBy("title")  // Order modules alphabetically by title
             .get()
             .addOnSuccessListener { moduleSnapshot ->
                 Log.d(TAG, "Module snapshot received. Empty? ${moduleSnapshot.isEmpty}")
@@ -167,8 +212,11 @@ class CourseFragment : Fragment() {
                 Log.d(TAG, "Found ${moduleDocuments.size} modules")
                 var completedModules = 0
 
-                moduleDocuments.forEach { moduleDoc ->
-                    Log.d(TAG, "Processing module: ${moduleDoc.id}")
+                // Create a temporary map to preserve order
+                val tempModules = mutableMapOf<Int, Module>()
+
+                moduleDocuments.forEachIndexed { index, moduleDoc ->
+                    Log.d(TAG, "Processing module at index $index: ${moduleDoc.id}")
                     val module = Module(
                         id = moduleDoc.id,
                         title = moduleDoc.getString("title") ?: "Untitled Module",
@@ -181,10 +229,11 @@ class CourseFragment : Fragment() {
                         .collection("modules")
                         .document(module.id)
                         .collection("lessons")
+                        .orderBy("number")  // Order lessons by their number (1.1, 1.2, etc.)
                         .get()
                         .addOnSuccessListener { lessonSnapshot ->
                             Log.d(TAG, "Lessons snapshot received for module ${module.id}. Count: ${lessonSnapshot.size()}")
-                            
+
                             val lessons = lessonSnapshot.documents.mapNotNull { lessonDoc ->
                                 try {
                                     Lesson(
@@ -201,18 +250,21 @@ class CourseFragment : Fragment() {
                                     null
                                 }
                             }
-                            
+
                             Log.d(TAG, "Successfully parsed ${lessons.size} lessons for module ${module.id}")
                             module.lessons.addAll(lessons)
-                            
+
                             synchronized(modules) {
-                                modules.add(module)
+                                tempModules[index] = module
                                 completedModules++
-                                
-                                Log.d(TAG, "Added module ${module.id}. Progress: $completedModules/${moduleDocuments.size}")
-                                
+
+                                Log.d(TAG, "Completed module ${module.id} at index $index. Progress: $completedModules/${moduleDocuments.size}")
+
                                 if (completedModules == moduleDocuments.size) {
-                                    Log.d(TAG, "All modules loaded. Total: ${modules.size}")
+                                    // Add modules in the correct order
+                                    modules.clear()
+                                    tempModules.toSortedMap().values.forEach { modules.add(it) }
+                                    Log.d(TAG, "All modules loaded in order. Total: ${modules.size}")
                                     onComplete()
                                 }
                             }
@@ -222,6 +274,9 @@ class CourseFragment : Fragment() {
                             synchronized(modules) {
                                 completedModules++
                                 if (completedModules == moduleDocuments.size) {
+                                    // Add modules in the correct order even with errors
+                                    modules.clear()
+                                    tempModules.toSortedMap().values.forEach { modules.add(it) }
                                     Log.e(TAG, "Completing with errors. Loaded modules: ${modules.size}")
                                     onComplete()
                                 }
@@ -244,22 +299,34 @@ class CourseFragment : Fragment() {
 
     private fun loadCompletedLessons() {
         try {
-            val prefs = requireContext().getSharedPreferences("course_prefs", Context.MODE_PRIVATE)
-            completedLessonIds = (prefs.getStringSet(courseId, emptySet()) ?: emptySet()).toMutableSet()
-            Log.d(TAG, "Loaded ${completedLessonIds.size} completed lessons for course: $courseId")
+            progressManager.loadCompletedLessons(courseId) { lessons ->
+                completedLessonIds.clear()
+                completedLessonIds.addAll(lessons)
+                lessonsLoaded = true
+                Log.d(TAG, "Loaded ${completedLessonIds.size} completed lessons from Firebase for course: $courseId")
+                Log.d(TAG, "Completed lesson IDs: $completedLessonIds")
+
+                // If view is already created, load the course data now
+                if (view != null) {
+                    loadCourseData()
+                }
+
+                // Refresh UI if already loaded
+                if (::moduleAdapter.isInitialized) {
+                    moduleAdapter.notifyDataSetChanged()
+                    view?.findViewById<LinearProgressIndicator>(R.id.progressIndicator)?.let {
+                        updateCourseProgress(it)
+                    }
+                }
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error loading completed lessons", e)
-            completedLessonIds = mutableSetOf() // Fallback to empty set
-        }
-    }
-
-    private fun saveCompletedLessons() {
-        try {
-            val prefs = requireContext().getSharedPreferences("course_prefs", Context.MODE_PRIVATE)
-            prefs.edit().putStringSet(courseId, completedLessonIds).apply()
-            Log.d(TAG, "Saved ${completedLessonIds.size} completed lessons for course: $courseId")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error saving completed lessons", e)
+            completedLessonIds.clear()
+            lessonsLoaded = true
+            // Still load course data even if there's an error
+            if (view != null) {
+                loadCourseData()
+            }
         }
     }
 }

@@ -23,8 +23,9 @@ class LessonAdapter(
     private val context: Context,
     private val lessons: MutableList<Lesson>,  // make this mutable
     private val completedLessonIds: MutableSet<String>,
+    private val moduleId: String,
     private val onLessonClick: (Lesson) -> Unit,
-    private val onLessonCompleted: (String) -> Unit
+    private val onLessonCompleted: (lessonId: String, isCompleted: Boolean) -> Unit
 ) : RecyclerView.Adapter<LessonAdapter.LessonViewHolder>() {
 
     private val TAG = "LessonAdapter"
@@ -79,6 +80,7 @@ class LessonAdapter(
 
         private fun setupCompletionState(lesson: Lesson) {
             val isCompleted = completedLessonIds.contains(lesson.id)
+            Log.d(TAG, "Setting up completion for lesson ${lesson.id}: isCompleted=$isCompleted, completedIds size=${completedLessonIds.size}")
             updateCompletionUI(isCompleted)
         }
 
@@ -110,16 +112,18 @@ class LessonAdapter(
         }
 
         private fun toggleLessonCompletion(lesson: Lesson) {
-            val isCompleted = completedLessonIds.contains(lesson.id)
-            if (isCompleted) {
+            val wasCompleted = completedLessonIds.contains(lesson.id)
+            val isNowCompleted = !wasCompleted
+
+            if (wasCompleted) {
                 completedLessonIds.remove(lesson.id)
             } else {
                 completedLessonIds.add(lesson.id)
             }
-            
-            updateCompletionUI(!isCompleted)
-            onLessonCompleted(lesson.id)
-            Log.d(TAG, "Lesson ${lesson.id} completion toggled. Completed: ${!isCompleted}")
+
+            updateCompletionUI(isNowCompleted)
+            onLessonCompleted(lesson.id, isNowCompleted)
+            Log.d(TAG, "Lesson ${lesson.id} for module $moduleId completion toggled. Completed: $isNowCompleted")
         }
 
         private fun updateCompletionUI(isCompleted: Boolean) {

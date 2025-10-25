@@ -1,5 +1,8 @@
 package com.labactivity.lala.quiz
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 /**
  * Data class representing a quiz question from Firestore.
  *
@@ -9,19 +12,22 @@ package com.labactivity.lala.quiz
  *   "question": "What is Python?",
  *   "options": ["A programming language", "A snake", "A framework", "A library"],
  *   "correctOptionIndex": 0,
+ *   "explanation": "The 'def' keyword is used to define a function in Python.",
  *   "difficulty": "EASY",
  *   "order": 1,
  *   "module_id": "java_module_1"
  * }
  */
+@Parcelize
 data class Quiz(
     var question: String = "",
     var options: List<String> = emptyList(),
     var correctOptionIndex: Int = -1,
+    var explanation: String = "",
     var difficulty: String = "NORMAL",
     var order: Int = 0,
     var module_id: String = ""
-) {
+) : Parcelable {
     /**
      * Validates that this Quiz object has all required fields properly set
      * @return true if valid, false otherwise

@@ -24,7 +24,7 @@ class ModuleAdapter(
     private val context: Context,
     private val modules: List<Module>,
     private val completedLessonIds: MutableSet<String>,
-    private val onLessonCompleted: (String) -> Unit
+    private val onLessonCompleted: (lessonId: String, moduleId: String, isCompleted: Boolean) -> Unit
 ) : RecyclerView.Adapter<ModuleAdapter.ModuleViewHolder>() {
 
     private val TAG = "ModuleAdapter"
@@ -62,32 +62,64 @@ class ModuleAdapter(
 
         private var currentModule: Module? = null
         private var lessonAdapter: LessonAdapter? = null
+        private var clickListenerSet = false
+
+        init {
+            // Set click listeners only once in init to avoid multiple listeners
+            moduleHeader.setOnClickListener {
+                currentModule?.let { module ->
+                    module.isExpanded = !module.isExpanded
+                    updateExpandState(module.isExpanded)
+                    Log.d(TAG, "Module ${module.id} expanded: ${module.isExpanded}")
+                }
+            }
+
+            btnTakeQuizzes.setOnClickListener {
+                currentModule?.let { module ->
+                    try {
+                        if (!module.isValidModuleId()) {
+                            Log.e(TAG, "Invalid module ID format: ${module.id}")
+                            Toast.makeText(context, "Invalid module format", Toast.LENGTH_SHORT).show()
+                            return@setOnClickListener
+                        }
+
+                        // Extract quiz ID from module ID (e.g., "sql_module_1" -> "sql_quiz")
+                        val quizId = "${module.id.split("_").firstOrNull()}_quiz"
+
+                        Log.d(TAG, "Starting quiz:")
+                        Log.d(TAG, "  Module ID: ${module.id}")
+                        Log.d(TAG, "  Quiz ID: $quizId")
+                        Log.d(TAG, "  Title: ${module.title}")
+
+                        val intent = Intent(context, DynamicQuizActivity::class.java).apply {
+                            putExtra("module_id", module.id.trim())
+                            putExtra("module_title", module.title)
+                            putExtra("quiz_id", quizId)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error launching quiz for module ${module.id}", e)
+                        Toast.makeText(context, "Unable to start quiz", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
 
         fun bind(module: Module) {
             currentModule = module
-            
+
             setModuleTitleWithScoreIndicator(module)
             tvModuleDescription.text = module.description
 
             // Calculate and update progress
             updateModuleProgress(module)
 
-            // Setup lessons RecyclerView if not already setup
-            if (lessonAdapter == null) {
-                setupLessonsRecyclerView(module)
-            } else {
-                lessonAdapter?.updateLessons(module.lessons)
-            }
-
-            // Quiz button
-            setupQuizButton(module)
+            // Always recreate the lesson adapter with the current module
+            setupLessonsRecyclerView(module)
 
             // Expanded state
             updateExpandState(module.isExpanded)
-            moduleHeader.setOnClickListener {
-                module.isExpanded = !module.isExpanded
-                updateExpandState(module.isExpanded)
-            }
         }
 
         private fun updateModuleProgress(module: Module) {
@@ -115,44 +147,14 @@ class ModuleAdapter(
                 context,
                 module.lessons,
                 completedLessonIds,
+                module.id,
                 onLessonClick = { /* Handle lesson click if needed */ },
-                onLessonCompleted = { lessonId ->
-                    onLessonCompleted(lessonId)
+                onLessonCompleted = { lessonId, isCompleted ->
+                    onLessonCompleted(lessonId, module.id, isCompleted)
                     updateModuleProgress(module)
                 }
             )
             rvLessons.adapter = lessonAdapter
-        }
-
-        private fun setupQuizButton(module: Module) {
-            btnTakeQuizzes.setOnClickListener {
-                try {
-                    if (!module.isValidModuleId()) {
-                        Log.e(TAG, "Invalid module ID format: ${module.id}")
-                        Toast.makeText(context, "Invalid module format", Toast.LENGTH_SHORT).show()
-                        return@setOnClickListener
-                    }
-
-                    // Extract quiz ID from module ID (e.g., "sql_module_1" -> "sql_quiz")
-                    val quizId = "${module.id.split("_").firstOrNull()}_quiz"
-
-                    Log.d(TAG, "Starting quiz:")
-                    Log.d(TAG, "  Module ID: ${module.id}")
-                    Log.d(TAG, "  Quiz ID: $quizId")
-                    Log.d(TAG, "  Title: ${module.title}")
-                    
-                    val intent = Intent(context, DynamicQuizActivity::class.java).apply {
-                        putExtra("module_id", module.id.trim())
-                        putExtra("module_title", module.title)
-                        putExtra("quiz_id", quizId)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error launching quiz for module ${module.id}", e)
-                    Toast.makeText(context, "Unable to start quiz", Toast.LENGTH_SHORT).show()
-                }
-            }
         }
 
         private fun setModuleTitleWithScoreIndicator(module: Module) {

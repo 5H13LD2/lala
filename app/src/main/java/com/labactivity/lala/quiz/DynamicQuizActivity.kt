@@ -337,9 +337,11 @@ class DynamicQuizActivity : AppCompatActivity() {
             putExtra("TOTAL", quizList.size)
             putExtra("MODULE_ID", moduleId)
             putExtra("MODULE_TITLE", moduleTitle)
+            putExtra("QUIZ_ID", quizId)
+            putParcelableArrayListExtra("QUIZ_QUESTIONS", ArrayList(quizList))
         }
 
-        Log.d(TAG, "showResults: Navigating to ResultActivity")
+        Log.d(TAG, "showResults: Navigating to ResultActivity with ${quizList.size} questions")
         startActivity(intent)
         finish()
     }
