@@ -6,7 +6,9 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.method.ScrollingMovementMethod
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -46,6 +48,7 @@ class CompilerActivity : AppCompatActivity() {
 
     private var pyInputBuffer = ""
     private var waitingForInput = false
+    private var currentInputPrompt = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,11 +107,30 @@ class CompilerActivity : AppCompatActivity() {
 
         // Set click listener for Submit Input button
         submitInputButton.setOnClickListener {
-            val input = userInputEditText.text.toString()
-            submitUserInput(input)
-            userInputEditText.text.clear()
-            inputContainer.visibility = View.GONE
-            waitingForInput = false
+            handleInputSubmission()
+        }
+
+        // Add Enter key listener for input field (like LeetCode)
+        userInputEditText.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_DONE ||
+                actionId == EditorInfo.IME_ACTION_GO ||
+                (event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN)
+            ) {
+                handleInputSubmission()
+                true
+            } else {
+                false
+            }
+        }
+
+        // Also handle Enter key press directly
+        userInputEditText.setOnKeyListener { _, keyCode, event ->
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
+                handleInputSubmission()
+                true
+            } else {
+                false
+            }
         }
 
         // Set click listener for Hint button
@@ -244,21 +266,29 @@ class CompilerActivity : AppCompatActivity() {
                 try {
                     val isInputRequested = pyModule.callAttr("is_input_requested").toBoolean()
 
-                    if (isInputRequested) {
+                    if (isInputRequested && !waitingForInput) {
                         val prompt = pyModule.callAttr("get_input_prompt").toString()
+                        currentInputPrompt = prompt
                         waitingForInput = true
 
                         handler.post {
-                            inputContainer.visibility = View.VISIBLE
-                            userInputEditText.hint = prompt.ifEmpty { "Enter input..." }
-                            // Request focus and show keyboard
-                            userInputEditText.requestFocus()
-                        }
-                    } else {
-                        handler.post {
-                            if (inputContainer.visibility == View.VISIBLE && !waitingForInput) {
-                                inputContainer.visibility = View.GONE
+                            // Show prompt in output for better context (like LeetCode)
+                            if (prompt.isNotEmpty()) {
+                                outputTextView.append(prompt)
                             }
+
+                            // Show input container with visual feedback
+                            inputContainer.visibility = View.VISIBLE
+                            userInputEditText.hint = "Type your input and press Enter..."
+                            userInputEditText.requestFocus()
+
+                            // Make submit button more visible
+                            submitInputButton.isEnabled = true
+                        }
+                    } else if (!isInputRequested && inputContainer.visibility == View.VISIBLE) {
+                        handler.post {
+                            inputContainer.visibility = View.GONE
+                            waitingForInput = false
                         }
                     }
 
@@ -287,21 +317,42 @@ class CompilerActivity : AppCompatActivity() {
         pythonExecutionActive = false
     }
 
+    // Handle input submission (from button or Enter key)
+    private fun handleInputSubmission() {
+        val input = userInputEditText.text.toString()
+
+        // Don't submit empty input unless it's intentional
+        if (input.isEmpty() && !waitingForInput) {
+            return
+        }
+
+        submitUserInput(input)
+    }
+
     private fun submitUserInput(input: String) {
         executor.execute {
             try {
                 val py = Python.getInstance()
                 val pyModule = py.getModule("myscript")
 
+                // Show the user's input in the output (like LeetCode echo)
+                handler.post {
+                    outputTextView.append("$input\n")
+                }
+
                 // Provide input to Python
                 pyModule.callAttr("provide_input", input)
 
-                // Hide input container
+                // Clear input field and reset state
                 handler.post {
-                    inputContainer.visibility = View.GONE
+                    userInputEditText.text.clear()
+                    waitingForInput = false
+                    // Don't hide immediately - let the input check handle it
+                    // This allows smooth handling of multiple inputs
                 }
 
-                // Update output to show the input
+                // Update output to show any new content
+                Thread.sleep(100) // Small delay to allow Python to process
                 updateOutput()
 
             } catch (e: Exception) {

@@ -161,9 +161,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="8dp"
-            android:background="#EEEEEE"
+            android:padding="12dp"
+            android:background="#E3F2FD"
             android:visibility="gone"
+            android:elevation="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -174,17 +175,24 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:backgroundTint="@color/blue_primary"
-                android:hint="Enter your input here..."
+                android:hint="Type your input and press Enter..."
                 android:inputType="text"
-                android:padding="12dp" />
+                android:imeOptions="actionDone"
+                android:maxLines="1"
+                android:padding="12dp"
+                android:textSize="14sp"
+                android:fontFamily="monospace" />
 
             <Button
                 android:id="@+id/submitInputButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:backgroundTint="@color/blue_primary"
                 android:text="Submit"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

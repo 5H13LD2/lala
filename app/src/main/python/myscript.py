@@ -35,10 +35,8 @@ def custom_input(prompt=""):
     # Reset flag
     input_requested = False
 
-    # Print the input value to make it appear in the output
-    print(input_value)
-
     # Return the value provided by the Android app
+    # Note: We don't print the input here because the Android app will display it
     result = input_value
     return result
 
