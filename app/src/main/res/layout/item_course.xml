@@ -1,128 +1,181 @@
-<androidx.cardview.widget.CardView
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="6dp">
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/modern_border"
+    android:backgroundTint="@color/modern_card_bg">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
+        android:layout_height="wrap_content"
+        android:padding="20dp">
 
-        <!-- Course Image -->
-        <ImageView
-            android:id="@+id/courseImage"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/logo2"
+        <!-- Modern Course Icon with Gradient Background -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/courseIconCard"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/courseImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/modern_course_icon_bg"
+                android:padding="16dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/logo2"
+                android:tint="#FFFFFF" />
+        </androidx.cardview.widget.CardView>
 
         <!-- Course Title -->
-
-        <!-- Continue Learning Button -->
         <TextView
             android:id="@+id/courseTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
             android:text="Course Name"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintStart_toEndOf="@+id/courseImage"
-            app:layout_constraintTop_toTopOf="@+id/courseImage" />
+            android:textColor="@color/modern_text_primary"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="2"
+            android:ellipsize="end"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/courseIconCard"
+            app:layout_constraintTop_toTopOf="@+id/courseIconCard" />
 
+        <!-- Course Subtitle/Description -->
+        <TextView
+            android:id="@+id/courseSubtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:text="Continue your learning journey"
+            android:textSize="13sp"
+            android:textColor="@color/modern_text_secondary"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/courseIconCard"
+            app:layout_constraintTop_toBottomOf="@+id/courseTitle" />
+
+        <!-- Continue Learning Button with Gradient -->
         <Button
             android:id="@+id/btnContinueLearning"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:background="@drawable/rectangle_background"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/modern_button_primary"
             android:text="Continue Learning"
-            android:textSize="16sp"
+            android:textSize="15sp"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/courseImage" />
+            app:layout_constraintTop_toBottomOf="@+id/courseIconCard" />
 
-        <!-- Flashcard & Practice Buttons -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraintLayout"
-            android:layout_width="match_parent"
+        <!-- Action Buttons Container -->
+        <LinearLayout
+            android:id="@+id/actionButtonsLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintTop_toBottomOf="@+id/btnContinueLearning"
-            tools:layout_editor_absoluteX="16dp">
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btnContinueLearning">
 
-            <!-- Practice Button -->
-            <Button
+            <!-- Practice Button with Icon -->
+            <LinearLayout
                 android:id="@+id/btnPractice"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:background="@drawable/rectangle_background2"
-                android:padding="10dp"
-                android:text="Practice"
-                android:textSize="17sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/btnFlashcard"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/modern_button_practice"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:clickable="true"
+                android:focusable="true">
 
-            <!-- Flashcard Button -->
+                <ImageView
+                    android:id="@+id/practiceIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_practice_modern"
+                    android:layout_marginEnd="8dp"
+                    android:tint="#FFFFFF" />
 
-            <!-- Practice Icon (Inside Practice Button) -->
+                <TextView
+                    android:id="@+id/practiceText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Practice"
+                    android:textSize="14sp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
 
-            <!-- Flashcard Icon (Inside Flashcard Button) -->
-
-            <Button
+            <!-- Flashcard/Reviewer Button with Icon -->
+            <LinearLayout
                 android:id="@+id/btnFlashcard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:background="@drawable/rectangle_background2"
-                android:padding="10dp"
-                android:text="TechLaunch \nReviewer"
-                android:textSize="10sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/btnPractice"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/modern_button_flashcard"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:paddingTop="14dp"
+                android:paddingBottom="14dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:clickable="true"
+                android:focusable="true">
 
-            <ImageView
-                android:id="@+id/practicelogo"
-                android:layout_width="25dp"
-                android:layout_height="33dp"
-                android:layout_marginStart="16dp"
-                android:background="@drawable/rectangle_background"
-                android:src="@drawable/dumbell"
-                app:layout_constraintBottom_toBottomOf="@id/btnPractice"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@id/btnPractice" />
+                <ImageView
+                    android:id="@+id/flashcardIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_flashcard_modern"
+                    android:layout_marginEnd="8dp"
+                    android:tint="#FFFFFF" />
 
-            <ImageView
-                android:id="@+id/flashcardLogo"
-                android:layout_width="35dp"
-                android:layout_height="30dp"
-                android:layout_marginStart="12dp"
-                android:background="@drawable/rectangle_background"
-                android:src="@drawable/flashcard"
-                app:layout_constraintBottom_toBottomOf="@id/btnFlashcard"
-                app:layout_constraintStart_toStartOf="@+id/btnFlashcard"
-                app:layout_constraintTop_toTopOf="@id/btnFlashcard" />
+                <TextView
+                    android:id="@+id/flashcardText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reviewer"
+                    android:textSize="14sp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.cardview.widget.CardView>
-
-
-
+</com.google.android.material.card.MaterialCardView>

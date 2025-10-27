@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <solid android:color="#4CAF50" />
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <gradient
+                android:angle="135"
+                android:startColor="@color/modern_accent"
+                android:endColor="@color/modern_accent_secondary"
+                android:type="linear" />
+        </shape>
+    </item>
+</layer-list>

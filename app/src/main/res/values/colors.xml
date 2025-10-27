@@ -63,5 +63,22 @@
     <color name="background_light">#F5F5F5</color>
     <color name="card_background">#FFFFFF</color>
 
+    <!-- Modern Enterprise Colors (DataCamp/LeetCode inspired) -->
+    <color name="modern_primary">#0A0E27</color>
+    <color name="modern_secondary">#1A1F3A</color>
+    <color name="modern_accent">#00D9FF</color>
+    <color name="modern_accent_secondary">#5B6FFF</color>
+    <color name="modern_success">#00C48C</color>
+    <color name="modern_warning">#FFA726</color>
+    <color name="modern_card_bg">#FFFFFF</color>
+    <color name="modern_card_bg_dark">#F8F9FA</color>
+    <color name="modern_border">#E5E8EB</color>
+    <color name="modern_text_primary">#1A1F36</color>
+    <color name="modern_text_secondary">#6C757D</color>
+    <color name="modern_gradient_start">#667EEA</color>
+    <color name="modern_gradient_end">#764BA2</color>
+    <color name="modern_practice">#5B6FFF</color>
+    <color name="modern_flashcard">#00D9FF</color>
+
 
 </resources>

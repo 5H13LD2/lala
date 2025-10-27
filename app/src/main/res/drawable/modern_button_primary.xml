@@ -5,6 +5,6 @@
         android:angle="135"
         android:startColor="@color/modern_gradient_start"
         android:endColor="@color/modern_gradient_end"
-        android:type="linear" />
-    <corners android:radius="16dp" />
+        android:type="linear"/>
+    <corners android:radius="8dp"/>
 </shape>

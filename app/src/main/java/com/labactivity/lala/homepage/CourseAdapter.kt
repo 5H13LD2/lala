@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
@@ -74,8 +75,8 @@ class CourseAdapter(
         val courseImage: ImageView = view.findViewById(R.id.courseImage)
         val courseTitle: TextView = view.findViewById(R.id.courseTitle)
         val btnContinue: Button = view.findViewById(R.id.btnContinueLearning)
-        val btnFlashcard: Button = view.findViewById(R.id.btnFlashcard)
-        val btnPractice: Button = view.findViewById(R.id.btnPractice)
+        val btnFlashcard: LinearLayout = view.findViewById(R.id.btnFlashcard)
+        val btnPractice: LinearLayout = view.findViewById(R.id.btnPractice)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {

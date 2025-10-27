@@ -14,8 +14,8 @@
         <item name="colorOnSecondary">@color/white</item>
 
         <!-- Background Colors -->
-        <item name="android:colorBackground">@color/light_background</item>
-        <item name="colorSurface">@color/white</item>
+        <item name="android:colorBackground">@color/modern_card_bg_dark</item>
+        <item name="colorSurface">@color/modern_card_bg</item>
 
         <!-- Status Bar -->
         <item name="android:statusBarColor">@color/primary</item>
@@ -33,14 +33,16 @@
     <style name="TextAppearance.Lala.Heading" parent="TextAppearance.Material3.HeadlineSmall">
         <item name="android:textSize">@dimen/text_size_heading</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">@color/modern_text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <!-- Section Title -->
     <style name="TextAppearance.Lala.Title" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:textSize">@dimen/text_size_title</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textColor">@color/modern_text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <!-- Body Text -->
@@ -53,7 +55,7 @@
     <style name="TextAppearance.Lala.Link" parent="TextAppearance.Material3.LabelLarge">
         <item name="android:textSize">@dimen/text_size_caption</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/primary</item>
+        <item name="android:textColor">@color/modern_accent_secondary</item>
     </style>
 
     <!-- ========================================= -->
@@ -67,11 +69,13 @@
     <!-- CARD STYLES -->
     <!-- ========================================= -->
 
-    <!-- Default Card -->
+    <!-- Default Card - Modern Futuristic -->
     <style name="Widget.Lala.Card" parent="Widget.Material3.CardView.Elevated">
         <item name="cardCornerRadius">@dimen/card_corner_radius</item>
-        <item name="cardElevation">@dimen/card_elevation</item>
-        <item name="cardBackgroundColor">@color/white</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/modern_card_bg</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/modern_border</item>
         <item name="contentPadding">@dimen/spacing_md</item>
     </style>
 
