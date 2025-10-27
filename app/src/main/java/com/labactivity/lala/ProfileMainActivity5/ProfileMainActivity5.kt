@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.View
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import com.labactivity.lala.quiz.QuizScoreManager
 
 class ProfileMainActivity5 : BaseActivity() {
 
@@ -43,6 +44,7 @@ class ProfileMainActivity5 : BaseActivity() {
     private lateinit var enrolledCoursesAdapter: EnrolledCoursesAdapter
     private lateinit var quizHistoryAdapter: QuizHistoryAdapter
     private lateinit var progressManager: ModuleProgressManager
+    private lateinit var quizScoreManager: QuizScoreManager
 
     // Permission launcher
     private val permissionLauncher = registerForActivityResult(
@@ -81,6 +83,7 @@ class ProfileMainActivity5 : BaseActivity() {
         setContentView(binding.root)
 
         progressManager = ModuleProgressManager(this)
+        quizScoreManager = QuizScoreManager(this)
 
         setupRecyclerViews()
         setupClickListeners()
@@ -490,56 +493,35 @@ class ProfileMainActivity5 : BaseActivity() {
 
         Log.d(TAG, "Loading quiz history for user: ${currentUser.uid}")
 
-        firestore.collection("users")
-            .document(currentUser.uid)
-            .collection("quiz_scores")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(10) // Show only the 10 most recent quizzes
-            .get()
-            .addOnSuccessListener { snapshot ->
-                if (snapshot.isEmpty) {
-                    binding.quizHistoryRecyclerView.visibility = View.GONE
-                    binding.noQuizzesText.visibility = View.VISIBLE
-                    binding.quizCountBadge.text = "0"
-                    return@addOnSuccessListener
-                }
-
-                val quizHistoryList = snapshot.documents.mapNotNull { doc ->
-                    try {
-                        QuizHistoryItem(
-                            quizId = doc.id,
-                            courseId = doc.getString("courseId") ?: doc.getString("module_id") ?: "",
-                            courseName = doc.getString("courseName") ?: doc.getString("moduleName") ?: doc.id,
-                            score = (doc.getLong("score") ?: 0).toInt(),
-                            totalQuestions = (doc.getLong("total") ?: doc.getLong("totalQuestions") ?: 0).toInt(),
-                            completedAt = doc.getLong("timestamp") ?: doc.getLong("completedAt") ?: 0L,
-                            difficulty = doc.getString("difficulty") ?: "NORMAL"
-                        )
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error parsing quiz result: ${doc.id}", e)
-                        null
-                    }
-                }
-
-                Log.d(TAG, "Loaded ${quizHistoryList.size} quiz results")
-
-                if (quizHistoryList.isEmpty()) {
-                    binding.quizHistoryRecyclerView.visibility = View.GONE
-                    binding.noQuizzesText.visibility = View.VISIBLE
-                    binding.quizCountBadge.text = "0"
-                } else {
-                    binding.quizHistoryRecyclerView.visibility = View.VISIBLE
-                    binding.noQuizzesText.visibility = View.GONE
-                    binding.quizCountBadge.text = quizHistoryList.size.toString()
-                    quizHistoryAdapter.updateQuizHistory(quizHistoryList)
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error loading quiz history", e)
+        // Use the new QuizScoreManager to fetch recent attempts
+        quizScoreManager.getAllRecentAttemptsFromFirestore(limit = 20) { attempts ->
+            if (attempts.isEmpty()) {
                 binding.quizHistoryRecyclerView.visibility = View.GONE
                 binding.noQuizzesText.visibility = View.VISIBLE
                 binding.quizCountBadge.text = "0"
+                return@getAllRecentAttemptsFromFirestore
             }
+
+            // Convert QuizAttempt to QuizHistoryItem for adapter
+            val quizHistoryList = attempts.map { attempt ->
+                QuizHistoryItem(
+                    quizId = attempt.quizId,
+                    courseId = attempt.courseId,
+                    courseName = attempt.courseName,
+                    score = attempt.score,
+                    totalQuestions = attempt.totalQuestions,
+                    completedAt = attempt.timestamp,
+                    difficulty = attempt.difficulty
+                )
+            }
+
+            Log.d(TAG, "Loaded ${quizHistoryList.size} quiz attempts")
+
+            binding.quizHistoryRecyclerView.visibility = View.VISIBLE
+            binding.noQuizzesText.visibility = View.GONE
+            binding.quizCountBadge.text = quizHistoryList.size.toString()
+            quizHistoryAdapter.updateQuizHistory(quizHistoryList)
+        }
     }
 
     override fun onResume() {

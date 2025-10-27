@@ -30,6 +30,14 @@ data class Module(
     }
 
     fun isValidModuleId(): Boolean {
-        return id.matches(Regex("^[a-z]+_module_([1-9]|10)$"))
+        // More flexible validation: accepts any format like "coursename_module_number"
+        // Examples: python_module_1, Python_module_1, sql_module_10, java_module_15
+        // Just checks that it contains "module" and has some identifier before and after
+        val parts = id.split("_")
+        return parts.size >= 3 &&
+               parts.contains("module") &&
+               id.isNotEmpty() &&
+               parts.first().isNotEmpty() &&
+               parts.last().toIntOrNull() != null
     }
 }

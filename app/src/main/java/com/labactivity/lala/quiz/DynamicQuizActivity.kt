@@ -45,6 +45,7 @@ class DynamicQuizActivity : AppCompatActivity() {
     // Timer
     private var countDownTimer: CountDownTimer? = null
     private var timeLeftInMillis: Long = QUIZ_TIME_MINUTES * 60 * MILLIS_IN_SECOND
+    private var quizStartTime: Long = 0L  // Track when quiz actually started
 
     // Firestore
     private val firestore = FirebaseFirestore.getInstance()
@@ -271,6 +272,9 @@ class DynamicQuizActivity : AppCompatActivity() {
     private fun startTimer() {
         Log.d(TAG, "startTimer: Starting ${QUIZ_TIME_MINUTES} minute countdown")
 
+        // Record quiz start time
+        quizStartTime = System.currentTimeMillis()
+
         countDownTimer = object : CountDownTimer(timeLeftInMillis, MILLIS_IN_SECOND) {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis = millisUntilFinished
@@ -332,12 +336,20 @@ class DynamicQuizActivity : AppCompatActivity() {
 
         countDownTimer?.cancel()
 
+        // Calculate time taken (in milliseconds)
+        val timeTaken = if (quizStartTime > 0) {
+            System.currentTimeMillis() - quizStartTime
+        } else {
+            0L
+        }
+
         val intent = Intent(this, ResultActivity::class.java).apply {
             putExtra("SCORE", correctCount)
             putExtra("TOTAL", quizList.size)
             putExtra("MODULE_ID", moduleId)
             putExtra("MODULE_TITLE", moduleTitle)
             putExtra("QUIZ_ID", quizId)
+            putExtra("TIME_TAKEN", timeTaken)  // Pass time taken
             putParcelableArrayListExtra("QUIZ_QUESTIONS", ArrayList(quizList))
         }
 

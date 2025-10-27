@@ -159,21 +159,34 @@ class ModuleAdapter(
 
         private fun setModuleTitleWithScoreIndicator(module: Module) {
             try {
-                val scorePair = quizScoreManager.getQuizScore(module.id)
-                if (scorePair != null) {
-                    val (score, total) = scorePair
-                    val isPassing = quizScoreManager.hasPassedQuiz(module.id)
-                    val statusEmoji = if (isPassing) "🟩 " else "🟥 "
-                    tvModuleTitle.text = statusEmoji + module.title
-                    tvQuizScore.text = "Score: $score/$total"
-                    tvQuizScore.setTextColor(
-                        if (isPassing) ContextCompat.getColor(context, R.color.success_green)
-                        else ContextCompat.getColor(context, R.color.error_red)
-                    )
-                    tvQuizScore.visibility = View.VISIBLE
-                } else {
-                    tvModuleTitle.text = module.title
-                    tvQuizScore.visibility = View.GONE
+                // Use the new versioned system: get latest score from summary
+                // This ensures we only show scores from actual completed quizzes in Firestore
+                quizScoreManager.getAllQuizSummariesFromFirestore { summaries ->
+                    // Find the summary for this module
+                    val summary = summaries.firstOrNull { it.quizId == module.id }
+
+                    if (summary != null && summary.totalAttempts > 0) {
+                        // Quiz has been completed at least once
+                        val score = summary.latestScore
+                        val total = summary.latestTotal
+                        val isPassing = summary.latestPassed
+                        val statusEmoji = if (isPassing) "🟩 " else "🟥 "
+
+                        tvModuleTitle.text = statusEmoji + module.title
+                        tvQuizScore.text = "Score: $score/$total (${summary.totalAttempts} attempt${if (summary.totalAttempts > 1) "s" else ""})"
+                        tvQuizScore.setTextColor(
+                            if (isPassing) ContextCompat.getColor(context, R.color.success_green)
+                            else ContextCompat.getColor(context, R.color.error_red)
+                        )
+                        tvQuizScore.visibility = View.VISIBLE
+
+                        Log.d(TAG, "Showing score for ${module.id}: $score/$total (${summary.totalAttempts} attempts)")
+                    } else {
+                        // No quiz taken yet - hide score
+                        tvModuleTitle.text = module.title
+                        tvQuizScore.visibility = View.GONE
+                        Log.d(TAG, "No score found for ${module.id} in Firestore")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error setting module title with score", e)

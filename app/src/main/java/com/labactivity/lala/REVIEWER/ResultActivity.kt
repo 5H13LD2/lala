@@ -25,6 +25,7 @@ class ResultActivity : AppCompatActivity() {
         val moduleId = intent.getStringExtra("MODULE_ID") ?: ""
         val moduleTitle = intent.getStringExtra("MODULE_TITLE") ?: ""
         val quizId = intent.getStringExtra("QUIZ_ID") ?: "technical_quiz"
+        val timeTaken = intent.getLongExtra("TIME_TAKEN", 0L)
 
         // Get quiz questions from intent
         val quizQuestions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -34,7 +35,7 @@ class ResultActivity : AppCompatActivity() {
             intent.getParcelableArrayListExtra<Quiz>("QUIZ_QUESTIONS") ?: arrayListOf()
         }
 
-        // Save the score if not already saved
+        // Save the score with time taken
         if (moduleId.isNotEmpty()) {
             quizScoreManager.saveQuizScore(
                 moduleId = moduleId,
@@ -42,7 +43,8 @@ class ResultActivity : AppCompatActivity() {
                 total = total,
                 courseName = moduleTitle.ifEmpty { "Quiz" },
                 courseId = moduleId,
-                difficulty = "NORMAL"
+                difficulty = "NORMAL",
+                timeTaken = timeTaken
             )
         }
 

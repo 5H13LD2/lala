@@ -71,7 +71,7 @@ class QuizHistoryAdapter(
 
             // Set percentage color based on score
             val percentageColor = when {
-                quiz.percentage >= 80 -> context.getColor(R.color.quiz_excellent)
+                quiz.percentage >= 80 -> context.getColor(R     .color.quiz_excellent)
                 quiz.percentage >= 60 -> context.getColor(R.color.quiz_good)
                 quiz.percentage >= 40 -> context.getColor(R.color.quiz_average)
                 else -> context.getColor(R.color.quiz_poor)

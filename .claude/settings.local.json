@@ -3,7 +3,8 @@
     "allow": [
       "Bash(./gradlew compileDebugKotlin:*)",
       "Bash(adb devices:*)",
-      "Bash(./gradlew assembleDebug:*)"
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

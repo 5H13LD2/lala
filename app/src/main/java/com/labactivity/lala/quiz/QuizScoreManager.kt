@@ -5,9 +5,17 @@ import android.content.SharedPreferences
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 /**
  * Manages quiz scores both locally (SharedPreferences) and remotely (Firestore)
+ *
+ * Firestore Structure (Versioned Attempts):
+ * users/{userId}/quiz_scores/{quizId}
+ *   - Summary fields: latestScore, totalAttempts, highestScore, etc.
+ *   - attempts (subcollection)
+ *     - {attemptId1}: Full attempt data
+ *     - {attemptId2}: Full attempt data
  */
 class QuizScoreManager(context: Context) {
 
@@ -33,6 +41,7 @@ class QuizScoreManager(context: Context) {
      * @param courseName Optional course name for display
      * @param courseId Optional course ID for reference
      * @param difficulty Optional difficulty level
+     * @param timeTaken Optional time taken to complete (in milliseconds)
      */
     fun saveQuizScore(
         moduleId: String,
@@ -40,7 +49,8 @@ class QuizScoreManager(context: Context) {
         total: Int,
         courseName: String? = null,
         courseId: String? = null,
-        difficulty: String? = null
+        difficulty: String? = null,
+        timeTaken: Long = 0L
     ) {
         Log.d(TAG, "═══════════════════════════════════════")
         Log.d(TAG, "saveQuizScore: Saving score for module: $moduleId")
@@ -55,7 +65,16 @@ class QuizScoreManager(context: Context) {
         val currentUser = auth.currentUser
         if (currentUser != null) {
             Log.d(TAG, "  User authenticated: ${currentUser.uid}")
-            saveScoreToFirestore(currentUser.uid, moduleId, score, total, courseName, courseId, difficulty)
+            saveQuizAttemptToFirestore(
+                userId = currentUser.uid,
+                quizId = moduleId,
+                score = score,
+                total = total,
+                courseName = courseName ?: "",
+                courseId = courseId ?: "",
+                difficulty = difficulty ?: "NORMAL",
+                timeTaken = timeTaken
+            )
         } else {
             Log.d(TAG, "  ⚠ User not authenticated - skipping Firestore sync")
         }
@@ -83,83 +102,166 @@ class QuizScoreManager(context: Context) {
     }
 
     /**
-     * Saves score to Firestore under user's document
+     * Saves a new quiz attempt to Firestore with versioned attempt tracking
      *
-     * Structure:
-     * /users/{userId}/quiz_scores/{moduleId}
-     * {
-     *   "score": 15,
-     *   "total": 20,
-     *   "percentage": 75.0,
-     *   "passed": true,
-     *   "timestamp": 1234567890,
-     *   "attempts": 3,
-     *   "courseName": "Java Basics",
-     *   "courseId": "java_course",
-     *   "difficulty": "NORMAL"
-     * }
+     * New Structure (Non-destructive):
+     * /users/{userId}/quiz_scores/{quizId}
+     *   - Summary document with latest and aggregate stats
+     *   /attempts (subcollection)
+     *     /{attemptId1} - Full attempt data
+     *     /{attemptId2} - Full attempt data
      */
-    private fun saveScoreToFirestore(
+    private fun saveQuizAttemptToFirestore(
         userId: String,
-        moduleId: String,
+        quizId: String,
         score: Int,
         total: Int,
-        courseName: String? = null,
-        courseId: String? = null,
-        difficulty: String? = null
+        courseName: String,
+        courseId: String,
+        difficulty: String,
+        timeTaken: Long
     ) {
-        Log.d(TAG, "  → Syncing to Firestore...")
-        Log.d(TAG, "    Path: /users/$userId/quiz_scores/$moduleId")
+        Log.d(TAG, "  → Saving versioned attempt to Firestore...")
+        Log.d(TAG, "    Path: /users/$userId/quiz_scores/$quizId/attempts")
 
         val percentage = (score * 100.0 / total)
         val passed = percentage >= 70.0
+        val timestamp = System.currentTimeMillis()
 
-        val scoreData = hashMapOf(
-            "score" to score,
-            "total" to total,
-            "percentage" to percentage,
-            "passed" to passed,
-            "timestamp" to System.currentTimeMillis(),
-            "module_id" to moduleId
-        )
-
-        // Add optional fields if provided
-        courseName?.let { scoreData["courseName"] = it }
-        courseId?.let { scoreData["courseId"] = it }
-        difficulty?.let { scoreData["difficulty"] = it }
-
-        val docRef = firestore.collection("users")
+        val quizScoreDocRef = firestore.collection("users")
             .document(userId)
             .collection("quiz_scores")
-            .document(moduleId)
+            .document(quizId)
 
-        // Get existing attempts count
-        docRef.get()
-            .addOnSuccessListener { document ->
-                val attempts = if (document.exists()) {
-                    (document.getLong("attempts") ?: 0L) + 1
+        // Step 1: Get existing summary to determine attempt number
+        quizScoreDocRef.get()
+            .addOnSuccessListener { summaryDoc ->
+                val attemptNumber = if (summaryDoc.exists()) {
+                    (summaryDoc.getLong("totalAttempts") ?: 0L).toInt() + 1
                 } else {
-                    1L
+                    1
                 }
 
-                scoreData["attempts"] = attempts
+                Log.d(TAG, "    Attempt #$attemptNumber")
 
-                Log.d(TAG, "    Attempt #$attempts")
+                // Step 2: Create new attempt document
+                val attemptData = QuizAttempt(
+                    attemptId = "",  // Will be auto-generated
+                    quizId = quizId,
+                    courseId = courseId,
+                    courseName = courseName,
+                    score = score,
+                    totalQuestions = total,
+                    percentage = percentage,
+                    passed = passed,
+                    difficulty = difficulty,
+                    timestamp = timestamp,
+                    timeTaken = timeTaken,
+                    attemptNumber = attemptNumber
+                )
 
-                // Save to Firestore
-                docRef.set(scoreData)
-                    .addOnSuccessListener {
-                        Log.d(TAG, "  ✓ Successfully synced to Firestore")
-                        Log.d(TAG, "    Document: /users/$userId/quiz_scores/$moduleId")
-                        Log.d(TAG, "    Data: $scoreData")
+                // Step 3: Save attempt to subcollection
+                quizScoreDocRef.collection("attempts")
+                    .add(attemptData.toMap())
+                    .addOnSuccessListener { attemptDocRef ->
+                        Log.d(TAG, "  ✓ Attempt saved: ${attemptDocRef.id}")
+
+                        // Step 4: Update summary document
+                        updateQuizScoreSummary(
+                            userId = userId,
+                            quizId = quizId,
+                            courseId = courseId,
+                            courseName = courseName,
+                            latestAttempt = attemptData,
+                            isFirstAttempt = (attemptNumber == 1)
+                        )
                     }
                     .addOnFailureListener { e ->
-                        Log.e(TAG, "  ✗ Failed to sync to Firestore", e)
-                        Log.e(TAG, "    Error: ${e.message}")
+                        Log.e(TAG, "  ✗ Failed to save attempt", e)
                     }
             }
             .addOnFailureListener { e ->
-                Log.e(TAG, "  ✗ Failed to get attempts count", e)
+                Log.e(TAG, "  ✗ Failed to get attempt count", e)
+            }
+    }
+
+    /**
+     * Updates the quiz score summary document with latest and aggregate stats
+     */
+    private fun updateQuizScoreSummary(
+        userId: String,
+        quizId: String,
+        courseId: String,
+        courseName: String,
+        latestAttempt: QuizAttempt,
+        isFirstAttempt: Boolean
+    ) {
+        val quizScoreDocRef = firestore.collection("users")
+            .document(userId)
+            .collection("quiz_scores")
+            .document(quizId)
+
+        // Fetch all attempts to calculate aggregate statistics
+        quizScoreDocRef.collection("attempts")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .get()
+            .addOnSuccessListener { attemptsSnapshot ->
+                val allAttempts = attemptsSnapshot.documents.mapNotNull { doc ->
+                    try {
+                        QuizAttempt.fromMap(doc.data ?: emptyMap(), doc.id)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing attempt ${doc.id}", e)
+                        null
+                    }
+                }
+
+                if (allAttempts.isEmpty()) {
+                    Log.w(TAG, "No attempts found for summary calculation")
+                    return@addOnSuccessListener
+                }
+
+                // Calculate statistics
+                val totalAttempts = allAttempts.size
+                val highestScoreAttempt = allAttempts.maxByOrNull { it.percentage }
+                val averageScore = allAttempts.map { it.score }.average()
+                val averagePercentage = allAttempts.map { it.percentage }.average()
+                val firstAttemptTimestamp = allAttempts.first().timestamp
+                val lastAttemptTimestamp = allAttempts.last().timestamp
+
+                // Create summary document
+                val summary = QuizScoreSummary(
+                    quizId = quizId,
+                    courseId = courseId,
+                    courseName = courseName,
+                    totalAttempts = totalAttempts,
+                    latestScore = latestAttempt.score,
+                    latestTotal = latestAttempt.totalQuestions,
+                    latestPercentage = latestAttempt.percentage,
+                    latestPassed = latestAttempt.passed,
+                    latestDifficulty = latestAttempt.difficulty,
+                    latestTimestamp = latestAttempt.timestamp,
+                    highestScore = highestScoreAttempt?.score ?: 0,
+                    highestPercentage = highestScoreAttempt?.percentage ?: 0.0,
+                    averageScore = averageScore,
+                    averagePercentage = averagePercentage,
+                    firstAttemptTimestamp = firstAttemptTimestamp,
+                    lastAttemptTimestamp = lastAttemptTimestamp
+                )
+
+                // Save summary
+                quizScoreDocRef.set(summary.toMap())
+                    .addOnSuccessListener {
+                        Log.d(TAG, "  ✓ Summary updated successfully")
+                        Log.d(TAG, "    Total Attempts: $totalAttempts")
+                        Log.d(TAG, "    Highest Score: ${highestScoreAttempt?.percentage}%")
+                        Log.d(TAG, "    Average Score: ${"%.1f".format(averagePercentage)}%")
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "  ✗ Failed to update summary", e)
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "  ✗ Failed to fetch attempts for summary", e)
             }
     }
 
@@ -263,7 +365,211 @@ class QuizScoreManager(context: Context) {
     }
 
     /**
-     * Data class for quiz score information
+     * Gets all quiz attempts for a specific quiz from Firestore
+     *
+     * @param quizId The quiz/module identifier
+     * @param onComplete Callback with list of attempts
+     */
+    fun getQuizAttemptsFromFirestore(
+        quizId: String,
+        onComplete: (List<QuizAttempt>) -> Unit
+    ) {
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            Log.w(TAG, "getQuizAttemptsFromFirestore: User not authenticated")
+            onComplete(emptyList())
+            return
+        }
+
+        Log.d(TAG, "getQuizAttemptsFromFirestore: Fetching attempts for quiz $quizId")
+
+        firestore.collection("users")
+            .document(currentUser.uid)
+            .collection("quiz_scores")
+            .document(quizId)
+            .collection("attempts")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { documents ->
+                val attempts = documents.mapNotNull { doc ->
+                    try {
+                        QuizAttempt.fromMap(doc.data, doc.id)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing attempt ${doc.id}", e)
+                        null
+                    }
+                }
+                Log.d(TAG, "  ✓ Fetched ${attempts.size} attempts for quiz $quizId")
+                onComplete(attempts)
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "  ✗ Failed to fetch attempts for quiz $quizId", e)
+                onComplete(emptyList())
+            }
+    }
+
+    /**
+     * Gets all quiz score summaries for the current user
+     *
+     * @param onComplete Callback with list of quiz summaries
+     */
+    fun getAllQuizSummariesFromFirestore(
+        onComplete: (List<QuizScoreSummary>) -> Unit
+    ) {
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            Log.w(TAG, "getAllQuizSummariesFromFirestore: User not authenticated")
+            onComplete(emptyList())
+            return
+        }
+
+        Log.d(TAG, "getAllQuizSummariesFromFirestore: Fetching all summaries")
+
+        firestore.collection("users")
+            .document(currentUser.uid)
+            .collection("quiz_scores")
+            .orderBy("latestTimestamp", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { documents ->
+                val summaries = documents.mapNotNull { doc ->
+                    try {
+                        QuizScoreSummary.fromMap(doc.data)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing summary ${doc.id}", e)
+                        null
+                    }
+                }
+                Log.d(TAG, "  ✓ Fetched ${summaries.size} quiz summaries")
+                onComplete(summaries)
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "  ✗ Failed to fetch quiz summaries", e)
+                onComplete(emptyList())
+            }
+    }
+
+    /**
+     * Gets all quiz attempts across all quizzes for the current user
+     *
+     * @param limit Maximum number of recent attempts to fetch
+     * @param onComplete Callback with list of attempts
+     */
+    fun getAllRecentAttemptsFromFirestore(
+        limit: Int = 20,
+        onComplete: (List<QuizAttempt>) -> Unit
+    ) {
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            Log.w(TAG, "getAllRecentAttemptsFromFirestore: User not authenticated")
+            onComplete(emptyList())
+            return
+        }
+
+        Log.d(TAG, "getAllRecentAttemptsFromFirestore: Fetching recent attempts (limit: $limit)")
+
+        firestore.collection("users")
+            .document(currentUser.uid)
+            .collection("quiz_scores")
+            .get()
+            .addOnSuccessListener { quizDocs ->
+                val allAttempts = mutableListOf<QuizAttempt>()
+                var completedQueries = 0
+                val totalQuizzes = quizDocs.size()
+
+                if (totalQuizzes == 0) {
+                    onComplete(emptyList())
+                    return@addOnSuccessListener
+                }
+
+                quizDocs.forEach { quizDoc ->
+                    quizDoc.reference.collection("attempts")
+                        .orderBy("timestamp", Query.Direction.DESCENDING)
+                        .get()
+                        .addOnSuccessListener { attemptDocs ->
+                            attemptDocs.forEach { attemptDoc ->
+                                try {
+                                    val attempt = QuizAttempt.fromMap(attemptDoc.data, attemptDoc.id)
+                                    allAttempts.add(attempt)
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Error parsing attempt ${attemptDoc.id}", e)
+                                }
+                            }
+
+                            completedQueries++
+                            if (completedQueries == totalQuizzes) {
+                                // Sort all attempts by timestamp and limit
+                                val sortedAttempts = allAttempts
+                                    .sortedByDescending { it.timestamp }
+                                    .take(limit)
+                                Log.d(TAG, "  ✓ Fetched ${sortedAttempts.size} total recent attempts")
+                                onComplete(sortedAttempts)
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Failed to fetch attempts for quiz ${quizDoc.id}", e)
+                            completedQueries++
+                            if (completedQueries == totalQuizzes) {
+                                val sortedAttempts = allAttempts
+                                    .sortedByDescending { it.timestamp }
+                                    .take(limit)
+                                onComplete(sortedAttempts)
+                            }
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "  ✗ Failed to fetch quiz documents", e)
+                onComplete(emptyList())
+            }
+    }
+
+    /**
+     * Gets quiz performance analytics for a specific quiz
+     *
+     * @param quizId The quiz/module identifier
+     * @param onComplete Callback with analytics data
+     */
+    fun getQuizAnalytics(
+        quizId: String,
+        onComplete: (QuizAnalytics?) -> Unit
+    ) {
+        getQuizAttemptsFromFirestore(quizId) { attempts ->
+            if (attempts.isEmpty()) {
+                onComplete(null)
+                return@getQuizAttemptsFromFirestore
+            }
+
+            val analytics = QuizAnalytics(
+                quizId = quizId,
+                totalAttempts = attempts.size,
+                highestScore = attempts.maxByOrNull { it.percentage }?.percentage ?: 0.0,
+                lowestScore = attempts.minByOrNull { it.percentage }?.percentage ?: 0.0,
+                averageScore = attempts.map { it.percentage }.average(),
+                improvementRate = calculateImprovementRate(attempts),
+                passRate = attempts.count { it.passed }.toDouble() / attempts.size * 100,
+                averageTimeTaken = attempts.map { it.timeTaken }.average().toLong(),
+                attempts = attempts
+            )
+
+            onComplete(analytics)
+        }
+    }
+
+    /**
+     * Calculates improvement rate between first and last attempt
+     */
+    private fun calculateImprovementRate(attempts: List<QuizAttempt>): Double {
+        if (attempts.size < 2) return 0.0
+
+        val sorted = attempts.sortedBy { it.timestamp }
+        val first = sorted.first().percentage
+        val last = sorted.last().percentage
+
+        return last - first
+    }
+
+    /**
+     * Data class for quiz score information (LEGACY - kept for backward compatibility)
      */
     data class QuizScoreData(
         val moduleId: String,
@@ -275,3 +581,18 @@ class QuizScoreManager(context: Context) {
         val attempts: Int
     )
 }
+
+/**
+ * Analytics data for quiz performance tracking
+ */
+data class QuizAnalytics(
+    val quizId: String,
+    val totalAttempts: Int,
+    val highestScore: Double,
+    val lowestScore: Double,
+    val averageScore: Double,
+    val improvementRate: Double,
+    val passRate: Double,
+    val averageTimeTaken: Long,
+    val attempts: List<QuizAttempt>
+)
