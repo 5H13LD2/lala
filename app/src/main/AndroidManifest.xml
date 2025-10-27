@@ -99,7 +99,7 @@
 
         <!-- Profile -->
         <activity
-            android:name=".ProfileMainActivity5"
+            android:name=".ProfileMainActivity5.ProfileMainActivity5"
             android:exported="false" />
 
         <!-- Google Sign-In -->

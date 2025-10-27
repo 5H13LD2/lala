@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 🔹 Users Collection
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Quiz Results subcollection under users (for profile page quiz history)
+      match /quizResults/{resultId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Quiz Scores subcollection under users (for tracking module quiz attempts)
+      match /quiz_scores/{moduleId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // 🔹 User Progress Collection (for tracking lesson completion)
+    match /user_progress/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Courses subcollection under user_progress
+      match /courses/{courseId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+
+        // Modules subcollection under courses
+        match /modules/{moduleId} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+      }
+    }
+
+    // 🔹 Courses Collection
+    match /courses/{courseId} {
+      allow read: if true;                   // public read
+      allow write: if request.auth != null;  // only logged-in can write
+
+      // Modules subcollection
+      match /modules/{moduleId} {
+        allow read: if true;
+        allow write: if request.auth != null;
+
+        // Lessons subcollection under modules
+        match /lessons/{lessonId} {
+          allow read: if true;
+          allow write: if request.auth != null;
+        }
+      }
+    }
+
+    // 🔹 Quizzes Collection (Global)
+    match /course_quiz/{quizId} {
+      allow read: if true;                   // anyone can read quizzes
+      allow write: if request.auth != null;  // only logged-in can add/edit
+
+      // Questions subcollection under each quiz
+      match /questions/{questionId} {
+        allow read: if true;
+        allow write: if request.auth != null;
+      }
+    }
+
+    // 🔹 Leaderboard Collection
+    match /leaderboard/{userId} {
+      allow read: if request.auth != null;   // logged-in users can view leaderboard
+      allow write: if request.auth != null && request.auth.uid == userId;  // users can only update their own score
+    }
+
+    // 🔹 Technical Assessment Collection
+    match /technical_assesment/{docId} {
+      allow read: if request.auth != null;   // only logged-in users can fetch challenges
+      allow write: if request.auth != null;  // allow creation or updates if needed
+    }
+
+    // 🔹 Test Collection (for dev/debugging)
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 🔹 Catch-all deny (safety net)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

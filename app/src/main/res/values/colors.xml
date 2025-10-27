@@ -80,5 +80,15 @@
     <color name="modern_practice">#5B6FFF</color>
     <color name="modern_flashcard">#00D9FF</color>
 
+    <!-- Difficulty Colors -->
+    <color name="difficulty_beginner">#00C48C</color>
+    <color name="difficulty_intermediate">#FFA726</color>
+    <color name="difficulty_advanced">#FF4081</color>
+
+    <!-- Quiz Score Colors -->
+    <color name="quiz_excellent">#00C48C</color>
+    <color name="quiz_good">#00D9FF</color>
+    <color name="quiz_average">#FFA726</color>
+    <color name="quiz_poor">#FF4081</color>
 
 </resources>

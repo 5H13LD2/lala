@@ -36,7 +36,14 @@ class ResultActivity : AppCompatActivity() {
 
         // Save the score if not already saved
         if (moduleId.isNotEmpty()) {
-            quizScoreManager.saveQuizScore(moduleId, score, total)
+            quizScoreManager.saveQuizScore(
+                moduleId = moduleId,
+                score = score,
+                total = total,
+                courseName = moduleTitle.ifEmpty { "Quiz" },
+                courseId = moduleId,
+                difficulty = "NORMAL"
+            )
         }
 
         val scoreTextView = findViewById<TextView>(R.id.score_text)

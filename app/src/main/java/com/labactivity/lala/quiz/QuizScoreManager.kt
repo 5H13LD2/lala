@@ -30,12 +30,23 @@ class QuizScoreManager(context: Context) {
      * @param moduleId The module identifier (e.g., "java_module_1")
      * @param score Number of correct answers
      * @param total Total number of questions
+     * @param courseName Optional course name for display
+     * @param courseId Optional course ID for reference
+     * @param difficulty Optional difficulty level
      */
-    fun saveQuizScore(moduleId: String, score: Int, total: Int) {
+    fun saveQuizScore(
+        moduleId: String,
+        score: Int,
+        total: Int,
+        courseName: String? = null,
+        courseId: String? = null,
+        difficulty: String? = null
+    ) {
         Log.d(TAG, "═══════════════════════════════════════")
         Log.d(TAG, "saveQuizScore: Saving score for module: $moduleId")
         Log.d(TAG, "  Score: $score/$total")
         Log.d(TAG, "  Percentage: ${(score * 100.0 / total).toInt()}%")
+        Log.d(TAG, "  Course: $courseName")
 
         // Save locally first
         saveScoreLocally(moduleId, score, total)
@@ -44,7 +55,7 @@ class QuizScoreManager(context: Context) {
         val currentUser = auth.currentUser
         if (currentUser != null) {
             Log.d(TAG, "  User authenticated: ${currentUser.uid}")
-            saveScoreToFirestore(currentUser.uid, moduleId, score, total)
+            saveScoreToFirestore(currentUser.uid, moduleId, score, total, courseName, courseId, difficulty)
         } else {
             Log.d(TAG, "  ⚠ User not authenticated - skipping Firestore sync")
         }
@@ -82,10 +93,21 @@ class QuizScoreManager(context: Context) {
      *   "percentage": 75.0,
      *   "passed": true,
      *   "timestamp": 1234567890,
-     *   "attempts": 3
+     *   "attempts": 3,
+     *   "courseName": "Java Basics",
+     *   "courseId": "java_course",
+     *   "difficulty": "NORMAL"
      * }
      */
-    private fun saveScoreToFirestore(userId: String, moduleId: String, score: Int, total: Int) {
+    private fun saveScoreToFirestore(
+        userId: String,
+        moduleId: String,
+        score: Int,
+        total: Int,
+        courseName: String? = null,
+        courseId: String? = null,
+        difficulty: String? = null
+    ) {
         Log.d(TAG, "  → Syncing to Firestore...")
         Log.d(TAG, "    Path: /users/$userId/quiz_scores/$moduleId")
 
@@ -100,6 +122,11 @@ class QuizScoreManager(context: Context) {
             "timestamp" to System.currentTimeMillis(),
             "module_id" to moduleId
         )
+
+        // Add optional fields if provided
+        courseName?.let { scoreData["courseName"] = it }
+        courseId?.let { scoreData["courseId"] = it }
+        difficulty?.let { scoreData["difficulty"] = it }
 
         val docRef = firestore.collection("users")
             .document(userId)

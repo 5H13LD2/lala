@@ -14,14 +14,13 @@ import com.labactivity.lala.AVAILABLECOURSEPAGE.Course  // Import the correct Co
 import com.labactivity.lala.PYTHONASSESMENT.PYTHONASSESMENT
 import com.labactivity.lala.PYTHONASSESMENT.AllAssessmentsActivity
 import com.labactivity.lala.PYTHONASSESMENT.AllInterviewsActivity
-import com.labactivity.lala.ProfileMainActivity5
+import com.labactivity.lala.ProfileMainActivity5.ProfileMainActivity5
 import com.labactivity.lala.R
 import com.labactivity.lala.SettingsActivity
 import com.labactivity.lala.databinding.ActivityMain4Binding
 import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
 import com.labactivity.lala.UTILS.setupWithSafeNavigation
 import com.labactivity.lala.UTILS.AnimationUtils.animateCardPress
-import com.labactivity.lala.UTILS.AnimationUtils.animateChildren
 import com.labactivity.lala.UTILS.AnimationUtils.slideUpFadeIn
 import com.labactivity.lala.UTILS.AnimationUtils.animateItems
 import com.labactivity.lala.UTILS.AnimationUtils.pulse
