@@ -99,12 +99,8 @@ android {
         // Firebase
         implementation("com.google.firebase:firebase-auth:22.3.1")
         implementation("com.google.firebase:firebase-firestore:24.10.1")
-        implementation("com.google.firebase:firebase-storage:20.3.0")
         implementation("androidx.cardview:cardview:1.0.0")
         implementation("com.google.android.gms:play-services-auth:21.0.0")
-
-        // Glide for image loading
-        implementation("com.github.bumptech.glide:glide:4.16.0")
 
         // Coroutines
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
