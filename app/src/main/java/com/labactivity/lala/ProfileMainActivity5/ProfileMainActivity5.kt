@@ -45,6 +45,7 @@ class ProfileMainActivity5 : BaseActivity() {
     private lateinit var quizHistoryAdapter: QuizHistoryAdapter
     private lateinit var progressManager: ModuleProgressManager
     private lateinit var quizScoreManager: QuizScoreManager
+    private var allQuizHistory: List<QuizHistoryItem> = listOf()
 
     // Permission launcher
     private val permissionLauncher = registerForActivityResult(
@@ -162,6 +163,11 @@ class ProfileMainActivity5 : BaseActivity() {
         // Profile image click to upload
         binding.profileImageCard.setOnClickListener {
             checkPermissionAndOpenPicker()
+        }
+
+        // View All Quizzes button
+        binding.viewAllQuizzesBtn.setOnClickListener {
+            showAllQuizzes()
         }
     }
 
@@ -499,6 +505,7 @@ class ProfileMainActivity5 : BaseActivity() {
                 binding.quizHistoryRecyclerView.visibility = View.GONE
                 binding.noQuizzesText.visibility = View.VISIBLE
                 binding.quizCountBadge.text = "0"
+                binding.viewAllQuizzesBtn.visibility = View.GONE
                 return@getAllRecentAttemptsFromFirestore
             }
 
@@ -517,11 +524,62 @@ class ProfileMainActivity5 : BaseActivity() {
 
             Log.d(TAG, "Loaded ${quizHistoryList.size} quiz attempts")
 
+            // Store the full list
+            allQuizHistory = quizHistoryList
+
+            // Show only first 3 items in the UI
+            val displayedList = quizHistoryList.take(3)
+
             binding.quizHistoryRecyclerView.visibility = View.VISIBLE
             binding.noQuizzesText.visibility = View.GONE
             binding.quizCountBadge.text = quizHistoryList.size.toString()
-            quizHistoryAdapter.updateQuizHistory(quizHistoryList)
+
+            // Show "View All" button only if there are more than 3 quizzes
+            if (quizHistoryList.size > 3) {
+                binding.viewAllQuizzesBtn.visibility = View.VISIBLE
+                binding.viewAllQuizzesBtn.text = "View All (${quizHistoryList.size})"
+            } else {
+                binding.viewAllQuizzesBtn.visibility = View.GONE
+            }
+
+            quizHistoryAdapter.updateQuizHistory(displayedList)
         }
+    }
+
+    private fun showAllQuizzes() {
+        if (allQuizHistory.isEmpty()) {
+            Toast.makeText(this, "No quiz history available", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Create a dialog to show all quizzes
+        val dialogBuilder = android.app.AlertDialog.Builder(this)
+        dialogBuilder.setTitle("All Quiz Results (${allQuizHistory.size})")
+
+        // Create a RecyclerView for the dialog
+        val recyclerView = androidx.recyclerview.widget.RecyclerView(this)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val allQuizzesAdapter = QuizHistoryAdapter(
+            this,
+            allQuizHistory.toMutableList()
+        ) { quiz ->
+            Toast.makeText(
+                this,
+                "Quiz from ${quiz.courseName}: ${quiz.score}/${quiz.totalQuestions}",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+        recyclerView.adapter = allQuizzesAdapter
+        recyclerView.setPadding(16, 16, 16, 16)
+
+        dialogBuilder.setView(recyclerView)
+        dialogBuilder.setPositiveButton("Close") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = dialogBuilder.create()
+        dialog.show()
     }
 
     override fun onResume() {

@@ -77,9 +77,16 @@ class ModuleAdapter(
             btnTakeQuizzes.setOnClickListener {
                 currentModule?.let { module ->
                     try {
+                        Log.d(TAG, "═══ QUIZ BUTTON CLICKED ═══")
+                        Log.d(TAG, "Module ID: ${module.id}")
+                        Log.d(TAG, "Module Title: ${module.title}")
+                        Log.d(TAG, "ID parts: ${module.id.split("_")}")
+                        Log.d(TAG, "Is valid: ${module.isValidModuleId()}")
+
                         if (!module.isValidModuleId()) {
                             Log.e(TAG, "Invalid module ID format: ${module.id}")
-                            Toast.makeText(context, "Invalid module format", Toast.LENGTH_SHORT).show()
+                            Log.e(TAG, "Expected format: coursename_module_number (e.g., python_module_1)")
+                            Toast.makeText(context, "Invalid module format: ${module.id}", Toast.LENGTH_LONG).show()
                             return@setOnClickListener
                         }
 
