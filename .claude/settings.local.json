@@ -4,7 +4,9 @@
       "Bash(./gradlew compileDebugKotlin:*)",
       "Bash(adb devices:*)",
       "Bash(./gradlew assembleDebug:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(./gradlew clean:*)"
     ],
     "deny": [],
     "ask": []

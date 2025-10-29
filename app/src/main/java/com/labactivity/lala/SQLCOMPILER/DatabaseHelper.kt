@@ -192,5 +192,34 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
 
 
     }
+
+    /**
+     * Resets the database by dropping all tables
+     * Used when setting up new challenge tables
+     */
+    fun resetDatabase() {
+        val db = writableDatabase
+
+        // Get all table names
+        val cursor = db.rawQuery(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+            null
+        )
+
+        val tables = mutableListOf<String>()
+        while (cursor.moveToNext()) {
+            tables.add(cursor.getString(0))
+        }
+        cursor.close()
+
+        // Drop all tables
+        tables.forEach { tableName ->
+            try {
+                db.execSQL("DROP TABLE IF EXISTS $tableName")
+            } catch (e: Exception) {
+                // Ignore errors
+            }
+        }
+    }
 }
 

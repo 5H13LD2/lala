@@ -1,0 +1,188 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==================== SQL CHALLENGES ====================
+    // Collection: sql_challenges/{challengeId}
+    match /sql_challenges/{challengeId} {
+
+      // Allow read access for authenticated users (only active challenges)
+      allow read: if request.auth != null &&
+                     resource.data.status == 'active';
+
+      // Allow read access for admins (all challenges including drafts and archived)
+      allow read: if request.auth != null &&
+                     request.auth.token.admin == true;
+
+      // Only admins can create new challenges
+      allow create: if request.auth != null &&
+                       request.auth.token.admin == true &&
+                       request.resource.data.keys().hasAll(['title', 'description', 'difficulty',
+                                                            'topic', 'courseId', 'expectedQuery',
+                                                            'expectedResult', 'sampleTable']) &&
+                       request.resource.data.difficulty in ['Easy', 'Medium', 'Hard'] &&
+                       request.resource.data.status in ['active', 'draft', 'archived'];
+
+      // Only admins can update challenges
+      allow update: if request.auth != null &&
+                       request.auth.token.admin == true;
+
+      // Only admins can delete challenges
+      allow delete: if request.auth != null &&
+                       request.auth.token.admin == true;
+    }
+
+    // ==================== USER SQL PROGRESS ====================
+    // Sub-collection: users/{userId}/sql_progress/{challengeId}
+    match /users/{userId}/sql_progress/{challengeId} {
+
+      // Users can only read their own progress
+      allow read: if request.auth != null &&
+                     request.auth.uid == userId;
+
+      // Users can only write their own progress
+      allow write: if request.auth != null &&
+                      request.auth.uid == userId &&
+                      request.resource.data.keys().hasAll(['challengeId', 'status',
+                                                           'attempts', 'bestScore']) &&
+                      request.resource.data.status in ['not_started', 'in_progress', 'completed'];
+
+      // Admins can read all user progress for analytics
+      allow read: if request.auth != null &&
+                     request.auth.token.admin == true;
+    }
+
+    // ==================== EXISTING TECHNICAL ASSESSMENTS ====================
+    // Collection: technical_assesment/{docId}
+    match /technical_assesment/{docId} {
+      // Read access for authenticated users
+      allow read: if request.auth != null;
+
+      // Write access for authenticated users (or restrict to admin if needed)
+      allow write: if request.auth != null;
+
+      // RECOMMENDED: Restrict writes to admins only
+      // allow write: if request.auth != null &&
+      //                 request.auth.token.admin == true;
+    }
+
+    // ==================== USER DATA ====================
+    // Collection: users/{userId}
+    match /users/{userId} {
+      // Users can read their own data
+      allow read: if request.auth != null &&
+                     request.auth.uid == userId;
+
+      // Users can write their own data
+      allow write: if request.auth != null &&
+                      request.auth.uid == userId;
+
+      // Admins can read all user data
+      allow read: if request.auth != null &&
+                     request.auth.token.admin == true;
+    }
+
+    // ==================== COURSES ====================
+    // Collection: courses/{courseId}
+    match /courses/{courseId} {
+      // Anyone authenticated can read courses
+      allow read: if request.auth != null;
+
+      // Only admins can modify courses
+      allow write: if request.auth != null &&
+                      request.auth.token.admin == true;
+    }
+
+    // ==================== QUIZ SCORES ====================
+    // Sub-collection: users/{userId}/quiz_scores/{quizId}
+    match /users/{userId}/quiz_scores/{quizId} {
+      // Users can read and write their own quiz scores
+      allow read, write: if request.auth != null &&
+                            request.auth.uid == userId;
+
+      // Admins can read all quiz scores
+      allow read: if request.auth != null &&
+                     request.auth.token.admin == true;
+
+      // Allow reading quiz attempts sub-collection
+      match /attempts/{attemptId} {
+        allow read, write: if request.auth != null &&
+                              request.auth.uid == userId;
+
+        allow read: if request.auth != null &&
+                       request.auth.token.admin == true;
+      }
+    }
+
+    // ==================== USER PROGRESS ====================
+    // Document: user_progress/{userId}/courses/{courseId}
+    match /user_progress/{userId}/courses/{courseId} {
+      // Users can read and write their own progress
+      allow read, write: if request.auth != null &&
+                            request.auth.uid == userId;
+
+      // Admins can read all progress
+      allow read: if request.auth != null &&
+                     request.auth.token.admin == true;
+    }
+
+    // ==================== LEADERBOARD ====================
+    // Collection: leaderboard/{userId} (if implemented)
+    match /leaderboard/{userId} {
+      // Anyone authenticated can read leaderboard
+      allow read: if request.auth != null;
+
+      // Only the system or admins can write to leaderboard
+      allow write: if request.auth != null &&
+                      request.auth.token.admin == true;
+    }
+
+    // ==================== DEFAULT DENY ====================
+    // Deny all other requests by default
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// ==================== INSTRUCTIONS ====================
+//
+// To apply these rules:
+// 1. Go to Firebase Console (https://console.firebase.google.com/)
+// 2. Select your project
+// 3. Navigate to Firestore Database > Rules
+// 4. Copy and paste this entire file content
+// 5. Click "Publish"
+//
+// To set admin custom claims:
+// 1. Install Firebase Admin SDK on your server/local machine
+// 2. Run the following code (Node.js example):
+//
+//    const admin = require('firebase-admin');
+//    admin.initializeApp();
+//
+//    async function setAdminClaim(uid) {
+//      await admin.auth().setCustomUserClaims(uid, { admin: true });
+//      console.log(`Admin claim set for user ${uid}`);
+//    }
+//
+//    setAdminClaim('YOUR_USER_UID_HERE');
+//
+// 3. The user must sign out and sign back in for the claim to take effect
+//
+// To verify admin status in your app:
+//    val user = FirebaseAuth.getInstance().currentUser
+//    val tokenResult = user?.getIdToken(false)?.await()
+//    val isAdmin = tokenResult?.claims?.get("admin") as? Boolean ?: false
+//
+// ==================== TESTING RULES ====================
+//
+// You can test these rules in the Firebase Console:
+// 1. Go to Firestore Database > Rules
+// 2. Click on "Rules Playground"
+// 3. Test different scenarios:
+//    - Authenticated user reading active challenges
+//    - Authenticated user trying to write challenges (should fail)
+//    - Admin user writing challenges (should succeed)
+//    - User reading/writing their own progress (should succeed)
+//    - User reading another user's progress (should fail)

@@ -231,6 +231,37 @@
                 style="@style/Widget.Lala.RecyclerView.Horizontal"
                 android:orientation="horizontal" />
 
+            <!-- SQL Challenges Section -->
+            <LinearLayout
+                style="@style/Widget.Lala.SectionHeader">
+
+                <TextView
+                    android:id="@+id/textSQLChallengesTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="SQL Challenges"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/modern_text_primary"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:id="@+id/textViewAllSQLChallenges"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="View All"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/modern_accent_secondary"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerViewSQLChallenges"
+                style="@style/Widget.Lala.RecyclerView.Horizontal"
+                android:orientation="horizontal" />
+
             <!-- Technical Interview Section -->
             <LinearLayout
                 style="@style/Widget.Lala.SectionHeader">

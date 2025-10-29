@@ -36,12 +36,21 @@
             android:exported="true" />
 
         <activity
+            android:name=".SQLCOMPILER.AllSQLChallengesActivity"
+            android:exported="true" />
+
+        <activity
             android:name=".PYTHONASSESMENT.AllAssessmentsActivity"
             android:exported="true" />
 
         <activity
             android:name=".PYTHONASSESMENT.AllInterviewsActivity"
             android:exported="true" />
+
+        <activity
+            android:name=".SQLCOMPILER.SQLChallengeActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Login Page -->
         <activity
