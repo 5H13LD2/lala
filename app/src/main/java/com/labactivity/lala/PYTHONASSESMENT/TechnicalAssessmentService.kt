@@ -13,6 +13,8 @@ class TechnicalAssessmentService {
         private const val TAG = "TechnicalAssessmentService"
         private const val COLLECTION_TECHNICAL_ASSESSMENT = "technical_assesment"
         private const val COLLECTION_USERS = "users"
+        private const val COLLECTION_USER_PROGRESS = "user_progress"
+        private const val SUB_COLLECTION_TECHNICAL_ASSESSMENT_PROGRESS = "technical_assessment_progress"
         private const val FIELD_COURSE_TAKEN = "courseTaken"
         private const val FIELD_COURSE_ID = "courseId"
     }
@@ -121,6 +123,127 @@ class TechnicalAssessmentService {
             Log.d(TAG, "✅ Updated challenge [$challengeId] status → $status")
         } catch (e: Exception) {
             Log.e(TAG, "❌ Error updating challenge status", e)
+        }
+    }
+
+    /**
+     * Save user progress for a technical assessment challenge
+     * Stores in user_progress/{userId}/technical_assessment_progress/{challengeId}
+     */
+    suspend fun saveUserProgress(
+        challengeId: String,
+        challengeTitle: String,
+        passed: Boolean,
+        score: Int = 100,
+        timeTaken: Long = 0,
+        userCode: String = ""
+    ): Boolean {
+        return try {
+            val userId = auth.currentUser?.uid ?: run {
+                Log.w(TAG, "⚠️ User not authenticated")
+                return false
+            }
+
+            // Get existing progress or create new
+            val existingProgress = getUserProgress(challengeId)
+
+            val progressData = TechnicalAssessmentProgress(
+                challengeId = challengeId,
+                challengeTitle = challengeTitle,
+                status = if (passed) "completed" else "in_progress",
+                attempts = (existingProgress?.attempts ?: 0) + 1,
+                bestScore = maxOf(score, existingProgress?.bestScore ?: 0),
+                lastAttemptDate = com.google.firebase.Timestamp.now(),
+                timeTaken = timeTaken,
+                userCode = userCode,
+                passed = passed,
+                updatedAt = com.google.firebase.Timestamp.now()
+            )
+
+            firestore.collection(COLLECTION_USER_PROGRESS)
+                .document(userId)
+                .collection(SUB_COLLECTION_TECHNICAL_ASSESSMENT_PROGRESS)
+                .document(challengeId)
+                .set(progressData)
+                .await()
+
+            Log.d(TAG, "✅ Saved progress for challenge [$challengeId] - Passed: $passed")
+            true
+
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error saving user progress", e)
+            false
+        }
+    }
+
+    /**
+     * Get user progress for a specific challenge
+     */
+    suspend fun getUserProgress(challengeId: String): TechnicalAssessmentProgress? {
+        return try {
+            val userId = auth.currentUser?.uid ?: return null
+
+            Log.d(TAG, "Fetching progress for challenge $challengeId and user $userId")
+
+            val document = firestore.collection(COLLECTION_USER_PROGRESS)
+                .document(userId)
+                .collection(SUB_COLLECTION_TECHNICAL_ASSESSMENT_PROGRESS)
+                .document(challengeId)
+                .get()
+                .await()
+
+            if (!document.exists()) {
+                Log.d(TAG, "Progress not found for challenge $challengeId")
+                return null
+            }
+
+            val progress = try {
+                document.toObject(TechnicalAssessmentProgress::class.java)
+            } catch (e: Exception) {
+                Log.w(TAG, "⚠️ Error parsing progress for $challengeId: ${e.message}")
+                null
+            }
+
+            Log.d(TAG, "Progress found: ${progress != null}")
+            progress
+
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error getting user progress", e)
+            null
+        }
+    }
+
+    /**
+     * Get all user progress for technical assessments
+     */
+    suspend fun getAllUserProgress(): List<TechnicalAssessmentProgress> {
+        return try {
+            val userId = auth.currentUser?.uid ?: return emptyList()
+
+            Log.d(TAG, "Fetching all progress for user $userId")
+
+            val snapshot = firestore.collection(COLLECTION_USER_PROGRESS)
+                .document(userId)
+                .collection(SUB_COLLECTION_TECHNICAL_ASSESSMENT_PROGRESS)
+                .get()
+                .await()
+
+            // Manually parse documents to handle mixed data types
+            val progressList = snapshot.documents.mapNotNull { doc ->
+                try {
+                    doc.toObject(TechnicalAssessmentProgress::class.java)
+                } catch (e: Exception) {
+                    Log.w(TAG, "⚠️ Skipping document ${doc.id} due to parsing error: ${e.message}")
+                    null
+                }
+            }
+
+            Log.d(TAG, "Found ${progressList.size} progress records")
+            progressList
+
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error getting all user progress", e)
+            emptyList()
         }
     }
 

@@ -28,6 +28,7 @@ class AllAssessmentsActivity : BaseActivity() {
 
     private var allChallenges: List<Challenge> = emptyList()
     private var filteredChallenges: List<Challenge> = emptyList()
+    private var progressMap: Map<String, TechnicalAssessmentProgress> = emptyMap()
 
     companion object {
         private const val TAG = "AllAssessmentsActivity"
@@ -98,18 +99,24 @@ class AllAssessmentsActivity : BaseActivity() {
             try {
                 Log.d(TAG, "Loading all challenges from Firestore...")
 
-                val challenges = withContext(Dispatchers.IO) {
-                    assessmentService.getChallengesForUser()
+                // Fetch challenges and user progress in parallel
+                val (challenges, userProgress) = withContext(Dispatchers.IO) {
+                    val challengesList = assessmentService.getChallengesForUser()
+                    val progressList = assessmentService.getAllUserProgress()
+                    Pair(challengesList, progressList)
                 }
 
-                Log.d(TAG, "✅ Loaded ${challenges.size} challenges")
+                Log.d(TAG, "✅ Loaded ${challenges.size} challenges and ${userProgress.size} progress records")
+
+                // Build progress map
+                progressMap = userProgress.associateBy { it.challengeId }
 
                 allChallenges = challenges
                 filteredChallenges = challenges
 
                 // Update UI
                 updateAssessmentCount(challenges.size)
-                adapter.setChallenges(challenges)
+                adapter.setChallengesWithProgress(challenges, progressMap)
 
                 binding.progressBar.visibility = View.GONE
 
@@ -145,13 +152,17 @@ class AllAssessmentsActivity : BaseActivity() {
             "Easy", "Medium", "Hard" -> allChallenges.filter {
                 it.difficulty.equals(filterType, ignoreCase = true)
             }
-            "Available" -> allChallenges.filter { it.status == "available" }
-            "Completed" -> allChallenges.filter { it.status == "taken" }
+            "In Progress" -> allChallenges.filter { challenge ->
+                progressMap[challenge.id]?.status == "in_progress"
+            }
+            "Completed" -> allChallenges.filter { challenge ->
+                progressMap[challenge.id]?.status == "completed"
+            }
             else -> allChallenges
         }
 
         // Update adapter and count
-        adapter.setChallenges(filteredChallenges)
+        adapter.setChallengesWithProgress(filteredChallenges, progressMap)
         updateAssessmentCount(filteredChallenges.size)
 
         // Show/hide empty state
@@ -213,5 +224,29 @@ class AllAssessmentsActivity : BaseActivity() {
         binding.chipGroupFilter.slideUpFadeIn(duration = 400, startDelay = 200)
         binding.textAssessmentCount.slideUpFadeIn(duration = 400, startDelay = 300)
         binding.recyclerViewAssessments.slideUpFadeIn(duration = 400, startDelay = 400)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Reload progress when user returns (in case they completed a challenge)
+        refreshProgress()
+    }
+
+    /**
+     * Refresh user progress without reloading all challenges
+     */
+    private fun refreshProgress() {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val userProgress = withContext(Dispatchers.IO) {
+                    assessmentService.getAllUserProgress()
+                }
+                progressMap = userProgress.associateBy { it.challengeId }
+                adapter.updateProgress(progressMap)
+                Log.d(TAG, "✅ Progress refreshed")
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error refreshing progress", e)
+            }
+        }
     }
 }

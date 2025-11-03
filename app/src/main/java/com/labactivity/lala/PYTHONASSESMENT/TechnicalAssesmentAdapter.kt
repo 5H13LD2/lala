@@ -15,6 +15,7 @@ import com.labactivity.lala.R
 class TechnicalAssessmentAdapter(
     private val context: Context,
     private var challenges: List<Challenge> = listOf(),
+    private var progressMap: Map<String, TechnicalAssessmentProgress> = mapOf(),
     var isLoading: Boolean = true  // Changed to 'var' and made public for AllAssessmentsActivity
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -43,6 +44,8 @@ class TechnicalAssessmentAdapter(
             holder.startShimmerAnimation(context)
         } else if (holder is ChallengeViewHolder && !isLoading) {
             val challenge = challenges[position]
+            val progress = progressMap[challenge.id]
+
             holder.titleTextView.text = challenge.title
             holder.difficultyTextView.text = challenge.difficulty
 
@@ -60,14 +63,35 @@ class TechnicalAssessmentAdapter(
             }
             holder.difficultyTextView.setTextColor(difficultyColor)
 
-            val isTaken = challenge.status == "taken"
-            holder.itemView.alpha = if (isTaken) 0.7f else 1f
-            holder.itemView.setBackgroundColor(
-                if (isTaken)
-                    ContextCompat.getColor(context, R.color.primary_dark)
-                else
-                    ContextCompat.getColor(context, R.color.white)
-            )
+            // Show progress indicator if challenge is completed or in progress
+            when (progress?.status) {
+                "completed" -> {
+                    holder.statusTextView?.text = "✓ Completed"
+                    holder.statusTextView?.setTextColor(
+                        ContextCompat.getColor(context, R.color.success_green)
+                    )
+                    holder.statusTextView?.visibility = View.VISIBLE
+                    holder.scoreTextView?.text = "Score: ${progress.bestScore}%"
+                    holder.scoreTextView?.visibility = View.VISIBLE
+                }
+                "in_progress" -> {
+                    holder.statusTextView?.text = "⟳ In Progress"
+                    holder.statusTextView?.setTextColor(
+                        ContextCompat.getColor(context, R.color.primary_blue)
+                    )
+                    holder.statusTextView?.visibility = View.VISIBLE
+                    holder.scoreTextView?.text = "Attempts: ${progress.attempts}"
+                    holder.scoreTextView?.visibility = View.VISIBLE
+                }
+                else -> {
+                    holder.statusTextView?.visibility = View.GONE
+                    holder.scoreTextView?.visibility = View.GONE
+                }
+            }
+
+            // Set card appearance based on completion status
+            val isCompleted = progress?.status == "completed"
+            holder.itemView.alpha = if (isCompleted) 0.85f else 1f
 
             // Animate only if not already animated
             if (holder.itemView.animation == null) {
@@ -79,10 +103,10 @@ class TechnicalAssessmentAdapter(
             }
 
             holder.itemView.setOnClickListener {
-                if (isTaken) {
+                if (isCompleted && progress?.passed == true) {
                     AlertDialog.Builder(context)
-                        .setTitle("Assessment Already Taken")
-                        .setMessage("This assessment is already taken. Do you want to retry?")
+                        .setTitle("Assessment Completed")
+                        .setMessage("You've already completed this assessment with a score of ${progress.bestScore}%. Do you want to retry?")
                         .setPositiveButton("Retry") { _, _ ->
                             openCompiler(challenge)
                         }
@@ -105,6 +129,27 @@ class TechnicalAssessmentAdapter(
         notifyDataSetChanged()
     }
 
+    /**
+     * Updates the adapter with new challenges and progress data
+     */
+    fun setChallengesWithProgress(
+        newChallenges: List<Challenge>,
+        newProgressMap: Map<String, TechnicalAssessmentProgress>
+    ) {
+        challenges = newChallenges
+        progressMap = newProgressMap
+        isLoading = false
+        notifyDataSetChanged()
+    }
+
+    /**
+     * Updates only the progress data without changing challenges
+     */
+    fun updateProgress(newProgressMap: Map<String, TechnicalAssessmentProgress>) {
+        progressMap = newProgressMap
+        notifyDataSetChanged()
+    }
+
     fun setChallengesWithDelay(newChallenges: List<Challenge>, delayMillis: Long = 5000) {
         // Keep showing skeleton for specified delay
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
@@ -114,8 +159,25 @@ class TechnicalAssessmentAdapter(
         }, delayMillis)
     }
 
+    /**
+     * Updates the adapter with new challenges and progress after a delay
+     */
+    fun setChallengesWithProgressAndDelay(
+        newChallenges: List<Challenge>,
+        newProgressMap: Map<String, TechnicalAssessmentProgress>,
+        delayMillis: Long = 5000
+    ) {
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            challenges = newChallenges
+            progressMap = newProgressMap
+            isLoading = false
+            notifyDataSetChanged()
+        }, delayMillis)
+    }
+
     private fun openCompiler(challenge: Challenge) {
         val intent = Intent(context, CompilerActivity::class.java).apply {
+            putExtra("CHALLENGE_ID", challenge.id)
             putExtra("CHALLENGE_TITLE", challenge.title)
             putExtra("CHALLENGE_CODE", challenge.brokenCode)
             putExtra("CORRECT_OUTPUT", challenge.correctOutput)
@@ -129,6 +191,8 @@ class TechnicalAssessmentAdapter(
         val titleTextView: TextView = itemView.findViewById(R.id.textAssessmentTitle)
         val difficultyTextView: TextView = itemView.findViewById(R.id.textDifficulty)
         val codePreviewTextView: TextView = itemView.findViewById(R.id.textCodePreview)
+        val statusTextView: TextView? = itemView.findViewById(R.id.textStatus)
+        val scoreTextView: TextView? = itemView.findViewById(R.id.textScore)
     }
 
     class SkeletonViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

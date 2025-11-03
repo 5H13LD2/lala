@@ -24,8 +24,8 @@ class FirestoreSQLHelper {
     companion object {
         private const val TAG = "FirestoreSQLHelper"
         private const val COLLECTION_SQL_CHALLENGES = "technical_assesment"
-        private const val COLLECTION_USERS = "users"
-        private const val SUB_COLLECTION_SQL_PROGRESS = "sql_progress"
+        private const val COLLECTION_USER_PROGRESS = "user_progress"
+        private const val SUB_COLLECTION_SQL_PROGRESS = "technical_assessment_progress"
 
         // Singleton instance
         @Volatile
@@ -253,7 +253,7 @@ class FirestoreSQLHelper {
                 val userId = auth.currentUser?.uid ?: return@withContext null
                 Log.d(TAG, "Fetching progress for challenge $challengeId and user $userId")
 
-                val document = firestore.collection(COLLECTION_USERS)
+                val document = firestore.collection(COLLECTION_USER_PROGRESS)
                     .document(userId)
                     .collection(SUB_COLLECTION_SQL_PROGRESS)
                     .document(challengeId)
@@ -283,7 +283,7 @@ class FirestoreSQLHelper {
             val userId = auth.currentUser?.uid ?: return@withContext false
             Log.d(TAG, "Saving progress for challenge $challengeId and user $userId")
 
-            firestore.collection(COLLECTION_USERS)
+            firestore.collection(COLLECTION_USER_PROGRESS)
                 .document(userId)
                 .collection(SUB_COLLECTION_SQL_PROGRESS)
                 .document(challengeId)
@@ -349,7 +349,7 @@ class FirestoreSQLHelper {
                 val userId = auth.currentUser?.uid ?: return@withContext emptyList()
                 Log.d(TAG, "Fetching all progress for user $userId")
 
-                val snapshot = firestore.collection(COLLECTION_USERS)
+                val snapshot = firestore.collection(COLLECTION_USER_PROGRESS)
                     .document(userId)
                     .collection(SUB_COLLECTION_SQL_PROGRESS)
                     .get()

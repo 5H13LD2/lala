@@ -57,6 +57,12 @@
             android:name=".LOGINPAGE.MainActivity"
             android:exported="true" />
 
+        <!-- Forgot Password -->
+        <activity
+            android:name=".FORGOTPASSWORD.ForgotPasswordActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- SQL Compiler -->
         <activity
             android:name=".SQLCOMPILER.sqlcompiler"

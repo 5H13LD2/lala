@@ -15,21 +15,65 @@ object AssessmentStatusManager {
     private val assessmentService = TechnicalAssessmentService()
 
     /**
-     * Marks an assessment as completed
+     * Marks an assessment as completed and saves progress
      * This should be called when the user successfully completes an assessment
+     *
+     * @param context Application context
+     * @param challengeId The Firestore document ID of the challenge
+     * @param challengeTitle The title of the challenge
+     * @param passed Whether the user passed the challenge
+     * @param score The score achieved (0-100, default 100)
+     * @param timeTaken Time taken in milliseconds (default 0)
+     * @param userCode The user's submitted code (default empty)
      */
+    fun markAssessmentCompleted(
+        context: Context,
+        challengeId: String,
+        challengeTitle: String,
+        passed: Boolean = true,
+        score: Int = 100,
+        timeTaken: Long = 0,
+        userCode: String = ""
+    ) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // Save user progress to user_progress/{userId}/technical_assessment_progress/{challengeId}
+                val success = assessmentService.saveUserProgress(
+                    challengeId = challengeId,
+                    challengeTitle = challengeTitle,
+                    passed = passed,
+                    score = score,
+                    timeTaken = timeTaken,
+                    userCode = userCode
+                )
+
+                if (success) {
+                    Log.d(TAG, "✅ Marked assessment '$challengeTitle' as completed - Progress saved")
+                } else {
+                    Log.w(TAG, "⚠️ Failed to save progress for assessment '$challengeTitle'")
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error marking assessment as completed", e)
+            }
+        }
+    }
+
+    /**
+     * Legacy method for backward compatibility
+     * @deprecated Use markAssessmentCompleted with challengeId parameter
+     */
+    @Deprecated(
+        "Use markAssessmentCompleted with challengeId parameter",
+        ReplaceWith("markAssessmentCompleted(context, challengeId, challengeTitle, true)")
+    )
     fun markAssessmentCompleted(context: Context, challengeTitle: String, courseId: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // For now, we'll use the challenge title as the document ID
-                // In a real implementation, you might want to use a proper challenge ID
                 val challengeId = generateChallengeId(challengeTitle, courseId)
-                
-                assessmentService.updateChallengeStatus(challengeId, "taken")
-                Log.d(TAG, "Marked assessment '$challengeTitle' as completed")
-                
+                markAssessmentCompleted(context, challengeId, challengeTitle, true)
             } catch (e: Exception) {
-                Log.e(TAG, "Error marking assessment as completed", e)
+                Log.e(TAG, "❌ Error marking assessment as completed", e)
             }
         }
     }
@@ -45,16 +89,41 @@ object AssessmentStatusManager {
     /**
      * Resets an assessment status to available (for retry scenarios)
      */
-    fun resetAssessmentStatus(context: Context, challengeTitle: String, courseId: String) {
+    fun resetAssessmentStatus(context: Context, challengeId: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val challengeId = generateChallengeId(challengeTitle, courseId)
                 assessmentService.updateChallengeStatus(challengeId, "available")
-                Log.d(TAG, "Reset assessment '$challengeTitle' status to available")
-                
+                Log.d(TAG, "✅ Reset assessment status to available")
+
             } catch (e: Exception) {
-                Log.e(TAG, "Error resetting assessment status", e)
+                Log.e(TAG, "❌ Error resetting assessment status", e)
             }
+        }
+    }
+
+    /**
+     * Gets user progress for a specific challenge
+     * @return TechnicalAssessmentProgress object or null if not found
+     */
+    suspend fun getUserProgress(challengeId: String): TechnicalAssessmentProgress? {
+        return try {
+            assessmentService.getUserProgress(challengeId)
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error getting user progress", e)
+            null
+        }
+    }
+
+    /**
+     * Gets all user progress for technical assessments
+     * @return List of TechnicalAssessmentProgress objects
+     */
+    suspend fun getAllUserProgress(): List<TechnicalAssessmentProgress> {
+        return try {
+            assessmentService.getAllUserProgress()
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error getting all user progress", e)
+            emptyList()
         }
     }
 }

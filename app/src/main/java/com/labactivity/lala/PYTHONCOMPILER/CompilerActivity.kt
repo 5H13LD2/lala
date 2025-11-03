@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.NestedScrollView
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
+import com.labactivity.lala.PYTHONASSESMENT.AssessmentStatusManager
 import com.labactivity.lala.R
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -42,6 +43,7 @@ class CompilerActivity : AppCompatActivity() {
     private var checkInputTimer: Runnable? = null
     private var outputFile: File? = null
 
+    private var challengeId: String = ""
     private var challengeTitle: String = ""
     private var correctOutput: String = ""
     private var hintText: String = ""
@@ -49,6 +51,7 @@ class CompilerActivity : AppCompatActivity() {
     private var pyInputBuffer = ""
     private var waitingForInput = false
     private var currentInputPrompt = ""
+    private var startTime: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +62,7 @@ class CompilerActivity : AppCompatActivity() {
             Python.start(AndroidPlatform(this))
         }
 
+        challengeId = intent.getStringExtra("CHALLENGE_ID") ?: ""
         challengeTitle = intent.getStringExtra("CHALLENGE_TITLE") ?: "Debug Code"
         val challengeCode = intent.getStringExtra("CHALLENGE_CODE") ?: ""
         correctOutput = intent.getStringExtra("CORRECT_OUTPUT") ?: ""
@@ -174,6 +178,9 @@ class CompilerActivity : AppCompatActivity() {
             Toast.makeText(this, "Please enter some Python code.", Toast.LENGTH_SHORT).show()
             return
         }
+
+        // Record start time for progress tracking
+        startTime = System.currentTimeMillis()
 
         // Disable the run button while execution is in progress
         runButton.isEnabled = false
@@ -397,12 +404,41 @@ class CompilerActivity : AppCompatActivity() {
         try {
             val output = outputFile?.readText()?.trim() ?: ""
             val expected = correctOutput.trim()
+            val userCode = codeEditText.text.toString()
+
+            // Calculate time taken in milliseconds
+            val timeTaken = System.currentTimeMillis() - startTime
 
             if (output.contains(expected)) {
                 Toast.makeText(this, "Challenge completed successfully! 🎉", Toast.LENGTH_LONG).show()
-                // You could add code here to update user progress, add points, etc.
+
+                // Save progress to Firestore
+                if (challengeId.isNotEmpty()) {
+                    AssessmentStatusManager.markAssessmentCompleted(
+                        context = this,
+                        challengeId = challengeId,
+                        challengeTitle = challengeTitle,
+                        passed = true,
+                        score = 100,
+                        timeTaken = timeTaken,
+                        userCode = userCode
+                    )
+                }
             } else {
                 Toast.makeText(this, "Output doesn't match expected result. Try again!", Toast.LENGTH_LONG).show()
+
+                // Save attempt even if failed (in_progress status)
+                if (challengeId.isNotEmpty()) {
+                    AssessmentStatusManager.markAssessmentCompleted(
+                        context = this,
+                        challengeId = challengeId,
+                        challengeTitle = challengeTitle,
+                        passed = false,
+                        score = 0,
+                        timeTaken = timeTaken,
+                        userCode = userCode
+                    )
+                }
             }
         } catch (e: Exception) {
             Toast.makeText(this, "Error checking completion: ${e.message}", Toast.LENGTH_SHORT).show()

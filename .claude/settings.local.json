@@ -6,7 +6,8 @@
       "Bash(./gradlew assembleDebug:*)",
       "Bash(find:*)",
       "Bash(rm:*)",
-      "Bash(./gradlew clean:*)"
+      "Bash(./gradlew clean:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []
