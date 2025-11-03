@@ -1,11 +1,14 @@
 package com.labactivity.lala.FORGOTPASSWORD
 
 import android.os.Bundle
+import android.util.Log
 import android.util.Patterns
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.labactivity.lala.databinding.ActivityForgotPasswordBinding
 
 /**
@@ -88,32 +91,49 @@ class ForgotPasswordActivity : AppCompatActivity() {
         // Show loading state
         setLoadingState(true)
 
+        Log.d(TAG, "Attempting to send password reset email to: $email")
+
+        // Send password reset email directly - Firebase will check if user exists
         auth.sendPasswordResetEmail(email)
-            .addOnCompleteListener { task ->
+            .addOnSuccessListener {
                 setLoadingState(false)
+                Log.d(TAG, "Password reset email sent successfully to: $email")
 
-                if (task.isSuccessful) {
-                    // Show success message
-                    showSuccessState()
-                    Toast.makeText(
-                        this,
-                        "Password reset email sent to $email",
-                        Toast.LENGTH_LONG
-                    ).show()
-                } else {
-                    // Show error message
-                    val errorMessage = when (task.exception?.message) {
-                        "There is no user record corresponding to this identifier. The user may have been deleted." ->
-                            "No account found with this email address"
-                        "The email address is badly formatted." ->
-                            "Invalid email format"
-                        else ->
-                            task.exception?.message ?: "Failed to send reset email"
+                // Show success message
+                showSuccessState()
+                Toast.makeText(
+                    this,
+                    "Password reset email sent to $email\nPlease check your inbox and spam folder.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            .addOnFailureListener { exception ->
+                setLoadingState(false)
+                Log.e(TAG, "Failed to send password reset email", exception)
+
+                // Handle specific error types
+                val errorMessage = when (exception) {
+                    is FirebaseAuthInvalidUserException -> {
+                        "No account found with this email address. Please check your email or sign up."
                     }
-
-                    binding.textInputLayoutEmail.error = errorMessage
-                    Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+                    else -> {
+                        when {
+                            exception.message?.contains("There is no user record", ignoreCase = true) == true ->
+                                "No account found with this email address"
+                            exception.message?.contains("email address is badly formatted", ignoreCase = true) == true ->
+                                "Invalid email format"
+                            exception.message?.contains("network", ignoreCase = true) == true ->
+                                "Network error. Please check your internet connection."
+                            else -> {
+                                Log.e(TAG, "Unknown error: ${exception.message}")
+                                "Failed to send reset email: ${exception.message}"
+                            }
+                        }
+                    }
                 }
+
+                binding.textInputLayoutEmail.error = errorMessage
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
             }
     }
 

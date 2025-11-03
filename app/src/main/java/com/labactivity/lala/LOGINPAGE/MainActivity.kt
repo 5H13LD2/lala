@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.google.firebase.auth.FirebaseAuth
 import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
+import com.labactivity.lala.FORGOTPASSWORD.ForgotPasswordActivity
 import com.labactivity.lala.REGISTERPAGE.MainActivity2
 import com.labactivity.lala.databinding.ActivityMainBinding
 import com.labactivity.lala.homepage.MainActivity4
@@ -59,6 +60,12 @@ class MainActivity : AppCompatActivity() {
         // ✅ Sign Up Redirect
         binding.text7.setOnClickListener {
             val intent = Intent(this, MainActivity2::class.java)
+            startActivity(intent)
+        }
+
+        // ✅ Forgot Password Redirect
+        binding.textForgotPassword.setOnClickListener {
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
             startActivity(intent)
         }
     }
