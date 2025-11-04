@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldValue
 import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
 import com.labactivity.lala.FORGOTPASSWORD.ForgotPasswordActivity
 import com.labactivity.lala.REGISTERPAGE.MainActivity2
@@ -14,6 +16,7 @@ import com.labactivity.lala.homepage.MainActivity4
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var auth: FirebaseAuth
+    private lateinit var firestore: FirebaseFirestore  // ✅ ADD THIS
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,6 +24,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         auth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()  // ✅ ADD THIS
 
         // 🔄 Clear password error on typing
         binding.password.addTextChangedListener {
@@ -47,6 +51,10 @@ class MainActivity : AppCompatActivity() {
                         // ✅ Login success
                         binding.passwordInputLayout.error = null
                         binding.emailInputLayout.error = null
+
+                        // ✅ UPDATE LAST LOGIN TIMESTAMP
+                        updateLastLoginTimestamp()
+
                         val intent = Intent(this, MainActivity4::class.java)
                         startActivity(intent)
                         finish()
@@ -67,6 +75,25 @@ class MainActivity : AppCompatActivity() {
         binding.textForgotPassword.setOnClickListener {
             val intent = Intent(this, ForgotPasswordActivity::class.java)
             startActivity(intent)
+        }
+    }
+
+    // ✅ NEW METHOD: Update lastLogin timestamp in Firestore
+    private fun updateLastLoginTimestamp() {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            val userId = currentUser.uid
+
+            // Update using document ID directly (faster and simpler)
+            firestore.collection("users")
+                .document(userId)
+                .update("lastLogin", FieldValue.serverTimestamp())
+                .addOnSuccessListener {
+                    android.util.Log.d("MainActivity", "✅ Last login updated for user: $userId")
+                }
+                .addOnFailureListener { e ->
+                    android.util.Log.e("MainActivity", "❌ Failed to update lastLogin: ${e.message}")
+                }
         }
     }
 
