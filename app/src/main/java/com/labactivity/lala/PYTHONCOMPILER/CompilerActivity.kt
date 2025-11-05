@@ -11,6 +11,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -36,6 +37,7 @@ class CompilerActivity : AppCompatActivity() {
     private lateinit var userInputEditText: EditText
     private lateinit var submitInputButton: Button
     private lateinit var hintButton: Button
+    private lateinit var backButton: ImageButton
     private val handler = Handler(Looper.getMainLooper())
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
@@ -79,6 +81,7 @@ class CompilerActivity : AppCompatActivity() {
         userInputEditText = findViewById(R.id.userInputEditText)
         submitInputButton = findViewById(R.id.submitInputButton)
         hintButton = findViewById(R.id.hint)
+        backButton = findViewById(R.id.backButton)
 
         // Set the title TextView
         val titleTextView = findViewById<TextView>(R.id.titleTextView)
@@ -112,6 +115,11 @@ class CompilerActivity : AppCompatActivity() {
         // Set click listener for Submit Input button
         submitInputButton.setOnClickListener {
             handleInputSubmission()
+        }
+
+        // Set click listener for Back button
+        backButton.setOnClickListener {
+            finish()
         }
 
         // Add Enter key listener for input field (like LeetCode)

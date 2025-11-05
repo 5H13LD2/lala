@@ -7,6 +7,18 @@
     android:background="#E6F3FF"
     tools:context=".quiz.ActivityMainQuiz">
 
+    <!-- Back Button -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <!-- Timer and Question Counter Section -->
     <LinearLayout
         android:id="@+id/header_layout"
@@ -16,7 +28,7 @@
         android:orientation="horizontal"
         android:padding="16dp"
         android:layout_marginTop="30dp"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/backButton">
 
         <TextView
             android:id="@+id/question_counter"

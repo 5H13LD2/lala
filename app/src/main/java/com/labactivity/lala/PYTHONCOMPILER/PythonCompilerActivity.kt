@@ -7,6 +7,7 @@ import android.text.method.ScrollingMovementMethod
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -26,6 +27,7 @@ class PythonCompilerActivity : AppCompatActivity() {
     private lateinit var inputContainer: LinearLayout
     private lateinit var userInputEditText: EditText
     private lateinit var submitInputButton: Button
+    private lateinit var backButton: ImageButton
 
     private val handler = Handler(Looper.getMainLooper())
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
@@ -50,6 +52,7 @@ class PythonCompilerActivity : AppCompatActivity() {
         inputContainer = findViewById(R.id.inputContainer)
         userInputEditText = findViewById(R.id.userInputEditText)
         submitInputButton = findViewById(R.id.submitInputButton)
+        backButton = findViewById(R.id.backButton)
 
         // Enable scrolling for output
         outputTextView.movementMethod = ScrollingMovementMethod()
@@ -72,6 +75,11 @@ class PythonCompilerActivity : AppCompatActivity() {
             val userInput = userInputEditText.text.toString()
             submitUserInput(userInput)
             userInputEditText.text.clear()
+        }
+
+        // Set click listener for Back button
+        backButton.setOnClickListener {
+            finish()
         }
 
         // Define the output file path

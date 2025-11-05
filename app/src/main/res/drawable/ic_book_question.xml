@@ -1,0 +1,79 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Background circle (purple) -->
+    <path
+        android:fillColor="#5B4FE8"
+        android:pathData="M100,100m-85,0a85,85 0,1,1 170,0a85,85 0,1,1 -170,0" />
+
+    <!-- Light purple inner circle -->
+    <path
+        android:fillColor="#E8E5FF"
+        android:pathData="M100,100m-70,0a70,70 0,1,1 140,0a70,70 0,1,1 -140,0" />
+
+    <!-- Book - left page (peach/light orange) -->
+    <path
+        android:fillColor="#FFD4B8"
+        android:pathData="M60,55 L60,135 Q60,140 65,142 L95,145 L95,58 L65,55 Q60,55 60,55 Z" />
+
+    <!-- Book - left page inner shadow -->
+    <path
+        android:fillColor="#FFCAA8"
+        android:pathData="M95,58 L95,145 L92,144.5 L92,59 Z" />
+
+    <!-- Book - right page (light peach) -->
+    <path
+        android:fillColor="#FFE4D0"
+        android:pathData="M105,58 L105,145 L135,142 Q140,140 140,135 L140,55 Q140,55 135,55 L105,58 Z" />
+
+    <!-- Book - right page inner shadow -->
+    <path
+        android:fillColor="#FFD4B8"
+        android:pathData="M105,58 L105,145 L108,144.5 L108,59 Z" />
+
+    <!-- Book - spine (orange) -->
+    <path
+        android:fillColor="#FF9966"
+        android:pathData="M95,58 L95,145 L105,145 L105,58 Z" />
+
+    <!-- Book - left page lines -->
+    <path
+        android:strokeColor="#FFB890"
+        android:strokeWidth="1"
+        android:pathData="M68,70 L88,71 M68,78 L88,79 M68,86 L88,87 M68,94 L88,95 M68,102 L88,103" />
+
+    <!-- Book - right page lines -->
+    <path
+        android:strokeColor="#FFCAA8"
+        android:strokeWidth="1"
+        android:pathData="M112,71 L132,70 M112,79 L132,78 M112,87 L132,86 M112,95 L132,94 M112,103 L132,102" />
+
+    <!-- Question mark circle (cyan/turquoise) -->
+    <path
+        android:fillColor="#40C4E8"
+        android:pathData="M100,45m-25,0a25,25 0,1,1 50,0a25,25 0,1,1 -50,0" />
+
+    <!-- Question mark - top curve -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,35 Q106,35 109,38 Q112,41 112,46 Q112,49.5 110,52 Q108,54 103,57 L100,59 Q97,60.5 96,62.5 Q95,64 95,67 L95,69 L105,69 L105,67 Q105,65.5 106,64.5 Q107,63.5 109,62 L112,59.5 Q115,57 116.5,53.5 Q118,50 118,46 Q118,39.5 113.5,35.5 Q109,31.5 100,31.5 Q91,31.5 86.5,35.5 Q82,39.5 82,46 L88,46 Q88,41.5 91,38.5 Q94,35 100,35 Z" />
+
+    <!-- Question mark - dot -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,75m-4,0a4,4 0,1,1 8,0a4,4 0,1,1 -8,0" />
+
+    <!-- Book top edge highlight (left) -->
+    <path
+        android:fillColor="#FFE0C0"
+        android:pathData="M65,55 L95,58 L95,60 L65,57 Z" />
+
+    <!-- Book top edge highlight (right) -->
+    <path
+        android:fillColor="#FFF0E0"
+        android:pathData="M105,58 L135,55 L135,57 L105,60 Z" />
+
+</vector>
