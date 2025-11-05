@@ -5,54 +5,63 @@
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
 
-    <!-- Primary Theme Colors -->
-    <color name="primary">#1976D2</color>
-    <color name="primary_dark">#0D47A1</color>
-    <color name="primary_light">#BBDEFB</color>
-    <color name="accent">#29B6F6</color>
+    <!-- ========================================== -->
+    <!-- NEW BRAND COLOR PALETTE -->
+    <!-- ========================================== -->
+    <color name="brand_mint">#C6EBBE</color>           <!-- Light mint green -->
+    <color name="brand_mauve">#C19AB7</color>          <!-- Soft mauve/pink -->
+    <color name="brand_blue">#228CDB</color>           <!-- Vibrant blue -->
+    <color name="brand_teal">#0B7189</color>           <!-- Deep teal -->
+    <color name="brand_dark">#170A1C</color>           <!-- Almost black purple -->
 
-    <!-- Background Shades -->
-    <color name="background_color_light">#B3DCFB</color>
-    <color name="background_color_medium">#7F5BD5</color>
-    <color name="background_color_dark">#27164E</color>
+    <!-- Primary Theme Colors (Updated with brand palette) -->
+    <color name="primary">#228CDB</color>              <!-- brand_blue -->
+    <color name="primary_dark">#0B7189</color>         <!-- brand_teal -->
+    <color name="primary_light">#C6EBBE</color>        <!-- brand_mint -->
+    <color name="accent">#C19AB7</color>               <!-- brand_mauve -->
+
+    <!-- Background Shades (Updated with brand palette) -->
+    <color name="background_color_light">#C6EBBE</color>    <!-- Mint background -->
+    <color name="background_color_medium">#228CDB</color>   <!-- Blue background -->
+    <color name="background_color_dark">#170A1C</color>     <!-- Dark purple background -->
     <color name="light_background">#F5F5F5</color>
-    <color name="light_blue">#E1F5FE</color>
+    <color name="light_blue">#E6F5FB</color>
 
     <!-- Text Colors -->
-    <color name="text_primary">#212121</color>
+    <color name="text_primary">#170A1C</color>         <!-- brand_dark for text -->
     <color name="text_secondary">#757575</color>
 
     <!-- Content Colors -->
-    <color name="code_background">#263238</color>
-    <color name="code_text">#ECEFF1</color>
-    <color name="success_green">#4CAF50</color>
+    <color name="code_background">#170A1C</color>      <!-- brand_dark -->
+    <color name="code_text">#C6EBBE</color>            <!-- brand_mint -->
+    <color name="success_green">#C6EBBE</color>        <!-- brand_mint -->
     <color name="light_green_background">#E8F5E9</color>
-    <color name="error_red">#F44336</color>
+    <color name="error_red">#C19AB7</color>            <!-- brand_mauve for errors (softer) -->
 
-    <color name="blue_primary">#2196F3</color>
-    <color name="code_text1">#212121</color>
-    <color name="console_text">#212121</color>
+    <color name="blue_primary">#228CDB</color>         <!-- brand_blue -->
+    <color name="code_text1">#170A1C</color>
+    <color name="console_text">#170A1C</color>
     <color name="gray_text">#757575</color>
 
-    <color name="primary_">#2A36A0</color>
-    <color name="primary_dark_">#1A237E</color>
-    <color name="accent_">#448AFF</color>
+    <color name="primary_">#0B7189</color>             <!-- brand_teal -->
+    <color name="primary_dark_">#170A1C</color>        <!-- brand_dark -->
+    <color name="accent_">#228CDB</color>              <!-- brand_blue -->
     <color name="black_">#000000</color>
     <color name="gray">#757575</color>
     <color name="light_gray">#F0F0F0</color>
-    <color name="red">#FF4081</color>
+    <color name="red">#C19AB7</color>                  <!-- brand_mauve -->
 
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="primary_blue">#FF2196F3</color>
+    <color name="purple_200">#C19AB7</color>           <!-- brand_mauve -->
+    <color name="purple_500">#0B7189</color>           <!-- brand_teal -->
+    <color name="purple_700">#170A1C</color>           <!-- brand_dark -->
+    <color name="teal_200">#C6EBBE</color>             <!-- brand_mint -->
+    <color name="teal_700">#0B7189</color>             <!-- brand_teal -->
+    <color name="primary_blue">#228CDB</color>         <!-- brand_blue -->
 
     <!-- Primary colors for the app -->
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#228CDB</color>         <!-- brand_blue -->
+    <color name="colorPrimaryDark">#0B7189</color>     <!-- brand_teal -->
+    <color name="colorAccent">#C19AB7</color>          <!-- brand_mauve -->
 
     <!-- Rank colors -->
     <color name="gold">#FFD700</color>
@@ -63,32 +72,32 @@
     <color name="background_light">#F5F5F5</color>
     <color name="card_background">#FFFFFF</color>
 
-    <!-- Modern Enterprise Colors (DataCamp/LeetCode inspired) -->
-    <color name="modern_primary">#0A0E27</color>
-    <color name="modern_secondary">#1A1F3A</color>
-    <color name="modern_accent">#00D9FF</color>
-    <color name="modern_accent_secondary">#5B6FFF</color>
-    <color name="modern_success">#00C48C</color>
-    <color name="modern_warning">#FFA726</color>
+    <!-- Modern Enterprise Colors (Updated with brand palette) -->
+    <color name="modern_primary">#170A1C</color>       <!-- brand_dark -->
+    <color name="modern_secondary">#0B7189</color>     <!-- brand_teal -->
+    <color name="modern_accent">#228CDB</color>        <!-- brand_blue -->
+    <color name="modern_accent_secondary">#C19AB7</color>  <!-- brand_mauve -->
+    <color name="modern_success">#C6EBBE</color>       <!-- brand_mint -->
+    <color name="modern_warning">#C19AB7</color>       <!-- brand_mauve -->
     <color name="modern_card_bg">#FFFFFF</color>
     <color name="modern_card_bg_dark">#F8F9FA</color>
     <color name="modern_border">#E5E8EB</color>
-    <color name="modern_text_primary">#1A1F36</color>
+    <color name="modern_text_primary">#170A1C</color>  <!-- brand_dark -->
     <color name="modern_text_secondary">#6C757D</color>
-    <color name="modern_gradient_start">#667EEA</color>
-    <color name="modern_gradient_end">#764BA2</color>
-    <color name="modern_practice">#5B6FFF</color>
-    <color name="modern_flashcard">#00D9FF</color>
+    <color name="modern_gradient_start">#228CDB</color>    <!-- brand_blue -->
+    <color name="modern_gradient_end">#0B7189</color>      <!-- brand_teal -->
+    <color name="modern_practice">#228CDB</color>      <!-- brand_blue -->
+    <color name="modern_flashcard">#C6EBBE</color>     <!-- brand_mint -->
 
-    <!-- Difficulty Colors -->
-    <color name="difficulty_beginner">#00C48C</color>
-    <color name="difficulty_intermediate">#FFA726</color>
-    <color name="difficulty_advanced">#FF4081</color>
+    <!-- Difficulty Colors (Updated with brand palette) -->
+    <color name="difficulty_beginner">#C6EBBE</color>  <!-- brand_mint -->
+    <color name="difficulty_intermediate">#228CDB</color>  <!-- brand_blue -->
+    <color name="difficulty_advanced">#C19AB7</color>  <!-- brand_mauve -->
 
-    <!-- Quiz Score Colors -->
-    <color name="quiz_excellent">#00C48C</color>
-    <color name="quiz_good">#00D9FF</color>
-    <color name="quiz_average">#FFA726</color>
-    <color name="quiz_poor">#FF4081</color>
+    <!-- Quiz Score Colors (Updated with brand palette) -->
+    <color name="quiz_excellent">#C6EBBE</color>       <!-- brand_mint -->
+    <color name="quiz_good">#228CDB</color>            <!-- brand_blue -->
+    <color name="quiz_average">#C19AB7</color>         <!-- brand_mauve -->
+    <color name="quiz_poor">#0B7189</color>            <!-- brand_teal -->
 
 </resources>

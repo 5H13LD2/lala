@@ -30,6 +30,13 @@ import android.view.View
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import com.labactivity.lala.quiz.QuizScoreManager
+import com.labactivity.lala.GAMIFICATION.XPManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import android.animation.ObjectAnimator
+import android.view.animation.DecelerateInterpolator
 
 class ProfileMainActivity5 : BaseActivity() {
 
@@ -45,6 +52,7 @@ class ProfileMainActivity5 : BaseActivity() {
     private lateinit var quizHistoryAdapter: QuizHistoryAdapter
     private lateinit var progressManager: ModuleProgressManager
     private lateinit var quizScoreManager: QuizScoreManager
+    private lateinit var xpManager: XPManager
     private var allQuizHistory: List<QuizHistoryItem> = listOf()
 
     // Permission launcher
@@ -85,6 +93,7 @@ class ProfileMainActivity5 : BaseActivity() {
 
         progressManager = ModuleProgressManager(this)
         quizScoreManager = QuizScoreManager(this)
+        xpManager = XPManager()
 
         setupRecyclerViews()
         setupClickListeners()
@@ -315,48 +324,89 @@ class ProfileMainActivity5 : BaseActivity() {
             return
         }
 
-        // Load user data from Firestore
-        firestore.collection("users")
-            .document(currentUser.uid)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    // Get user data
-                    val username = document.getString("username") ?: "@${currentUser.email?.split("@")?.get(0)}"
-                    val email = document.getString("email") ?: currentUser.email ?: "No email"
-                    val totalXP = (document.getLong("totalXP") ?: 0).toInt()
-                    val coursesCompleted = (document.getLong("coursesCompleted") ?: 0).toInt()
-                    val quizzesTaken = (document.getLong("quizzesTaken") ?: 0).toInt()
-                    val profilePhotoBase64 = document.getString("profilePhotoBase64")
+        // Load user data from Firestore with XP system
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val document = withContext(Dispatchers.IO) {
+                    firestore.collection("users")
+                        .document(currentUser.uid)
+                        .get()
+                        .addOnSuccessListener { }
+                        .addOnFailureListener { }
+                }
 
-                    // Update UI
-                    binding.textUsername.text = username
-                    binding.textEmail.text = email
-                    binding.textXpValue.text = totalXP.toString()
-                    binding.textCoursesValue.text = coursesCompleted.toString()
-                    binding.textExercisesValue.text = quizzesTaken.toString()
+                firestore.collection("users")
+                    .document(currentUser.uid)
+                    .get()
+                    .addOnSuccessListener { document ->
+                        if (document != null && document.exists()) {
+                            // Get user data
+                            val username = document.getString("username") ?: "@${currentUser.email?.split("@")?.get(0)}"
+                            val email = document.getString("email") ?: currentUser.email ?: "No email"
+                            val totalXP = (document.getLong("totalXP") ?: 0).toInt()
+                            val coursesCompleted = (document.getLong("coursesCompleted") ?: 0).toInt()
+                            val quizzesTaken = (document.getLong("quizzesTaken") ?: 0).toInt()
+                            val technicalAssessments = (document.getLong("technicalAssessmentsCompleted") ?: 0).toInt()
+                            val profilePhotoBase64 = document.getString("profilePhotoBase64")
 
-                    // Update progress bar
-                    binding.xpProgressBar.progress = totalXP
-                    binding.progressText.text = "$totalXP / 500 XP"
+                            // Calculate level and progress using XPManager
+                            val level = xpManager.calculateLevel(totalXP)
+                            val progressInLevel = xpManager.getXPProgressInLevel(totalXP)
+                            val progressPercentage = xpManager.getProgressPercentage(totalXP)
 
-                    // Load profile photo if available
-                    if (!profilePhotoBase64.isNullOrEmpty()) {
-                        displayProfileImageFromBase64(profilePhotoBase64)
+                            // Update UI
+                            binding.textUsername.text = username
+                            binding.textEmail.text = email
+
+                            // Display level and XP
+                            binding.textXpValue.text = "${xpManager.getLevelString(totalXP)} — $totalXP XP"
+                            binding.textCoursesValue.text = coursesCompleted.toString()
+                            binding.textExercisesValue.text = quizzesTaken.toString()
+
+                            // Update progress bar with animation
+                            animateProgressBar(progressPercentage)
+
+                            // Update progress text to show progress within level
+                            binding.progressText.text = "$progressInLevel / ${XPManager.XP_PER_LEVEL} XP"
+
+                            // Load profile photo if available
+                            if (!profilePhotoBase64.isNullOrEmpty()) {
+                                displayProfileImageFromBase64(profilePhotoBase64)
+                            }
+
+                            Log.d(TAG, "User profile loaded successfully")
+                            Log.d(TAG, "  Total XP: $totalXP")
+                            Log.d(TAG, "  Level: $level")
+                            Log.d(TAG, "  Progress: $progressInLevel/${XPManager.XP_PER_LEVEL} ($progressPercentage%)")
+                        } else {
+                            Log.w(TAG, "No user document found")
+                            // Set default values
+                            binding.textUsername.text = "@${currentUser.email?.split("@")?.get(0)}"
+                            binding.textEmail.text = currentUser.email ?: "No email"
+                            binding.textXpValue.text = "Level 0 — 0 XP"
+                            binding.progressText.text = "0 / ${XPManager.XP_PER_LEVEL} XP"
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e(TAG, "Error loading user profile", e)
+                        Toast.makeText(this@ProfileMainActivity5, "Failed to load profile", Toast.LENGTH_SHORT).show()
                     }
 
-                    Log.d(TAG, "User profile loaded successfully")
-                } else {
-                    Log.w(TAG, "No user document found")
-                    // Set default values
-                    binding.textUsername.text = "@${currentUser.email?.split("@")?.get(0)}"
-                    binding.textEmail.text = currentUser.email ?: "No email"
-                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in loadUserProfile", e)
             }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error loading user profile", e)
-                Toast.makeText(this, "Failed to load profile", Toast.LENGTH_SHORT).show()
-            }
+        }
+    }
+
+    /**
+     * Animates the XP progress bar
+     */
+    private fun animateProgressBar(targetProgress: Int) {
+        val currentProgress = binding.xpProgressBar.progress
+        val animator = ObjectAnimator.ofInt(binding.xpProgressBar, "progress", currentProgress, targetProgress)
+        animator.duration = 800 // 800ms animation
+        animator.interpolator = DecelerateInterpolator()
+        animator.start()
     }
 
     private fun loadEnrolledCourses() {

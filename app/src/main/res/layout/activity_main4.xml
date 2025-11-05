@@ -200,6 +200,7 @@
                 android:id="@+id/recyclerView"
                 style="@style/Widget.Lala.RecyclerView.Vertical" />
 
+
             <!-- Technical Assessment Section -->
             <LinearLayout
                 style="@style/Widget.Lala.SectionHeader">

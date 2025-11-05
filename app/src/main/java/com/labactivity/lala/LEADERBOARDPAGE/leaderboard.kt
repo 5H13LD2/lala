@@ -38,7 +38,7 @@ class Leaderboard : AppCompatActivity() {
 
     private fun listenToUserLeaderboard() {
         firestore.collection("users")
-            .orderBy("score", Query.Direction.DESCENDING)
+            .orderBy("totalXP", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, error ->
                 if (error != null) {
                     Log.w("Leaderboard", "Listen failed.", error)
@@ -49,7 +49,10 @@ class Leaderboard : AppCompatActivity() {
                     userList.clear()
                     for (doc in snapshots) {
                         val user = doc.toObject(User::class.java)
-                        userList.add(user)
+                        // Only add users with XP > 0 to leaderboard
+                        if (user.totalXP > 0 || user.score > 0) {
+                            userList.add(user)
+                        }
                     }
                     adapter.notifyDataSetChanged()
                 }
