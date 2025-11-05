@@ -4,10 +4,12 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import com.labactivity.lala.GAMIFICATION.XPManager
 
 class TechnicalAssessmentService {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val xpManager = XPManager()
 
     companion object {
         private const val TAG = "TechnicalAssessmentService"
@@ -168,6 +170,16 @@ class TechnicalAssessmentService {
                 .await()
 
             Log.d(TAG, "✅ Saved progress for challenge [$challengeId] - Passed: $passed")
+
+            // Award XP if the challenge was passed
+            if (passed) {
+                xpManager.awardTechnicalAssessmentXP(
+                    challengeTitle = challengeTitle,
+                    passed = true,
+                    score = score
+                )
+            }
+
             true
 
         } catch (e: Exception) {

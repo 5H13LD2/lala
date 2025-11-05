@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Badge Background -->
+    <item>
+        <shape android:shape="oval">
+            <gradient
+                android:angle="135"
+                android:startColor="#B9F2FF"
+                android:centerColor="#89CFF0"
+                android:endColor="#4FC3F7"
+                android:type="linear" />
+            <size android:width="32dp" android:height="32dp" />
+        </shape>
+    </item>
+    <!-- Badge Border -->
+    <item android:top="2dp" android:bottom="2dp" android:left="2dp" android:right="2dp">
+        <shape android:shape="oval">
+            <solid android:color="#00BCD4" />
+        </shape>
+    </item>
+</layer-list>

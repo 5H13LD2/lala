@@ -4,6 +4,9 @@ service cloud.firestore {
 
     // 🔹 Users Collection
     match /users/{userId} {
+      // Allow users to read and write their own profile
+      // XP fields (totalXP, level, quizzesTaken, technicalAssessmentsCompleted, coursesCompleted)
+      // are updated by the app after completing activities
       allow read, write: if request.auth != null && request.auth.uid == userId;
 
       // Quiz Results subcollection under users (for profile page quiz history)
@@ -22,9 +25,14 @@ service cloud.firestore {
       }
     }
 
-    // 🔹 User Progress Collection (for tracking lesson completion)
+    // 🔹 User Progress Collection (for tracking lesson completion and technical assessments)
     match /user_progress/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // 🔹 Technical Assessment Progress subcollection
+      match /technical_assessment_progress/{challengeId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
 
       // Courses subcollection under user_progress
       match /courses/{courseId} {

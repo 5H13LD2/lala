@@ -6,6 +6,10 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.labactivity.lala.GAMIFICATION.XPManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Manages quiz scores both locally (SharedPreferences) and remotely (Firestore)
@@ -31,6 +35,7 @@ class QuizScoreManager(context: Context) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val xpManager = XPManager()
 
     /**
      * Saves quiz score locally and syncs to Firestore if user is authenticated
@@ -175,6 +180,15 @@ class QuizScoreManager(context: Context) {
                             latestAttempt = attemptData,
                             isFirstAttempt = (attemptNumber == 1)
                         )
+
+                        // Step 5: Award XP for completing the quiz
+                        CoroutineScope(Dispatchers.IO).launch {
+                            xpManager.awardQuizXP(
+                                score = score,
+                                totalQuestions = total,
+                                difficulty = difficulty
+                            )
+                        }
                     }
                     .addOnFailureListener { e ->
                         Log.e(TAG, "  ✗ Failed to save attempt", e)

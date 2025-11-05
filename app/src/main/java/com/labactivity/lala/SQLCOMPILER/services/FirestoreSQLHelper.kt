@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.labactivity.lala.SQLCOMPILER.models.*
 import com.labactivity.lala.SQLCOMPILER.utils.FirestoreDataConverter
+import com.labactivity.lala.GAMIFICATION.XPManager
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,6 +21,7 @@ class FirestoreSQLHelper {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val xpManager = XPManager()
 
     companion object {
         private const val TAG = "FirestoreSQLHelper"
@@ -331,7 +333,21 @@ class FirestoreSQLHelper {
                 passed = passed
             )
 
-            saveUserProgress(challengeId, newProgress)
+            val saveResult = saveUserProgress(challengeId, newProgress)
+
+            // Award XP if the challenge was passed
+            if (saveResult && passed) {
+                // Get challenge details for title
+                val challenge = getChallengeById(challengeId)
+                xpManager.awardTechnicalAssessmentXP(
+                    challengeTitle = challenge?.title ?: "SQL Challenge",
+                    passed = true,
+                    score = score
+                )
+                Log.d(TAG, "✅ Awarded 50 XP for completing SQL challenge: $challengeId")
+            }
+
+            saveResult
 
         } catch (e: Exception) {
             Log.e(TAG, "Error updating progress after attempt: ${e.message}", e)
