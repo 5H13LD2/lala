@@ -1,245 +1,236 @@
 package com.labactivity.lala.GAMIFICATION
 
-import android.content.Context
 import android.util.Log
-import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.labactivity.lala.R
+import com.labactivity.lala.LEADERBOARDPAGE.Achievement
 import kotlinx.coroutines.tasks.await
 
 /**
- * AchievementManager - Manages user achievements based on XP milestones
+ * AchievementManager - Manages achievement unlocking and badge awarding
  *
- * Achievement Tiers:
- * - Bronze: 500 XP (Level 1)
- * - Silver: 1500 XP (Level 3)
- * - Gold: 3000 XP (Level 6)
- * - Diamond: 5000 XP (Level 10)
- * - Master: 10000 XP (Level 20)
+ * Responsibilities:
+ * - Check and unlock achievements when XP thresholds are met
+ * - Award badges tied to achievements
+ * - Sync user achievements to Firestore
+ * - Notify when new achievements are unlocked
  */
-class AchievementManager(private val context: Context) {
+class AchievementManager {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
     companion object {
         private const val TAG = "AchievementManager"
-        private const val COLLECTION_ACHIEVEMENTS = "achievements"
 
-        // XP Milestones for achievements
-        const val BRONZE_MILESTONE = 500
-        const val SILVER_MILESTONE = 1500
-        const val GOLD_MILESTONE = 3000
-        const val DIAMOND_MILESTONE = 5000
-        const val MASTER_MILESTONE = 10000
+        // Firestore field names
+        private const val FIELD_ACHIEVEMENTS_UNLOCKED = "achievementsUnlocked"
+        private const val FIELD_CURRENT_BADGE = "currentBadge"
+        private const val FIELD_TOTAL_XP = "totalXP"
+
+        // Achievement subcollection fields
+        private const val FIELD_IS_UNLOCKED = "isUnlocked"
+        private const val FIELD_UNLOCKED_AT = "unlockedAt"
+        private const val FIELD_BADGE_EARNED = "badgeEarned"
+        private const val FIELD_BADGE_TIER = "badgeTier"
     }
 
     /**
-     * Achievement data class
+     * Data class for newly unlocked achievement
      */
-    data class Achievement(
-        val id: String = "",
-        val name: String = "",
-        val description: String = "",
-        val requiredXP: Int = 0,
-        val unlockedAt: Long = 0,
-        val isUnlocked: Boolean = false
+    data class UnlockedAchievement(
+        val achievement: Achievement,
+        val badgeEarned: String
     )
 
     /**
-     * Get achievement tier based on total XP
+     * Check and unlock achievements based on user's total XP
+     * Returns list of newly unlocked achievements
      */
-    fun getAchievementTier(totalXP: Int): AchievementTier {
-        return when {
-            totalXP >= MASTER_MILESTONE -> AchievementTier.MASTER
-            totalXP >= DIAMOND_MILESTONE -> AchievementTier.DIAMOND
-            totalXP >= GOLD_MILESTONE -> AchievementTier.GOLD
-            totalXP >= SILVER_MILESTONE -> AchievementTier.SILVER
-            totalXP >= BRONZE_MILESTONE -> AchievementTier.BRONZE
-            else -> AchievementTier.NONE
+    suspend fun checkAndUnlockAchievements(totalXP: Int): List<UnlockedAchievement> {
+        val userId = auth.currentUser?.uid ?: run {
+            Log.w(TAG, "User not authenticated")
+            return emptyList()
         }
-    }
 
-    /**
-     * Get achievement badge drawable resource ID
-     */
-    fun getAchievementBadge(totalXP: Int): Int? {
-        return when (getAchievementTier(totalXP)) {
-            AchievementTier.MASTER -> R.drawable.achievement_master
-            AchievementTier.DIAMOND -> R.drawable.achievement_diamond
-            AchievementTier.GOLD -> R.drawable.achievement_gold
-            AchievementTier.SILVER -> R.drawable.achievement_silver
-            AchievementTier.BRONZE -> R.drawable.achievement_bronze
-            AchievementTier.NONE -> null
-        }
-    }
+        Log.d(TAG, "═══════════════════════════════════════")
+        Log.d(TAG, "Checking achievements for totalXP: $totalXP")
 
-    /**
-     * Get achievement name
-     */
-    fun getAchievementName(totalXP: Int): String {
-        return when (getAchievementTier(totalXP)) {
-            AchievementTier.MASTER -> "Master Coder"
-            AchievementTier.DIAMOND -> "Diamond Developer"
-            AchievementTier.GOLD -> "Gold Programmer"
-            AchievementTier.SILVER -> "Silver Scholar"
-            AchievementTier.BRONZE -> "Bronze Beginner"
-            AchievementTier.NONE -> "No Badge"
-        }
-    }
-
-    /**
-     * Get achievement color
-     */
-    fun getAchievementColor(totalXP: Int): Int {
-        return when (getAchievementTier(totalXP)) {
-            AchievementTier.MASTER -> android.graphics.Color.parseColor("#9C27B0")
-            AchievementTier.DIAMOND -> android.graphics.Color.parseColor("#00BCD4")
-            AchievementTier.GOLD -> android.graphics.Color.parseColor("#FFD700")
-            AchievementTier.SILVER -> android.graphics.Color.parseColor("#C0C0C0")
-            AchievementTier.BRONZE -> android.graphics.Color.parseColor("#CD7F32")
-            AchievementTier.NONE -> android.graphics.Color.parseColor("#888888")
-        }
-    }
-
-    /**
-     * Check and unlock achievements for user
-     */
-    suspend fun checkAndUnlockAchievements(totalXP: Int): List<Achievement> {
-        val userId = auth.currentUser?.uid ?: return emptyList()
-        val newlyUnlocked = mutableListOf<Achievement>()
+        val newlyUnlocked = mutableListOf<UnlockedAchievement>()
 
         try {
-            val achievementsTier = getAchievementTier(totalXP)
+            val userRef = firestore.collection("users").document(userId)
 
-            // Get all achievements user should have
-            val achievementsToUnlock = mutableListOf<String>()
+            // Get current user data
+            val userDoc = userRef.get().await()
+            val unlockedAchievementIds = userDoc.get(FIELD_ACHIEVEMENTS_UNLOCKED) as? List<String> ?: emptyList()
 
-            if (totalXP >= BRONZE_MILESTONE) achievementsToUnlock.add("bronze")
-            if (totalXP >= SILVER_MILESTONE) achievementsToUnlock.add("silver")
-            if (totalXP >= GOLD_MILESTONE) achievementsToUnlock.add("gold")
-            if (totalXP >= DIAMOND_MILESTONE) achievementsToUnlock.add("diamond")
-            if (totalXP >= MASTER_MILESTONE) achievementsToUnlock.add("master")
+            Log.d(TAG, "Currently unlocked: ${unlockedAchievementIds.size} achievements")
 
-            // Get currently unlocked achievements
-            val userAchievements = firestore.collection("users")
-                .document(userId)
-                .collection(COLLECTION_ACHIEVEMENTS)
-                .get()
-                .await()
+            // Get all milestone achievements
+            val allAchievements = Achievement.getMilestoneAchievements()
 
-            val unlockedIds = userAchievements.documents.map { it.id }
+            // Check each achievement
+            for (achievement in allAchievements) {
+                // Skip if already unlocked
+                if (unlockedAchievementIds.contains(achievement.id)) {
+                    continue
+                }
 
-            // Unlock new achievements
-            for (achievementId in achievementsToUnlock) {
-                if (achievementId !in unlockedIds) {
-                    val achievement = createAchievement(achievementId)
+                // Check if XP threshold is met
+                if (totalXP >= achievement.requiredXP) {
+                    Log.d(TAG, "🏆 Unlocking achievement: ${achievement.title}")
 
-                    firestore.collection("users")
-                        .document(userId)
-                        .collection(COLLECTION_ACHIEVEMENTS)
-                        .document(achievementId)
-                        .set(achievement)
+                    // Add to user's achievements subcollection
+                    val achievementData = hashMapOf(
+                        FIELD_IS_UNLOCKED to true,
+                        FIELD_UNLOCKED_AT to FieldValue.serverTimestamp(),
+                        FIELD_BADGE_EARNED to achievement.badge,
+                        FIELD_BADGE_TIER to achievement.badgeTier
+                    )
+
+                    userRef.collection("achievements")
+                        .document(achievement.id)
+                        .set(achievementData)
                         .await()
 
-                    newlyUnlocked.add(achievement)
-                    Log.d(TAG, "✅ Unlocked achievement: ${achievement.name}")
+                    // Add to achievementsUnlocked array in user document
+                    userRef.update(FIELD_ACHIEVEMENTS_UNLOCKED, FieldValue.arrayUnion(achievement.id))
+                        .await()
+
+                    // Update current badge if this is a higher tier
+                    val currentBadge = userDoc.getString(FIELD_CURRENT_BADGE) ?: Achievement.TIER_NONE
+                    if (isHigherTier(achievement.badgeTier, currentBadge)) {
+                        userRef.update(FIELD_CURRENT_BADGE, achievement.badgeTier)
+                            .await()
+                        Log.d(TAG, "  Badge upgraded: $currentBadge → ${achievement.badgeTier}")
+                    }
+
+                    newlyUnlocked.add(
+                        UnlockedAchievement(
+                            achievement = achievement,
+                            badgeEarned = achievement.badgeTier
+                        )
+                    )
                 }
             }
 
-            // Update user's current achievement tier
-            firestore.collection("users")
-                .document(userId)
-                .update("achievementTier", achievementsTier.name)
-                .await()
+            if (newlyUnlocked.isNotEmpty()) {
+                Log.d(TAG, "✓ Unlocked ${newlyUnlocked.size} new achievement(s)")
+            } else {
+                Log.d(TAG, "No new achievements unlocked")
+            }
 
         } catch (e: Exception) {
             Log.e(TAG, "Error checking achievements", e)
         }
 
+        Log.d(TAG, "═══════════════════════════════════════")
         return newlyUnlocked
     }
 
     /**
-     * Create achievement object
-     */
-    private fun createAchievement(achievementId: String): Achievement {
-        return when (achievementId) {
-            "bronze" -> Achievement(
-                id = "bronze",
-                name = "Bronze Beginner",
-                description = "Earned 500 XP",
-                requiredXP = BRONZE_MILESTONE,
-                unlockedAt = System.currentTimeMillis(),
-                isUnlocked = true
-            )
-            "silver" -> Achievement(
-                id = "silver",
-                name = "Silver Scholar",
-                description = "Earned 1,500 XP",
-                requiredXP = SILVER_MILESTONE,
-                unlockedAt = System.currentTimeMillis(),
-                isUnlocked = true
-            )
-            "gold" -> Achievement(
-                id = "gold",
-                name = "Gold Programmer",
-                description = "Earned 3,000 XP",
-                requiredXP = GOLD_MILESTONE,
-                unlockedAt = System.currentTimeMillis(),
-                isUnlocked = true
-            )
-            "diamond" -> Achievement(
-                id = "diamond",
-                name = "Diamond Developer",
-                description = "Earned 5,000 XP",
-                requiredXP = DIAMOND_MILESTONE,
-                unlockedAt = System.currentTimeMillis(),
-                isUnlocked = true
-            )
-            "master" -> Achievement(
-                id = "master",
-                name = "Master Coder",
-                description = "Earned 10,000 XP",
-                requiredXP = MASTER_MILESTONE,
-                unlockedAt = System.currentTimeMillis(),
-                isUnlocked = true
-            )
-            else -> Achievement()
-        }
-    }
-
-    /**
-     * Get all unlocked achievements for user
+     * Get user's unlocked achievements from Firestore
      */
     suspend fun getUserAchievements(): List<Achievement> {
         val userId = auth.currentUser?.uid ?: return emptyList()
 
         return try {
-            val snapshot = firestore.collection("users")
-                .document(userId)
-                .collection(COLLECTION_ACHIEVEMENTS)
-                .get()
-                .await()
+            val userRef = firestore.collection("users").document(userId)
+            val achievementsSnapshot = userRef.collection("achievements").get().await()
 
-            snapshot.documents.mapNotNull { it.toObject(Achievement::class.java) }
+            val unlockedIds = achievementsSnapshot.documents.map { it.id }
+            val allAchievements = Achievement.getMilestoneAchievements()
+
+            // Map achievements and mark as unlocked if in user's collection
+            allAchievements.map { achievement ->
+                val doc = achievementsSnapshot.documents.find { it.id == achievement.id }
+                if (doc != null && doc.exists()) {
+                    achievement.copy(
+                        isUnlocked = true,
+                        unlockedAt = doc.getTimestamp("unlockedAt")?.toDate()?.time ?: 0L
+                    )
+                } else {
+                    achievement
+                }
+            }
+
         } catch (e: Exception) {
-            Log.e(TAG, "Error getting achievements", e)
+            Log.e(TAG, "Error getting user achievements", e)
             emptyList()
         }
     }
-}
 
-/**
- * Achievement tier enum
- */
-enum class AchievementTier {
-    NONE,
-    BRONZE,
-    SILVER,
-    GOLD,
-    DIAMOND,
-    MASTER
+    /**
+     * Get user's current badge
+     */
+    suspend fun getUserBadge(): String {
+        val userId = auth.currentUser?.uid ?: return Achievement.TIER_NONE
+
+        return try {
+            val userDoc = firestore.collection("users")
+                .document(userId)
+                .get()
+                .await()
+
+            userDoc.getString(FIELD_CURRENT_BADGE) ?: Achievement.TIER_NONE
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting user badge", e)
+            Achievement.TIER_NONE
+        }
+    }
+
+    /**
+     * Check if badge tier B is higher than badge tier A
+     */
+    private fun isHigherTier(tierB: String, tierA: String): Boolean {
+        val tierOrder = listOf(
+            Achievement.TIER_NONE,
+            Achievement.TIER_BRONZE,
+            Achievement.TIER_SILVER,
+            Achievement.TIER_GOLD,
+            Achievement.TIER_PLATINUM,
+            Achievement.TIER_DIAMOND
+        )
+
+        val indexA = tierOrder.indexOf(tierA)
+        val indexB = tierOrder.indexOf(tierB)
+
+        return indexB > indexA
+    }
+
+    /**
+     * Initialize user achievement fields if they don't exist
+     */
+    suspend fun initializeUserAchievements() {
+        val userId = auth.currentUser?.uid ?: return
+
+        try {
+            val userRef = firestore.collection("users").document(userId)
+            val userDoc = userRef.get().await()
+
+            val updates = mutableMapOf<String, Any>()
+
+            // Initialize achievementsUnlocked array if missing
+            if (!userDoc.contains(FIELD_ACHIEVEMENTS_UNLOCKED)) {
+                updates[FIELD_ACHIEVEMENTS_UNLOCKED] = emptyList<String>()
+            }
+
+            // Initialize currentBadge if missing
+            if (!userDoc.contains(FIELD_CURRENT_BADGE)) {
+                updates[FIELD_CURRENT_BADGE] = Achievement.TIER_NONE
+            }
+
+            // Apply updates if any
+            if (updates.isNotEmpty()) {
+                userRef.update(updates).await()
+                Log.d(TAG, "User achievement fields initialized")
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error initializing user achievements", e)
+        }
+    }
 }

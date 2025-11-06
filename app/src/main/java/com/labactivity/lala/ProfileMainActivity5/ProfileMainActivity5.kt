@@ -22,6 +22,8 @@ import com.google.firebase.firestore.Query
 import com.labactivity.lala.LEARNINGMATERIAL.CoreModule
 import com.labactivity.lala.LEARNINGMATERIAL.ModuleProgressManager
 import com.labactivity.lala.LEADERBOARDPAGE.Leaderboard
+import com.labactivity.lala.LEADERBOARDPAGE.Achievement
+import com.labactivity.lala.LEADERBOARDPAGE.AchievementAdapter
 import com.labactivity.lala.databinding.ActivityProfileMain5Binding
 import com.labactivity.lala.homepage.MainActivity4
 import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
@@ -37,6 +39,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.animation.ObjectAnimator
 import android.view.animation.DecelerateInterpolator
+import android.widget.ImageView
+import android.widget.FrameLayout
+import com.labactivity.lala.R
 
 class ProfileMainActivity5 : BaseActivity() {
 
@@ -50,6 +55,7 @@ class ProfileMainActivity5 : BaseActivity() {
     // Adapters for courses and quizzes
     private lateinit var enrolledCoursesAdapter: EnrolledCoursesAdapter
     private lateinit var quizHistoryAdapter: QuizHistoryAdapter
+    private lateinit var achievementAdapter: AchievementAdapter
     private lateinit var progressManager: ModuleProgressManager
     private lateinit var quizScoreManager: QuizScoreManager
     private lateinit var xpManager: XPManager
@@ -139,6 +145,13 @@ class ProfileMainActivity5 : BaseActivity() {
             layoutManager = LinearLayoutManager(this@ProfileMainActivity5)
             adapter = quizHistoryAdapter
         }
+
+        // Setup achievements RecyclerView
+        achievementAdapter = AchievementAdapter(listOf())
+        binding.achievementsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(this@ProfileMainActivity5)
+            adapter = achievementAdapter
+        }
     }
 
     private fun setupClickListeners() {
@@ -153,9 +166,7 @@ class ProfileMainActivity5 : BaseActivity() {
         // Leaderboard button
         binding.Leaderboard.setOnClickListener {
             Log.d(TAG, "Leaderboard clicked")
-            val intent = Intent(this, Leaderboard::class.java)
-            startActivity(intent)
-            finish()
+            checkLeaderboardEligibility()
         }
 
         // Upload photo button
@@ -178,6 +189,48 @@ class ProfileMainActivity5 : BaseActivity() {
         binding.viewAllQuizzesBtn.setOnClickListener {
             showAllQuizzes()
         }
+    }
+
+    private fun checkLeaderboardEligibility() {
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            Log.w(TAG, "No authenticated user")
+            Toast.makeText(this, "Please log in to view leaderboard", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Fetch user's current XP from Firestore
+        firestore.collection("users")
+            .document(currentUser.uid)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val totalXP = (document.getLong("totalXP") ?: 0).toInt()
+
+                    if (totalXP >= 500) {
+                        // User is eligible, navigate to leaderboard
+                        Log.d(TAG, "User eligible for leaderboard with $totalXP XP")
+                        val intent = Intent(this, Leaderboard::class.java)
+                        startActivity(intent)
+                    } else {
+                        // User doesn't have enough XP
+                        val requiredXP = 500 - totalXP
+                        Log.d(TAG, "User not eligible. Current XP: $totalXP, Required: 500")
+                        Toast.makeText(
+                            this,
+                            "You need 500 XP to access the leaderboard. You need $requiredXP more XP!",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } else {
+                    Log.w(TAG, "No user document found")
+                    Toast.makeText(this, "You need 500 XP to access the leaderboard.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error checking leaderboard eligibility", e)
+                Toast.makeText(this, "Failed to check eligibility. Please try again.", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun checkPermissionAndOpenPicker() {
@@ -348,6 +401,7 @@ class ProfileMainActivity5 : BaseActivity() {
                             val quizzesTaken = (document.getLong("quizzesTaken") ?: 0).toInt()
                             val technicalAssessments = (document.getLong("technicalAssessmentsCompleted") ?: 0).toInt()
                             val profilePhotoBase64 = document.getString("profilePhotoBase64")
+                            val currentBadge = document.getString("currentBadge") ?: Achievement.TIER_NONE
 
                             // Calculate level and progress using XPManager
                             val level = xpManager.calculateLevel(totalXP)
@@ -358,13 +412,30 @@ class ProfileMainActivity5 : BaseActivity() {
                             binding.textUsername.text = username
                             binding.textEmail.text = email
 
+                            // Display user badge
+                            if (currentBadge != Achievement.TIER_NONE) {
+                                binding.userBadgeDisplay.visibility = View.VISIBLE
+                                val badgeEmoji = when (currentBadge) {
+                                    Achievement.TIER_BRONZE -> "🥉"
+                                    Achievement.TIER_SILVER -> "🥈"
+                                    Achievement.TIER_GOLD -> "🥇"
+                                    Achievement.TIER_PLATINUM -> "💎"
+                                    Achievement.TIER_DIAMOND -> "💎"
+                                    else -> ""
+                                }
+                                binding.userBadgeDisplay.text = "$badgeEmoji ${Achievement.getBadgeDisplayName(currentBadge)}"
+                                binding.userBadgeDisplay.setTextColor(android.graphics.Color.parseColor(Achievement.getBadgeColor(currentBadge)))
+                            } else {
+                                binding.userBadgeDisplay.visibility = View.GONE
+                            }
+
                             // Display level and XP
                             binding.textXpValue.text = "${xpManager.getLevelString(totalXP)} — $totalXP XP"
                             binding.textCoursesValue.text = coursesCompleted.toString()
                             binding.textExercisesValue.text = quizzesTaken.toString()
 
-                            // Update progress bar with animation
-                            animateProgressBar(progressPercentage)
+                            // Update progress bar with checkpoints
+                            updateProgressWithCheckpoints(totalXP, level, progressInLevel, progressPercentage)
 
                             // Update progress text to show progress within level
                             binding.progressText.text = "$progressInLevel / ${XPManager.XP_PER_LEVEL} XP"
@@ -373,6 +444,9 @@ class ProfileMainActivity5 : BaseActivity() {
                             if (!profilePhotoBase64.isNullOrEmpty()) {
                                 displayProfileImageFromBase64(profilePhotoBase64)
                             }
+
+                            // Load achievements based on total XP
+                            loadAchievements(totalXP)
 
                             Log.d(TAG, "User profile loaded successfully")
                             Log.d(TAG, "  Total XP: $totalXP")
@@ -399,14 +473,81 @@ class ProfileMainActivity5 : BaseActivity() {
     }
 
     /**
-     * Animates the XP progress bar
+     * Updates the XP progress bar with checkpoint markers
      */
-    private fun animateProgressBar(targetProgress: Int) {
-        val currentProgress = binding.xpProgressBar.progress
-        val animator = ObjectAnimator.ofInt(binding.xpProgressBar, "progress", currentProgress, targetProgress)
-        animator.duration = 800 // 800ms animation
-        animator.interpolator = DecelerateInterpolator()
-        animator.start()
+    private fun updateProgressWithCheckpoints(totalXP: Int, level: Int, progressInLevel: Int, progressPercentage: Int) {
+        val XP_PER_LEVEL = 500
+
+        // Calculate current level based on totalXP
+        val currentLevel = (totalXP / XP_PER_LEVEL) + 1
+        val nextLevel = currentLevel + 1
+        val xpInCurrentLevel = totalXP % XP_PER_LEVEL
+        val progressPercent = (xpInCurrentLevel.toFloat() / XP_PER_LEVEL.toFloat() * 100).toInt()
+
+        // Update level text indicators
+        binding.currentLevelTextProfile.text = "Level $currentLevel"
+        binding.nextLevelTextProfile.text = "Level $nextLevel"
+        binding.xpProgressTextProfile.text = "$xpInCurrentLevel/$XP_PER_LEVEL XP"
+
+        // Update progress bar width dynamically
+        val progressBarParams = binding.xpProgressBar.layoutParams
+        progressBarParams.width = 0 // Will be set based on percentage
+        binding.xpProgressBar.layoutParams = progressBarParams
+
+        // Post to ensure layout is ready
+        binding.xpProgressBar.post {
+            val containerWidth = binding.xpProgressBar.parent.let {
+                if (it is View) it.width else 0
+            }
+
+            val newWidth = (containerWidth * progressPercent / 100)
+            val params = binding.xpProgressBar.layoutParams
+            params.width = newWidth
+            binding.xpProgressBar.layoutParams = params
+        }
+
+        // Add checkpoint markers for reached levels
+        binding.checkpointMarkersContainer.removeAllViews()
+
+        // Calculate how many checkpoints to show (levels already completed)
+        val completedLevels = totalXP / XP_PER_LEVEL
+
+        // Post to add checkpoint markers after layout is ready
+        binding.checkpointMarkersContainer.post {
+            val containerWidth = binding.checkpointMarkersContainer.width
+
+            if (containerWidth > 0 && completedLevels > 0) {
+                // Add checkpoint markers for completed levels
+                // We show markers to indicate previous level completions
+                for (i in 1..minOf(completedLevels, 5)) { // Show up to 5 checkpoints
+                    val checkpoint = ImageView(this)
+                    checkpoint.setImageResource(R.drawable.milestone_marker)
+
+                    val size = 20 // 20dp marker size
+                    val sizeInPx = (size * resources.displayMetrics.density).toInt()
+
+                    val params = FrameLayout.LayoutParams(sizeInPx, sizeInPx)
+
+                    // Position marker at the start of the bar to indicate completed level
+                    // For the current level progression, we position at the left as a reference point
+                    params.leftMargin = (containerWidth * 0.05 * i).toInt() // Spread them out
+
+                    checkpoint.layoutParams = params
+                    binding.checkpointMarkersContainer.addView(checkpoint)
+                }
+            }
+        }
+
+        // Show achievement message if user just reached a level
+        if (totalXP % XP_PER_LEVEL == 0 && totalXP > 0) {
+            binding.checkpointText.visibility = View.VISIBLE
+            binding.checkpointText.text = "🏆 Level $currentLevel Checkpoint Reached! Achievement Unlocked!"
+        } else {
+            binding.checkpointText.visibility = View.GONE
+        }
+
+        Log.d(TAG, "Progress bar updated: $xpInCurrentLevel/$XP_PER_LEVEL XP ($progressPercent%)")
+        Log.d(TAG, "Completed levels: $completedLevels, Current level: $currentLevel")
     }
 
     private fun loadEnrolledCourses() {
@@ -630,6 +771,35 @@ class ProfileMainActivity5 : BaseActivity() {
 
         val dialog = dialogBuilder.create()
         dialog.show()
+    }
+
+    private fun loadAchievements(totalXP: Int) {
+        Log.d(TAG, "Loading achievements for totalXP: $totalXP")
+
+        // Get all achievements with their unlock status
+        val achievements = Achievement.getUnlockedAchievements(totalXP)
+
+        // Count unlocked achievements
+        val unlockedCount = achievements.count { it.isUnlocked }
+        val totalCount = achievements.size
+
+        Log.d(TAG, "Unlocked $unlockedCount of $totalCount achievements")
+
+        // Update achievements count badge
+        binding.achievementsCountBadge.text = "$unlockedCount/$totalCount"
+
+        // Update the adapter
+        achievementAdapter = AchievementAdapter(achievements)
+        binding.achievementsRecyclerView.adapter = achievementAdapter
+
+        // Show/hide empty state
+        if (achievements.isEmpty()) {
+            binding.achievementsRecyclerView.visibility = View.GONE
+            binding.noAchievementsText.visibility = View.VISIBLE
+        } else {
+            binding.achievementsRecyclerView.visibility = View.VISIBLE
+            binding.noAchievementsText.visibility = View.GONE
+        }
     }
 
     override fun onResume() {

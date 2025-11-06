@@ -4,32 +4,44 @@ service cloud.firestore {
 
     // 🔹 Users Collection
     match /users/{userId} {
-      // Allow users to read and write their own profile
-      // XP fields (totalXP, level, quizzesTaken, technicalAssessmentsCompleted, coursesCompleted)
-      // are updated by the app after completing activities
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Allow all authenticated users to READ any user profile (for leaderboard)
+      // But only allow users to WRITE to their own profile
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
 
-      // Quiz Results subcollection under users (for profile page quiz history)
-      match /quizResults/{resultId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+      // 🔹 Achievements subcollection (user-specific unlocked achievements)
+      match /achievements/{achievementId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if request.auth != null && request.auth.uid == userId;
       }
 
-      // Quiz Scores subcollection under users (for tracking module quiz attempts)
+      // Quiz Scores subcollection under users
       match /quiz_scores/{moduleId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
 
-        // Attempts subcollection under quiz_scores (versioned quiz attempts)
+        // 🔹 Attempts subcollection inside each quiz score
         match /attempts/{attemptId} {
           allow read, write: if request.auth != null && request.auth.uid == userId;
         }
       }
+
+      // Quiz Results subcollection under users
+      match /quizResults/{resultId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // 🔹 Global Achievements Collection (template list of all achievements)
+    match /achievements/{achievementId} {
+      allow read: if true;                     // anyone can read available achievements
+      allow write: if request.auth.token.admin == true; // only admin can modify global achievements
     }
 
     // 🔹 User Progress Collection (for tracking lesson completion and technical assessments)
     match /user_progress/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
 
-      // 🔹 Technical Assessment Progress subcollection
+      // 🔹 Technical Assessment Progress subcollection (for both Python and SQL)
       match /technical_assessment_progress/{challengeId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
@@ -47,8 +59,8 @@ service cloud.firestore {
 
     // 🔹 Courses Collection
     match /courses/{courseId} {
-      allow read: if true;                   // public read
-      allow write: if request.auth != null;  // only logged-in can write
+      allow read: if true;
+      allow write: if request.auth != null;
 
       // Modules subcollection
       match /modules/{moduleId} {
@@ -65,8 +77,8 @@ service cloud.firestore {
 
     // 🔹 Quizzes Collection (Global)
     match /course_quiz/{quizId} {
-      allow read: if true;                   // anyone can read quizzes
-      allow write: if request.auth != null;  // only logged-in can add/edit
+      allow read: if true;
+      allow write: if request.auth != null;
 
       // Questions subcollection under each quiz
       match /questions/{questionId} {
@@ -77,14 +89,14 @@ service cloud.firestore {
 
     // 🔹 Leaderboard Collection
     match /leaderboard/{userId} {
-      allow read: if request.auth != null;   // logged-in users can view leaderboard
-      allow write: if request.auth != null && request.auth.uid == userId;  // users can only update their own score
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // 🔹 Technical Assessment Collection
+    // 🔹 Technical Assessments (Challenge Definitions)
     match /technical_assesment/{docId} {
-      allow read: if request.auth != null;   // only logged-in users can fetch challenges
-      allow write: if request.auth != null;  // allow creation or updates if needed
+      allow read: if request.auth != null;
+      allow write: if request.auth.token.admin == true;
     }
 
     // 🔹 Test Collection (for dev/debugging)

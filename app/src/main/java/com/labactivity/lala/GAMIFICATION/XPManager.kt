@@ -121,7 +121,7 @@ class XPManager {
 
     /**
      * Updates user's total XP and recalculates level
-     * Also increments relevant counters
+     * Also increments relevant counters and checks for achievements
      */
     private suspend fun updateUserXP(
         xpAmount: Int,
@@ -167,6 +167,17 @@ class XPManager {
             Log.d(TAG, "    level: $newLevel")
             if (updateQuizzesTaken) Log.d(TAG, "    quizzesTaken: +1")
             if (updateTechnicalAssessments) Log.d(TAG, "    technicalAssessmentsCompleted: +1")
+
+            // Check and unlock achievements
+            val achievementManager = AchievementManager()
+            val unlockedAchievements = achievementManager.checkAndUnlockAchievements(newXP)
+
+            if (unlockedAchievements.isNotEmpty()) {
+                Log.d(TAG, "  🏆 New achievements unlocked: ${unlockedAchievements.size}")
+                unlockedAchievements.forEach { unlocked ->
+                    Log.d(TAG, "    - ${unlocked.achievement.title} (${unlocked.badgeEarned})")
+                }
+            }
 
             true
 

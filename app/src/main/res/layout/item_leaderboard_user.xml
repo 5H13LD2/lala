@@ -11,10 +11,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="16dp"
-        android:gravity="center_vertical"
         android:background="@color/white">
+
+        <!-- Top Row: User Info -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
         <!-- Rank Circle -->
         <TextView
@@ -26,9 +32,26 @@
             android:textStyle="bold"
             android:textColor="@android:color/white"
             android:background="@drawable/rank_circle"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="12dp"
             android:fontFamily="sans-serif-black"
             android:elevation="2dp" />
+
+        <!-- Profile Photo -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="12dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp">
+
+            <ImageView
+                android:id="@+id/profileImageView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="@drawable/profile_image_background"
+                android:contentDescription="Profile Photo" />
+        </androidx.cardview.widget.CardView>
 
         <!-- User Info Container -->
         <LinearLayout
@@ -37,17 +60,33 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
-            <!-- Username -->
-            <TextView
-                android:id="@+id/usernameText"
+            <!-- Username with Badge Row -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="@color/brand_dark"
-                android:fontFamily="sans-serif-medium"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/usernameText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/brand_dark"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/userBadgeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🥉"
+                    android:textSize="10sp"
+                    android:layout_marginStart="4dp"
+                    android:visibility="gone" />
+            </LinearLayout>
 
             <!-- Level Text -->
             <TextView
@@ -95,6 +134,92 @@
                 android:textColor="@color/modern_text_secondary"
                 android:fontFamily="sans-serif"
                 android:layout_marginTop="1dp" />
+        </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- XP Progress Bar Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="12dp">
+
+            <!-- Progress Info Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="4dp">
+
+                <TextView
+                    android:id="@+id/currentLevelText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Level 1"
+                    android:textSize="10sp"
+                    android:textColor="@color/brand_teal"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/xpProgressText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="200/500 XP"
+                    android:textSize="10sp"
+                    android:textColor="@color/modern_text_secondary" />
+
+                <TextView
+                    android:id="@+id/nextLevelText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Level 2"
+                    android:textSize="10sp"
+                    android:textColor="@color/brand_teal"
+                    android:textStyle="bold"
+                    android:gravity="end" />
+            </LinearLayout>
+
+            <!-- Progress Bar Container -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="12dp">
+
+                <!-- Background Progress Bar -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/xp_progress_bar_background" />
+
+                <!-- Filled Progress Bar -->
+                <View
+                    android:id="@+id/xpProgressBar"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/xp_progress_bar_fill" />
+
+                <!-- Milestone Markers Container -->
+                <LinearLayout
+                    android:id="@+id/milestoneMarkersContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical" />
+            </FrameLayout>
+
+            <!-- Milestone Achievement Text -->
+            <TextView
+                android:id="@+id/milestoneText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏆 Milestone Reached!"
+                android:textSize="11sp"
+                android:textColor="#FFD700"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp"
+                android:visibility="gone" />
         </LinearLayout>
 
     </LinearLayout>
