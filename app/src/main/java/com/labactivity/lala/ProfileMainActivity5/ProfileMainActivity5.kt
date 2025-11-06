@@ -797,37 +797,37 @@ class ProfileMainActivity5 : BaseActivity() {
                     AchievementBadgeItem(
                         name = "Bronze",
                         description = "500 XP",
-                        requiredXP = AchievementManager.BRONZE_MILESTONE,
-                        badgeDrawable = R.drawable.achievement_bronze,
-                        isUnlocked = totalXP >= AchievementManager.BRONZE_MILESTONE
+                        requiredXP = 500,
+                        badgeDrawable = R.drawable.badge_bronze,
+                        isUnlocked = totalXP >= 500
                     ),
                     AchievementBadgeItem(
                         name = "Silver",
-                        description = "1,500 XP",
-                        requiredXP = AchievementManager.SILVER_MILESTONE,
-                        badgeDrawable = R.drawable.achievement_silver,
-                        isUnlocked = totalXP >= AchievementManager.SILVER_MILESTONE
+                        description = "1,000 XP",
+                        requiredXP = 1000,
+                        badgeDrawable = R.drawable.badge_silver,
+                        isUnlocked = totalXP >= 1000
                     ),
                     AchievementBadgeItem(
                         name = "Gold",
+                        description = "2,000 XP",
+                        requiredXP = 2000,
+                        badgeDrawable = R.drawable.badge_gold,
+                        isUnlocked = totalXP >= 2000
+                    ),
+                    AchievementBadgeItem(
+                        name = "Platinum",
                         description = "3,000 XP",
-                        requiredXP = AchievementManager.GOLD_MILESTONE,
-                        badgeDrawable = R.drawable.achievement_gold,
-                        isUnlocked = totalXP >= AchievementManager.GOLD_MILESTONE
+                        requiredXP = 3000,
+                        badgeDrawable = R.drawable.badge_platinum,
+                        isUnlocked = totalXP >= 3000
                     ),
                     AchievementBadgeItem(
                         name = "Diamond",
                         description = "5,000 XP",
-                        requiredXP = AchievementManager.DIAMOND_MILESTONE,
-                        badgeDrawable = R.drawable.achievement_diamond,
-                        isUnlocked = totalXP >= AchievementManager.DIAMOND_MILESTONE
-                    ),
-                    AchievementBadgeItem(
-                        name = "Master",
-                        description = "10,000 XP",
-                        requiredXP = AchievementManager.MASTER_MILESTONE,
-                        badgeDrawable = R.drawable.achievement_master,
-                        isUnlocked = totalXP >= AchievementManager.MASTER_MILESTONE
+                        requiredXP = 5000,
+                        badgeDrawable = R.drawable.badge_diamond,
+                        isUnlocked = totalXP >= 5000
                     )
                 )
 
@@ -837,7 +837,7 @@ class ProfileMainActivity5 : BaseActivity() {
 
                 // Update achievement count
                 val unlockedCount = achievementList.count { it.isUnlocked }
-                binding.achievementCount.text = "$unlockedCount/5"
+                binding.achievementsCountBadge.text = "$unlockedCount/5"
 
                 Log.d(TAG, "✅ Loaded achievements: $unlockedCount unlocked")
 
