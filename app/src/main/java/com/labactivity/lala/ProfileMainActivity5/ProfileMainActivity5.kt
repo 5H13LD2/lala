@@ -848,7 +848,7 @@ class ProfileMainActivity5 : BaseActivity() {
             }
         }
     }
-
+//putangina ayaw gumana
     override fun onResume() {
         super.onResume()
         // Refresh user data when returning to the activity
