@@ -9,6 +9,11 @@
       "Bash(./gradlew clean:*)",
       "Bash(mkdir:*)",
       "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git merge:*)",
+      "Bash(git log:*)",
+      "Bash(git fetch:*)",
+      "Bash(git stash:*)",
       "Bash(for file in *)",
       "Bash(do mv \"$file\" ..)",
       "Bash(done)"
