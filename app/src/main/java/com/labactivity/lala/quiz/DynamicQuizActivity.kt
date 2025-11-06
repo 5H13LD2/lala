@@ -27,6 +27,7 @@ class DynamicQuizActivity : AppCompatActivity() {
     private lateinit var answerOptions: RadioGroup
     private lateinit var nextButton: Button
     private lateinit var timeUpMessage: TextView
+    private lateinit var backButton: ImageButton
     private lateinit var option1: RadioButton
     private lateinit var option2: RadioButton
     private lateinit var option3: RadioButton
@@ -72,12 +73,17 @@ class DynamicQuizActivity : AppCompatActivity() {
         answerOptions = findViewById(R.id.answer_options)
         nextButton = findViewById(R.id.next_button)
         timeUpMessage = findViewById(R.id.time_up_message)
+        backButton = findViewById(R.id.backButton)
         option1 = findViewById(R.id.option_1)
         option2 = findViewById(R.id.option_2)
         option3 = findViewById(R.id.option_3)
         option4 = findViewById(R.id.option_4)
 
         nextButton.setOnClickListener { handleNextButton() }
+        backButton.setOnClickListener {
+            countDownTimer?.cancel()
+            finish()
+        }
 
         Log.d(TAG, "initializeViews: All views initialized successfully")
     }

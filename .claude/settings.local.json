@@ -8,7 +8,10 @@
       "Bash(rm:*)",
       "Bash(./gradlew clean:*)",
       "Bash(mkdir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(for file in *)",
+      "Bash(do mv \"$file\" ..)",
+      "Bash(done)"
     ],
     "deny": [],
     "ask": []
