@@ -33,15 +33,16 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import com.labactivity.lala.quiz.QuizScoreManager
 import com.labactivity.lala.GAMIFICATION.XPManager
+import com.labactivity.lala.GAMIFICATION.AchievementManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.animation.ObjectAnimator
 import android.view.animation.DecelerateInterpolator
-import android.widget.ImageView
-import android.widget.FrameLayout
+import androidx.recyclerview.widget.GridLayoutManager
 import com.labactivity.lala.R
+import kotlinx.coroutines.tasks.await
 
 class ProfileMainActivity5 : BaseActivity() {
 
@@ -55,10 +56,11 @@ class ProfileMainActivity5 : BaseActivity() {
     // Adapters for courses and quizzes
     private lateinit var enrolledCoursesAdapter: EnrolledCoursesAdapter
     private lateinit var quizHistoryAdapter: QuizHistoryAdapter
-    private lateinit var achievementAdapter: AchievementAdapter
+    private lateinit var achievementBadgeAdapter: AchievementBadgeAdapter
     private lateinit var progressManager: ModuleProgressManager
     private lateinit var quizScoreManager: QuizScoreManager
     private lateinit var xpManager: XPManager
+    private lateinit var achievementManager: AchievementManager
     private var allQuizHistory: List<QuizHistoryItem> = listOf()
 
     // Permission launcher
@@ -100,12 +102,14 @@ class ProfileMainActivity5 : BaseActivity() {
         progressManager = ModuleProgressManager(this)
         quizScoreManager = QuizScoreManager(this)
         xpManager = XPManager()
+        achievementManager = AchievementManager(this)
 
         setupRecyclerViews()
         setupClickListeners()
         loadUserProfile()
         loadEnrolledCourses()
         loadQuizHistory()
+        loadAchievements()
     }
 
     private fun setupRecyclerViews() {
@@ -146,11 +150,11 @@ class ProfileMainActivity5 : BaseActivity() {
             adapter = quizHistoryAdapter
         }
 
-        // Setup achievements RecyclerView
-        achievementAdapter = AchievementAdapter(listOf())
-        binding.achievementsRecyclerView.apply {
-            layoutManager = LinearLayoutManager(this@ProfileMainActivity5)
-            adapter = achievementAdapter
+        // Setup achievement badges RecyclerView
+        achievementBadgeAdapter = AchievementBadgeAdapter(emptyList())
+        binding.achievementBadgesRecyclerView.apply {
+            layoutManager = GridLayoutManager(this@ProfileMainActivity5, 5)
+            adapter = achievementBadgeAdapter
         }
     }
 
@@ -773,32 +777,73 @@ class ProfileMainActivity5 : BaseActivity() {
         dialog.show()
     }
 
-    private fun loadAchievements(totalXP: Int) {
-        Log.d(TAG, "Loading achievements for totalXP: $totalXP")
+    private fun loadAchievements() {
+        val userId = auth.currentUser?.uid ?: return
 
-        // Get all achievements with their unlock status
-        val achievements = Achievement.getUnlockedAchievements(totalXP)
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                // Get user's total XP
+                val userDoc = withContext(Dispatchers.IO) {
+                    firestore.collection("users")
+                        .document(userId)
+                        .get()
+                        .await()
+                }
 
-        // Count unlocked achievements
-        val unlockedCount = achievements.count { it.isUnlocked }
-        val totalCount = achievements.size
+                val totalXP = userDoc.getLong("totalXP")?.toInt() ?: 0
 
-        Log.d(TAG, "Unlocked $unlockedCount of $totalCount achievements")
+                // Create list of all achievements with their unlock status
+                val achievementList = listOf(
+                    AchievementBadgeItem(
+                        name = "Bronze",
+                        description = "500 XP",
+                        requiredXP = AchievementManager.BRONZE_MILESTONE,
+                        badgeDrawable = R.drawable.achievement_bronze,
+                        isUnlocked = totalXP >= AchievementManager.BRONZE_MILESTONE
+                    ),
+                    AchievementBadgeItem(
+                        name = "Silver",
+                        description = "1,500 XP",
+                        requiredXP = AchievementManager.SILVER_MILESTONE,
+                        badgeDrawable = R.drawable.achievement_silver,
+                        isUnlocked = totalXP >= AchievementManager.SILVER_MILESTONE
+                    ),
+                    AchievementBadgeItem(
+                        name = "Gold",
+                        description = "3,000 XP",
+                        requiredXP = AchievementManager.GOLD_MILESTONE,
+                        badgeDrawable = R.drawable.achievement_gold,
+                        isUnlocked = totalXP >= AchievementManager.GOLD_MILESTONE
+                    ),
+                    AchievementBadgeItem(
+                        name = "Diamond",
+                        description = "5,000 XP",
+                        requiredXP = AchievementManager.DIAMOND_MILESTONE,
+                        badgeDrawable = R.drawable.achievement_diamond,
+                        isUnlocked = totalXP >= AchievementManager.DIAMOND_MILESTONE
+                    ),
+                    AchievementBadgeItem(
+                        name = "Master",
+                        description = "10,000 XP",
+                        requiredXP = AchievementManager.MASTER_MILESTONE,
+                        badgeDrawable = R.drawable.achievement_master,
+                        isUnlocked = totalXP >= AchievementManager.MASTER_MILESTONE
+                    )
+                )
 
-        // Update achievements count badge
-        binding.achievementsCountBadge.text = "$unlockedCount/$totalCount"
+                // Update adapter with achievement data
+                achievementBadgeAdapter = AchievementBadgeAdapter(achievementList)
+                binding.achievementBadgesRecyclerView.adapter = achievementBadgeAdapter
 
-        // Update the adapter
-        achievementAdapter = AchievementAdapter(achievements)
-        binding.achievementsRecyclerView.adapter = achievementAdapter
+                // Update achievement count
+                val unlockedCount = achievementList.count { it.isUnlocked }
+                binding.achievementCount.text = "$unlockedCount/5"
 
-        // Show/hide empty state
-        if (achievements.isEmpty()) {
-            binding.achievementsRecyclerView.visibility = View.GONE
-            binding.noAchievementsText.visibility = View.VISIBLE
-        } else {
-            binding.achievementsRecyclerView.visibility = View.VISIBLE
-            binding.noAchievementsText.visibility = View.GONE
+                Log.d(TAG, "✅ Loaded achievements: $unlockedCount unlocked")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error loading achievements", e)
+            }
         }
     }
 
@@ -808,5 +853,6 @@ class ProfileMainActivity5 : BaseActivity() {
         loadUserProfile()
         loadEnrolledCourses()
         loadQuizHistory()
+        loadAchievements()
     }
 }
