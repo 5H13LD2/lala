@@ -40,6 +40,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.animation.ObjectAnimator
 import android.view.animation.DecelerateInterpolator
+import android.widget.FrameLayout
+import android.widget.ImageView
 import androidx.recyclerview.widget.GridLayoutManager
 import com.labactivity.lala.R
 import kotlinx.coroutines.tasks.await
@@ -102,7 +104,7 @@ class ProfileMainActivity5 : BaseActivity() {
         progressManager = ModuleProgressManager(this)
         quizScoreManager = QuizScoreManager(this)
         xpManager = XPManager()
-        achievementManager = AchievementManager(this)
+        achievementManager = AchievementManager()
 
         setupRecyclerViews()
         setupClickListeners()
@@ -450,7 +452,7 @@ class ProfileMainActivity5 : BaseActivity() {
                             }
 
                             // Load achievements based on total XP
-                            loadAchievements(totalXP)
+                            loadAchievements()
 
                             Log.d(TAG, "User profile loaded successfully")
                             Log.d(TAG, "  Total XP: $totalXP")
