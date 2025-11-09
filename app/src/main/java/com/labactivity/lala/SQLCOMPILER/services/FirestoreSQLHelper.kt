@@ -43,7 +43,7 @@ class FirestoreSQLHelper {
     // ==================== Challenge Fetching Methods ====================
 
     /**
-     * Fetches all active SQL challenges from Firestore
+     * Fetches all active SQL challenges from Firestore with unlock status
      * @return List of SQLChallenge objects sorted by order
      */
     suspend fun getAllChallenges(): List<SQLChallenge> = withContext(Dispatchers.IO) {
@@ -66,7 +66,12 @@ class FirestoreSQLHelper {
             }
 
             Log.d(TAG, "Successfully fetched ${challenges.size} SQL challenges")
-            challenges
+
+            // Apply unlock logic
+            val challengesWithUnlockStatus = applyUnlockLogic(challenges)
+            Log.d(TAG, "✅ Applied unlock logic to ${challengesWithUnlockStatus.size} SQL challenges")
+
+            challengesWithUnlockStatus
 
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching SQL challenges: ${e.message}", e)
@@ -154,6 +159,68 @@ class FirestoreSQLHelper {
                 emptyList()
             }
         }
+
+    /**
+     * Apply unlock logic to SQL challenges based on difficulty progression
+     * Rule: A challenge is unlocked if all easier challenges are completed
+     * Difficulty order: Easy -> Medium -> Hard
+     * @param challenges List of challenges to process
+     * @return List of challenges with isUnlocked field set correctly
+     */
+    private suspend fun applyUnlockLogic(challenges: List<SQLChallenge>): List<SQLChallenge> {
+        return try {
+            // Get all user progress
+            val allProgress = getAllUserProgress()
+            val completedChallengeIds = allProgress.filter { it.passed }.map { it.challengeId }.toSet()
+
+            Log.d(TAG, "🔓 User has completed ${completedChallengeIds.size} SQL challenges")
+
+            // Group challenges by difficulty
+            val easyChallenges = challenges.filter { it.difficulty.equals("Easy", ignoreCase = true) }
+            val mediumChallenges = challenges.filter { it.difficulty.equals("Medium", ignoreCase = true) }
+            val hardChallenges = challenges.filter { it.difficulty.equals("Hard", ignoreCase = true) }
+
+            // Check if all challenges of a difficulty are completed
+            val allEasyCompleted = easyChallenges.all { it.id in completedChallengeIds }
+            val allMediumCompleted = mediumChallenges.all { it.id in completedChallengeIds }
+
+            Log.d(TAG, "🔓 SQL Easy: ${easyChallenges.size} total, all completed: $allEasyCompleted")
+            Log.d(TAG, "🔓 SQL Medium: ${mediumChallenges.size} total, all completed: $allMediumCompleted")
+            Log.d(TAG, "🔓 SQL Hard: ${hardChallenges.size} total")
+
+            // Apply unlock logic
+            challenges.map { challenge ->
+                val isUnlocked = when (challenge.difficulty.lowercase()) {
+                    "easy" -> {
+                        // All Easy challenges are always unlocked
+                        true
+                    }
+                    "medium" -> {
+                        // Medium challenges unlock when all Easy are completed
+                        allEasyCompleted
+                    }
+                    "hard" -> {
+                        // Hard challenges unlock when all Easy AND Medium are completed
+                        allEasyCompleted && allMediumCompleted
+                    }
+                    else -> {
+                        // Unknown difficulty - unlock by default
+                        true
+                    }
+                }
+
+                if (!isUnlocked) {
+                    Log.d(TAG, "🔒 SQL Challenge locked: ${challenge.title} (${challenge.difficulty})")
+                }
+
+                challenge.copy(isUnlocked = isUnlocked)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error applying unlock logic to SQL challenges", e)
+            // On error, return all challenges as unlocked (fail-safe)
+            challenges.map { it.copy(isUnlocked = true) }
+        }
+    }
 
     /**
      * Fetches a single challenge by its document ID

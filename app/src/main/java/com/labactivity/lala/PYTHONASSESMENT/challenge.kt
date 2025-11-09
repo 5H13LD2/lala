@@ -11,6 +11,7 @@ data class Challenge(
     val category: String = "",
     val status: String = "available",
     val createdAt: String = "",
+    val isUnlocked: Boolean = true,     // Whether challenge is unlocked for user
     val codePreview: String = if (brokenCode.isNotEmpty()) {
         brokenCode.lines().firstOrNull {
             it.trim().isNotEmpty() && !it.trim().startsWith("#")

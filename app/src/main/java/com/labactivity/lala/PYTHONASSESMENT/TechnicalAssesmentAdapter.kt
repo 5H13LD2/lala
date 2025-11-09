@@ -6,7 +6,9 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.labactivity.lala.PYTHONCOMPILER.CompilerActivity
@@ -93,6 +95,16 @@ class TechnicalAssessmentAdapter(
             val isCompleted = progress?.status == "completed"
             holder.itemView.alpha = if (isCompleted) 0.85f else 1f
 
+            // Show/hide lock overlay for locked challenges
+            if (!challenge.isUnlocked) {
+                holder.lockOverlay?.visibility = View.VISIBLE
+                holder.lockIcon?.visibility = View.VISIBLE
+                holder.itemView.alpha = 0.6f
+            } else {
+                holder.lockOverlay?.visibility = View.GONE
+                holder.lockIcon?.visibility = View.GONE
+            }
+
             // Animate only if not already animated
             if (holder.itemView.animation == null) {
                 val animation = android.view.animation.AnimationUtils.loadAnimation(
@@ -103,6 +115,17 @@ class TechnicalAssessmentAdapter(
             }
 
             holder.itemView.setOnClickListener {
+                // Check if challenge is locked
+                if (!challenge.isUnlocked) {
+                    val message = when (challenge.difficulty.lowercase()) {
+                        "medium" -> "Complete all Easy challenges to unlock Medium difficulty"
+                        "hard" -> "Complete all Easy and Medium challenges to unlock Hard difficulty"
+                        else -> "This challenge is locked"
+                    }
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
                 if (isCompleted && progress?.passed == true) {
                     AlertDialog.Builder(context)
                         .setTitle("Assessment Completed")
@@ -193,6 +216,8 @@ class TechnicalAssessmentAdapter(
         val codePreviewTextView: TextView = itemView.findViewById(R.id.textCodePreview)
         val statusTextView: TextView? = itemView.findViewById(R.id.textStatus)
         val scoreTextView: TextView? = itemView.findViewById(R.id.textScore)
+        val lockOverlay: View? = itemView.findViewById(R.id.lockOverlay)
+        val lockIcon: ImageView? = itemView.findViewById(R.id.lockIcon)
     }
 
     class SkeletonViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

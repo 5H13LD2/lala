@@ -21,7 +21,7 @@ class TechnicalAssessmentService {
         private const val FIELD_COURSE_ID = "courseId"
     }
 
-    /** Fetch challenges based on user’s enrolled courses **/
+    /** Fetch challenges based on user's enrolled courses **/
     suspend fun getChallengesForUser(): List<Challenge> {
         return try {
             val userId = auth.currentUser?.uid ?: run {
@@ -40,7 +40,11 @@ class TechnicalAssessmentService {
             val challenges = fetchChallengesByCourseIds(enrolledCourseIds)
             Log.d(TAG, "✅ Found ${challenges.size} challenges for enrolled courses")
 
-            challenges
+            // Calculate which challenges should be unlocked
+            val challengesWithUnlockStatus = applyUnlockLogic(challenges)
+            Log.d(TAG, "✅ Applied unlock logic to ${challengesWithUnlockStatus.size} challenges")
+
+            challengesWithUnlockStatus
         } catch (e: Exception) {
             Log.e(TAG, "❌ Error fetching challenges for user", e)
             emptyList()
@@ -113,6 +117,65 @@ class TechnicalAssessmentService {
         }
     }
 
+    /**
+     * Apply unlock logic to challenges based on difficulty progression
+     * Rule: A challenge is unlocked if all easier challenges are completed
+     * Difficulty order: Easy -> Medium -> Hard
+     */
+    private suspend fun applyUnlockLogic(challenges: List<Challenge>): List<Challenge> {
+        return try {
+            // Get all user progress
+            val allProgress = getAllUserProgress()
+            val completedChallengeIds = allProgress.filter { it.passed }.map { it.challengeId }.toSet()
+
+            Log.d(TAG, "🔓 User has completed ${completedChallengeIds.size} challenges")
+
+            // Group challenges by difficulty
+            val easyChallenges = challenges.filter { it.difficulty.equals("Easy", ignoreCase = true) }
+            val mediumChallenges = challenges.filter { it.difficulty.equals("Medium", ignoreCase = true) }
+            val hardChallenges = challenges.filter { it.difficulty.equals("Hard", ignoreCase = true) }
+
+            // Check if all challenges of a difficulty are completed
+            val allEasyCompleted = easyChallenges.all { it.id in completedChallengeIds }
+            val allMediumCompleted = mediumChallenges.all { it.id in completedChallengeIds }
+
+            Log.d(TAG, "🔓 Easy: ${easyChallenges.size} total, all completed: $allEasyCompleted")
+            Log.d(TAG, "🔓 Medium: ${mediumChallenges.size} total, all completed: $allMediumCompleted")
+            Log.d(TAG, "🔓 Hard: ${hardChallenges.size} total")
+
+            // Apply unlock logic
+            challenges.map { challenge ->
+                val isUnlocked = when (challenge.difficulty.lowercase()) {
+                    "easy" -> {
+                        // All Easy challenges are always unlocked
+                        true
+                    }
+                    "medium" -> {
+                        // Medium challenges unlock when all Easy are completed
+                        allEasyCompleted
+                    }
+                    "hard" -> {
+                        // Hard challenges unlock when all Easy AND Medium are completed
+                        allEasyCompleted && allMediumCompleted
+                    }
+                    else -> {
+                        // Unknown difficulty - unlock by default
+                        true
+                    }
+                }
+
+                if (!isUnlocked) {
+                    Log.d(TAG, "🔒 Challenge locked: ${challenge.title} (${challenge.difficulty})")
+                }
+
+                challenge.copy(isUnlocked = isUnlocked)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error applying unlock logic", e)
+            // On error, return all challenges as unlocked (fail-safe)
+            challenges.map { it.copy(isUnlocked = true) }
+        }
+    }
 
     /** Update challenge status (e.g., when completed) **/
     suspend fun updateChallengeStatus(challengeId: String, status: String) {

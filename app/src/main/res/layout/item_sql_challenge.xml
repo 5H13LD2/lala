@@ -11,6 +11,10 @@
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -105,5 +109,26 @@
             android:visibility="gone" />
 
     </LinearLayout>
+
+    <!-- Lock overlay for locked challenges -->
+    <View
+        android:id="@+id/lockOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC000000"
+        android:visibility="gone" />
+
+    <!-- Lock icon centered -->
+    <ImageView
+        android:id="@+id/lockIcon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:src="@android:drawable/ic_lock_lock"
+        android:tint="#FFFFFF"
+        android:contentDescription="Locked Challenge"
+        android:visibility="gone" />
+
+    </FrameLayout>
 
 </androidx.cardview.widget.CardView>
