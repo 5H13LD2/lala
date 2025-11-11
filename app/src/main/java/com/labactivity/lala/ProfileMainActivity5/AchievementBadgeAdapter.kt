@@ -7,6 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.labactivity.lala.R
+import com.labactivity.lala.UTILS.DialogUtils
 
 class AchievementBadgeAdapter(
     private val achievements: List<AchievementBadgeItem>
@@ -50,17 +51,19 @@ class AchievementBadgeAdapter(
             // Set click listener to show achievement details
             itemView.setOnClickListener {
                 val context = itemView.context
-                val message = if (achievement.isUnlocked) {
-                    "${achievement.name} - ${achievement.description}\n✓ Unlocked!"
+                if (achievement.isUnlocked) {
+                    DialogUtils.showInfoDialog(
+                        context = context,
+                        title = "🏆 ${achievement.name}",
+                        message = "${achievement.description}\n\n✓ Unlocked!"
+                    )
                 } else {
-                    "${achievement.name}\nRequires ${achievement.requiredXP} XP\n🔒 Locked"
+                    DialogUtils.showLockedDialog(
+                        context = context,
+                        title = "🔒 ${achievement.name}",
+                        message = "Requires ${achievement.requiredXP} XP to unlock this achievement."
+                    )
                 }
-
-                android.widget.Toast.makeText(
-                    context,
-                    message,
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
             }
         }
     }

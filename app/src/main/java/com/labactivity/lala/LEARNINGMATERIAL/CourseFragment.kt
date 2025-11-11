@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.R
-import android.widget.Toast
+import com.labactivity.lala.UTILS.DialogUtils
 
 class CourseFragment : Fragment() {
 
@@ -38,18 +38,18 @@ class CourseFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        courseId = arguments?.getString(ARG_COURSE_ID).also { 
+        courseId = arguments?.getString(ARG_COURSE_ID).also {
             Log.d(TAG, "Retrieved courseId from arguments: $it")
         } ?: run {
             Log.e(TAG, "No courseId provided in arguments!")
-            Toast.makeText(requireContext(), "Error: Course not found", Toast.LENGTH_SHORT).show()
+            DialogUtils.showErrorDialog(requireContext(), "Error", "Course not found")
             requireActivity().finish()
             return
         }
 
         if (courseId.isEmpty()) {
             Log.e(TAG, "Empty courseId provided!")
-            Toast.makeText(requireContext(), "Error: Invalid course", Toast.LENGTH_SHORT).show()
+            DialogUtils.showErrorDialog(requireContext(), "Error", "Invalid course")
             requireActivity().finish()
             return
         }

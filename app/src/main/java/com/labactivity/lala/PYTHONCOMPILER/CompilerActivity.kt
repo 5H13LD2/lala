@@ -14,8 +14,8 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.labactivity.lala.UTILS.DialogUtils
 import androidx.core.widget.NestedScrollView
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
@@ -147,7 +147,7 @@ class CompilerActivity : AppCompatActivity() {
 
         // Set click listener for Hint button
         hintButton.setOnClickListener {
-            Toast.makeText(this, hintText, Toast.LENGTH_LONG).show()
+            DialogUtils.showHintDialog(this, "Hint", hintText)
         }
 
         // Define the output file path
@@ -183,7 +183,7 @@ class CompilerActivity : AppCompatActivity() {
         val userCode = codeEditText.text.toString().trim()
 
         if (userCode.isBlank()) {
-            Toast.makeText(this, "Please enter some Python code.", Toast.LENGTH_SHORT).show()
+            DialogUtils.showWarningDialog(this, "Empty Code", "Please enter some Python code.")
             return
         }
 
@@ -260,8 +260,7 @@ class CompilerActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 handler.post {
-                    Toast.makeText(this, "Execution failed: ${e.message}", Toast.LENGTH_SHORT)
-                        .show()
+                    DialogUtils.showErrorDialog(this, "Execution Error", "Execution failed: ${e.message}")
                     outputTextView.text =
                         "Error: ${e.message}\n\nStack trace: ${e.stackTraceToString()}"
                     runButton.isEnabled = true
@@ -372,11 +371,11 @@ class CompilerActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 handler.post {
-                    Toast.makeText(
+                    DialogUtils.showErrorDialog(
                         this,
-                        "Failed to submit input: ${e.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                        "Input Error",
+                        "Failed to submit input: ${e.message}"
+                    )
                 }
             }
         }
@@ -418,7 +417,7 @@ class CompilerActivity : AppCompatActivity() {
             val timeTaken = System.currentTimeMillis() - startTime
 
             if (output.contains(expected)) {
-                Toast.makeText(this, "Challenge completed successfully! 🎉", Toast.LENGTH_LONG).show()
+                DialogUtils.showSuccessDialog(this, "Challenge Completed", "Challenge completed successfully!")
 
                 // Save progress to Firestore
                 if (challengeId.isNotEmpty()) {
@@ -433,7 +432,7 @@ class CompilerActivity : AppCompatActivity() {
                     )
                 }
             } else {
-                Toast.makeText(this, "Output doesn't match expected result. Try again!", Toast.LENGTH_LONG).show()
+                DialogUtils.showWarningDialog(this, "Try Again", "Output doesn't match expected result. Try again!")
 
                 // Save attempt even if failed (in_progress status)
                 if (challengeId.isNotEmpty()) {
@@ -449,7 +448,7 @@ class CompilerActivity : AppCompatActivity() {
                 }
             }
         } catch (e: Exception) {
-            Toast.makeText(this, "Error checking completion: ${e.message}", Toast.LENGTH_SHORT).show()
+            DialogUtils.showErrorDialog(this, "Error", "Error checking completion: ${e.message}")
         }
     }
 }

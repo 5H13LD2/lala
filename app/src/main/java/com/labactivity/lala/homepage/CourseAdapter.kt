@@ -9,8 +9,8 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.labactivity.lala.UTILS.DialogUtils
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.FLASHCARD.FlashcardActivity
@@ -106,7 +106,7 @@ class CourseAdapter(
                 Log.d(TAG, "Navigating to CoreModule for course: ${course.courseId}")
             } catch (e: Exception) {
                 Log.e(TAG, "Error navigating to CoreModule", e)
-                Toast.makeText(context, "Unable to open course", Toast.LENGTH_SHORT).show()
+                DialogUtils.showErrorDialog(context, "Error", "Unable to open course")
             }
         }
 
@@ -124,14 +124,14 @@ class CourseAdapter(
                     context.startActivity(intent)
                     Log.d(TAG, "Opening flashcards for course: ${course.courseId}")
                 } else {
-                    Toast.makeText(context, 
-                        "Flashcards not available for this course yet", 
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    DialogUtils.showInfoDialog(context,
+                        "Not Available",
+                        "Flashcards not available for this course yet"
+                    )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error opening flashcards", e)
-                Toast.makeText(context, "Unable to open flashcards", Toast.LENGTH_SHORT).show()
+                DialogUtils.showErrorDialog(context, "Error", "Unable to open flashcards")
             }
         }
 
@@ -151,14 +151,14 @@ class CourseAdapter(
                     context.startActivity(intent)
                     Log.d(TAG, "Opening practice for course: ${course.courseId}")
                 } else {
-                    Toast.makeText(context, 
-                        "Practice not available for this course yet", 
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    DialogUtils.showInfoDialog(context,
+                        "Not Available",
+                        "Practice not available for this course yet"
+                    )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error opening practice", e)
-                Toast.makeText(context, "Unable to open practice", Toast.LENGTH_SHORT).show()
+                DialogUtils.showErrorDialog(context, "Error", "Unable to open practice")
             }
         }
     }

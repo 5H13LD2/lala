@@ -8,6 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.labactivity.lala.R
+import com.labactivity.lala.UTILS.DialogUtils
 import com.labactivity.lala.SQLCOMPILER.models.SQLChallenge
 import com.labactivity.lala.SQLCOMPILER.models.TableData
 import com.labactivity.lala.SQLCOMPILER.services.FirestoreSQLHelper
@@ -59,7 +60,7 @@ class SQLChallengeActivity : AppCompatActivity() {
         challengeId = intent.getStringExtra(EXTRA_CHALLENGE_ID)
 
         if (challengeId == null) {
-            Toast.makeText(this, "Error: No challenge ID provided", Toast.LENGTH_LONG).show()
+            DialogUtils.showErrorDialog(this, "Error", "No challenge ID provided")
             finish()
             return
         }
@@ -131,20 +132,20 @@ class SQLChallengeActivity : AppCompatActivity() {
                     setupChallengeDatabase(challenge)
                     startTime = System.currentTimeMillis()
                 } else {
-                    Toast.makeText(
+                    DialogUtils.showErrorDialog(
                         this@SQLChallengeActivity,
-                        "Error: Challenge not found",
-                        Toast.LENGTH_LONG
-                    ).show()
+                        "Error",
+                        "Challenge not found"
+                    )
                     finish()
                 }
 
             } catch (e: Exception) {
-                Toast.makeText(
+                DialogUtils.showErrorDialog(
                     this@SQLChallengeActivity,
-                    "Error loading challenge: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                    "Error",
+                    "Error loading challenge: ${e.message}"
+                )
                 finish()
             } finally {
                 showLoading(false)
@@ -189,7 +190,7 @@ class SQLChallengeActivity : AppCompatActivity() {
             queryEvaluator = QueryEvaluator(database)
 
         } catch (e: Exception) {
-            Toast.makeText(this, "Error setting up database: ${e.message}", Toast.LENGTH_LONG).show()
+            DialogUtils.showErrorDialog(this, "Database Error", "Error setting up database: ${e.message}")
         }
     }
 
@@ -359,13 +360,13 @@ class SQLChallengeActivity : AppCompatActivity() {
         val query = queryEditText.text.toString().trim()
 
         if (query.isEmpty()) {
-            Toast.makeText(this, "Please enter a query", Toast.LENGTH_SHORT).show()
+            DialogUtils.showWarningDialog(this, "Empty Query", "Please enter a query")
             return
         }
 
         // Check if queryEvaluator is initialized
         if (!::queryEvaluator.isInitialized) {
-            Toast.makeText(this, "Database not ready. Please wait...", Toast.LENGTH_SHORT).show()
+            DialogUtils.showWarningDialog(this, "Not Ready", "Database not ready. Please wait...")
             return
         }
 
@@ -464,18 +465,14 @@ class SQLChallengeActivity : AppCompatActivity() {
     private fun showHint() {
         currentChallenge?.let { challenge ->
             if (challenge.hints.isEmpty()) {
-                Toast.makeText(this, "No hints available", Toast.LENGTH_SHORT).show()
+                DialogUtils.showInfoDialog(this, "No Hints", "No hints available")
                 return
             }
 
             val hint = challenge.hints[currentHintIndex % challenge.hints.size]
             currentHintIndex++
 
-            AlertDialog.Builder(this)
-                .setTitle("Hint ${currentHintIndex}/${challenge.hints.size}")
-                .setMessage(hint)
-                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                .show()
+            DialogUtils.showHintDialog(this, "Hint ${currentHintIndex}/${challenge.hints.size}", hint)
         }
     }
 

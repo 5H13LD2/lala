@@ -12,8 +12,8 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Base64
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import com.labactivity.lala.UTILS.DialogUtils
 import androidx.core.content.ContextCompat
 
 import com.google.firebase.auth.FirebaseAuth
@@ -74,7 +74,7 @@ class ProfileMainActivity5 : BaseActivity() {
             openImagePicker()
         } else {
             Log.w(TAG, "Permission denied")
-            Toast.makeText(this, "Permission denied. Cannot access photos.", Toast.LENGTH_SHORT).show()
+            DialogUtils.showErrorDialog(this, "Permission Denied", "Cannot access photos without permission.")
         }
     }
 
@@ -89,7 +89,7 @@ class ProfileMainActivity5 : BaseActivity() {
                 saveImageToFirestore(uri)
             } ?: run {
                 Log.e(TAG, "No image data received")
-                Toast.makeText(this, "Failed to get image", Toast.LENGTH_SHORT).show()
+                DialogUtils.showErrorDialog(this, "Error", "Failed to get image")
             }
         } else {
             Log.w(TAG, "Image picker cancelled or failed. Result code: ${result.resultCode}")
@@ -139,12 +139,12 @@ class ProfileMainActivity5 : BaseActivity() {
             this,
             mutableListOf()
         ) { quiz ->
-            // Show toast with quiz details when clicked
-            Toast.makeText(
+            // Show dialog with quiz details when clicked
+            DialogUtils.showInfoDialog(
                 this,
-                "Quiz from ${quiz.courseName}: ${quiz.score}/${quiz.totalQuestions}",
-                Toast.LENGTH_SHORT
-            ).show()
+                "Quiz Details",
+                "Quiz from ${quiz.courseName}: ${quiz.score}/${quiz.totalQuestions}"
+            )
         }
 
         binding.quizHistoryRecyclerView.apply {
@@ -183,7 +183,7 @@ class ProfileMainActivity5 : BaseActivity() {
 
         // Edit profile button
         binding.btnEditProfile.setOnClickListener {
-            Toast.makeText(this, "Edit profile feature coming soon!", Toast.LENGTH_SHORT).show()
+            DialogUtils.showInfoDialog(this, "Coming Soon", "Edit profile feature coming soon!")
         }
 
         // Profile image click to upload
@@ -201,7 +201,7 @@ class ProfileMainActivity5 : BaseActivity() {
         val currentUser = auth.currentUser
         if (currentUser == null) {
             Log.w(TAG, "No authenticated user")
-            Toast.makeText(this, "Please log in to view leaderboard", Toast.LENGTH_SHORT).show()
+            DialogUtils.showWarningDialog(this, "Login Required", "Please log in to view leaderboard")
             return
         }
 
@@ -222,20 +222,20 @@ class ProfileMainActivity5 : BaseActivity() {
                         // User doesn't have enough XP
                         val requiredXP = 500 - totalXP
                         Log.d(TAG, "User not eligible. Current XP: $totalXP, Required: 500")
-                        Toast.makeText(
+                        DialogUtils.showInfoDialog(
                             this,
-                            "You need 500 XP to access the leaderboard. You need $requiredXP more XP!",
-                            Toast.LENGTH_LONG
-                        ).show()
+                            "XP Required",
+                            "You need 500 XP to access the leaderboard. You need $requiredXP more XP!"
+                        )
                     }
                 } else {
                     Log.w(TAG, "No user document found")
-                    Toast.makeText(this, "You need 500 XP to access the leaderboard.", Toast.LENGTH_SHORT).show()
+                    DialogUtils.showInfoDialog(this, "XP Required", "You need 500 XP to access the leaderboard.")
                 }
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Error checking leaderboard eligibility", e)
-                Toast.makeText(this, "Failed to check eligibility. Please try again.", Toast.LENGTH_SHORT).show()
+                DialogUtils.showErrorDialog(this, "Error", "Failed to check eligibility. Please try again.")
             }
     }
 
@@ -264,7 +264,7 @@ class ProfileMainActivity5 : BaseActivity() {
             Log.d(TAG, "Image picker launched")
         } catch (e: Exception) {
             Log.e(TAG, "Error opening image picker", e)
-            Toast.makeText(this, "Error opening gallery: ${e.message}", Toast.LENGTH_SHORT).show()
+            DialogUtils.showErrorDialog(this, "Error", "Error opening gallery: ${e.message}")
         }
     }
 
@@ -272,12 +272,12 @@ class ProfileMainActivity5 : BaseActivity() {
         val currentUser = auth.currentUser
         if (currentUser == null) {
             Log.e(TAG, "User not authenticated")
-            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show()
+            DialogUtils.showErrorDialog(this, "Error", "User not authenticated")
             return
         }
 
         Log.d(TAG, "Starting image save for URI: $imageUri")
-        Toast.makeText(this, "Processing image...", Toast.LENGTH_SHORT).show()
+        DialogUtils.showInfoDialog(this, "Processing", "Processing image...")
 
         try {
             // Convert image to Base64
@@ -286,7 +286,7 @@ class ProfileMainActivity5 : BaseActivity() {
             inputStream?.close()
 
             if (bitmap == null) {
-                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show()
+                DialogUtils.showErrorDialog(this, "Error", "Failed to load image")
                 return
             }
 
@@ -294,7 +294,7 @@ class ProfileMainActivity5 : BaseActivity() {
             val base64Image = compressAndEncodeImage(bitmap)
 
             if (base64Image == null) {
-                Toast.makeText(this, "Failed to process image", Toast.LENGTH_SHORT).show()
+                DialogUtils.showErrorDialog(this, "Error", "Failed to process image")
                 return
             }
 
@@ -304,23 +304,21 @@ class ProfileMainActivity5 : BaseActivity() {
             displayProfileImageFromBase64(base64Image)
 
             // Save to Firestore
-            Toast.makeText(this, "Saving photo...", Toast.LENGTH_SHORT).show()
-
             firestore.collection("users")
                 .document(currentUser.uid)
                 .update("profilePhotoBase64", base64Image)
                 .addOnSuccessListener {
                     Log.d(TAG, "Profile photo saved to Firestore successfully")
-                    Toast.makeText(this, "Photo saved successfully!", Toast.LENGTH_SHORT).show()
+                    DialogUtils.showSuccessDialog(this, "Success", "Photo saved successfully!")
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, "Failed to save photo to Firestore", e)
-                    Toast.makeText(this, "Failed to save photo: ${e.message}", Toast.LENGTH_SHORT).show()
+                    DialogUtils.showErrorDialog(this, "Error", "Failed to save photo: ${e.message}")
                 }
 
         } catch (e: Exception) {
             Log.e(TAG, "Error processing image", e)
-            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            DialogUtils.showErrorDialog(this, "Error", "${e.message}")
         }
     }
 
@@ -469,7 +467,7 @@ class ProfileMainActivity5 : BaseActivity() {
                     }
                     .addOnFailureListener { e ->
                         Log.e(TAG, "Error loading user profile", e)
-                        Toast.makeText(this@ProfileMainActivity5, "Failed to load profile", Toast.LENGTH_SHORT).show()
+                        DialogUtils.showErrorDialog(this@ProfileMainActivity5, "Error", "Failed to load profile")
                     }
 
             } catch (e: Exception) {
@@ -745,7 +743,7 @@ class ProfileMainActivity5 : BaseActivity() {
 
     private fun showAllQuizzes() {
         if (allQuizHistory.isEmpty()) {
-            Toast.makeText(this, "No quiz history available", Toast.LENGTH_SHORT).show()
+            DialogUtils.showInfoDialog(this, "No History", "No quiz history available")
             return
         }
 
@@ -761,11 +759,11 @@ class ProfileMainActivity5 : BaseActivity() {
             this,
             allQuizHistory.toMutableList()
         ) { quiz ->
-            Toast.makeText(
+            DialogUtils.showInfoDialog(
                 this,
-                "Quiz from ${quiz.courseName}: ${quiz.score}/${quiz.totalQuestions}",
-                Toast.LENGTH_SHORT
-            ).show()
+                "Quiz Details",
+                "Quiz from ${quiz.courseName}: ${quiz.score}/${quiz.totalQuestions}"
+            )
         }
         recyclerView.adapter = allQuizzesAdapter
         recyclerView.setPadding(16, 16, 16, 16)

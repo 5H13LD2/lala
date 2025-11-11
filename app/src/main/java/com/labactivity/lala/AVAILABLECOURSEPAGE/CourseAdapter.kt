@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.labactivity.lala.UTILS.DialogUtils
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -200,10 +200,10 @@ class CourseAdapter(
             btnYes.setOnClickListener {
                 saveEnrolledCourseToFirebase(course) { success ->
                     if (success) {
-                        Toast.makeText(context, "Successfully enrolled in ${course.name}!", Toast.LENGTH_SHORT).show()
+                        DialogUtils.showSuccessDialog(context, "Enrolled", "Successfully enrolled in ${course.name}!")
                         navigateToCourse(course)
                     } else {
-                        Toast.makeText(context, "Failed to enroll. Please try again.", Toast.LENGTH_SHORT).show()
+                        DialogUtils.showErrorDialog(context, "Error", "Failed to enroll. Please try again.")
                     }
                 }
                 dialog.dismiss()

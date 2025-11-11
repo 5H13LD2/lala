@@ -3,8 +3,8 @@ package com.labactivity.lala.AVAILABLECOURSEPAGE
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.labactivity.lala.UTILS.DialogUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -142,10 +142,10 @@ class MainActivity3 : AppCompatActivity() {
     }
 
     private fun showEmptyState() {
-        Toast.makeText(this, "No courses available.", Toast.LENGTH_LONG).show()
+        DialogUtils.showInfoDialog(this, "No Courses", "No courses available.")
     }
 
     private fun showSuccessState(count: Int) {
-        Toast.makeText(this, "Loaded $count courses", Toast.LENGTH_SHORT).show()
+        // Removed success toast as it's unnecessary
     }
 }

@@ -3,8 +3,8 @@ package com.labactivity.lala.REGISTERPAGE
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import com.labactivity.lala.UTILS.DialogUtils
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -51,7 +51,7 @@ class MainActivity2 : AppCompatActivity() {
             val password = binding.signinpass.text.toString().trim()
 
             if (username.isEmpty() || email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                DialogUtils.showWarningDialog(this, "Empty Fields", "Please fill all fields")
                 return@setOnClickListener
             }
 
@@ -69,16 +69,16 @@ class MainActivity2 : AppCompatActivity() {
                             firestore.collection("users").document(userId)
                                 .set(user)
                                 .addOnSuccessListener {
-                                    Toast.makeText(this, "Account created!", Toast.LENGTH_SHORT).show()
+                                    DialogUtils.showSuccessDialog(this, "Success", "Account created!")
                                     startActivity(Intent(this, MainActivity3::class.java)) // courses page
                                     finish()
                                 }
                                 .addOnFailureListener {
-                                    Toast.makeText(this, "Failed to save user data.", Toast.LENGTH_SHORT).show()
+                                    DialogUtils.showErrorDialog(this, "Error", "Failed to save user data.")
                                 }
                         }
                     } else {
-                        Toast.makeText(this, "Signup failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                        DialogUtils.showErrorDialog(this, "Signup Failed", "Signup failed: ${task.exception?.message}")
                     }
                 }
         }
@@ -111,21 +111,21 @@ class MainActivity2 : AppCompatActivity() {
                             firestore.collection("users").document(userId)
                                 .set(user)
                                 .addOnSuccessListener {
-                                    Toast.makeText(this, "Google Sign-In successful", Toast.LENGTH_SHORT).show()
+                                    DialogUtils.showSuccessDialog(this, "Success", "Google Sign-In successful")
                                     startActivity(Intent(this, MainActivity3::class.java))
                                     finish()
                                 }
                                 .addOnFailureListener {
-                                    Toast.makeText(this, "Failed to save Google user data", Toast.LENGTH_SHORT).show()
+                                    DialogUtils.showErrorDialog(this, "Error", "Failed to save Google user data")
                                 }
                         }
                     } else {
-                        Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show()
+                        DialogUtils.showErrorDialog(this, "Error", "Google Sign-In failed")
                     }
                 }
         } catch (e: ApiException) {
             Log.e("SignIn", "Google sign in failed", e)
-            Toast.makeText(this, "Google Sign-In failed", Toast.LENGTH_SHORT).show()
+            DialogUtils.showErrorDialog(this, "Error", "Google Sign-In failed")
         }
     }
 }

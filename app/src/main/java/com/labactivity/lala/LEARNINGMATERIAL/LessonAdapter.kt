@@ -16,8 +16,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.labactivity.lala.R
-import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.labactivity.lala.UTILS.DialogUtils
 
 class LessonAdapter(
     private val context: Context,
@@ -105,7 +105,7 @@ class LessonAdapter(
                         context.startActivity(intent)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error opening video URL", e)
-                        Toast.makeText(context, "Unable to open video", Toast.LENGTH_SHORT).show()
+                        DialogUtils.showErrorDialog(context, "Error", "Unable to open video")
                     }
                 }
             }

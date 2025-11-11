@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.util.Log
 import android.util.Patterns
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.ActionCodeSettings
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.labactivity.lala.databinding.ActivityForgotPasswordBinding
+import com.labactivity.lala.UTILS.DialogUtils
 
 /**
  * Activity for handling password reset requests
@@ -101,11 +101,11 @@ class ForgotPasswordActivity : AppCompatActivity() {
 
                 // Show success message
                 showSuccessState()
-                Toast.makeText(
+                DialogUtils.showSuccessDialog(
                     this,
-                    "Password reset email sent to $email\nPlease check your inbox and spam folder.",
-                    Toast.LENGTH_LONG
-                ).show()
+                    "Email Sent",
+                    "Password reset email sent to $email\nPlease check your inbox and spam folder."
+                )
             }
             .addOnFailureListener { exception ->
                 setLoadingState(false)
@@ -133,7 +133,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 }
 
                 binding.textInputLayoutEmail.error = errorMessage
-                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+                DialogUtils.showErrorDialog(this, "Error", errorMessage)
             }
     }
 

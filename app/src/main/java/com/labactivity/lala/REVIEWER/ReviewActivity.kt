@@ -6,8 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.labactivity.lala.UTILS.DialogUtils
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
@@ -101,7 +101,7 @@ class ReviewActivity : AppCompatActivity() {
                 Log.d(TAG, "Successfully loaded ${documents.size()} questions from quiz: $quizId")
 
                 if (documents.isEmpty) {
-                    Toast.makeText(this, "No questions found for review", Toast.LENGTH_LONG).show()
+                    DialogUtils.showInfoDialog(this, "No Questions", "No questions found for review")
                     finish()
                     return@addOnSuccessListener
                 }
@@ -127,11 +127,11 @@ class ReviewActivity : AppCompatActivity() {
             }
             .addOnFailureListener { exception ->
                 Log.e(TAG, "Error loading review questions", exception)
-                Toast.makeText(
+                DialogUtils.showErrorDialog(
                     this,
-                    "Error loading questions: ${exception.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                    "Error",
+                    "Error loading questions: ${exception.message}"
+                )
                 finish()
             }
 

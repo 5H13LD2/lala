@@ -3,13 +3,12 @@ package com.labactivity.lala
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.labactivity.lala.LOGINPAGE.MainActivity
 import com.labactivity.lala.databinding.ActivitySettingsBinding
 import com.labactivity.lala.homepage.MainActivity4
-
 import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
+import com.labactivity.lala.UTILS.DialogUtils
 
 class SettingsActivity : BaseActivity() {
 
@@ -35,34 +34,34 @@ class SettingsActivity : BaseActivity() {
     private fun setupClickListeners() {
         binding.changePasswordLayout.setOnClickListener {
             // Navigate to change password screen
-            Toast.makeText(this, "Change Password clicked", Toast.LENGTH_SHORT).show()
+            DialogUtils.showInfoDialog(this, "Coming Soon", "Change Password feature coming soon")
         }
 
         binding.emailPreferencesLayout.setOnClickListener {
             // Navigate to email preferences screen
-            Toast.makeText(this, "Email Preferences clicked", Toast.LENGTH_SHORT).show()
+            DialogUtils.showInfoDialog(this, "Coming Soon", "Email Preferences feature coming soon")
         }
 
         binding.contactSupportLayout.setOnClickListener {
             // Navigate to contact support screen
-            Toast.makeText(this, "Contact Support clicked", Toast.LENGTH_SHORT).show()
+            DialogUtils.showInfoDialog(this, "Coming Soon", "Contact Support feature coming soon")
         }
 
         binding.sendFeedbackLayout.setOnClickListener {
             // Navigate to send feedback screen
-            Toast.makeText(this, "Send Feedback clicked", Toast.LENGTH_SHORT).show()
+            DialogUtils.showInfoDialog(this, "Coming Soon", "Send Feedback feature coming soon")
         }
 
         binding.learningReminderLayout.setOnClickListener {
             // Navigate to learning reminder screen
-            Toast.makeText(this, "Learning Reminder Time clicked", Toast.LENGTH_SHORT).show()
+            DialogUtils.showInfoDialog(this, "Coming Soon", "Learning Reminder Time feature coming soon")
         }
 
 
 
 
         binding.logoutButton.setOnClickListener {
-            Toast.makeText(this, "Logging out...", Toast.LENGTH_SHORT).show()
+            DialogUtils.showInfoDialog(this, "Logging Out", "Logging out...")
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             // Add your logout logic here

@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -17,6 +16,7 @@ import com.labactivity.lala.R
 import com.labactivity.lala.SQLCOMPILER.SQLChallengeActivity
 import com.labactivity.lala.SQLCOMPILER.models.SQLChallenge
 import com.labactivity.lala.SQLCOMPILER.models.SQLChallengeProgress
+import com.labactivity.lala.UTILS.DialogUtils
 
 /**
  * RecyclerView Adapter for displaying SQL Challenges
@@ -119,11 +119,15 @@ class SQLChallengeAdapter(
                 // Check if challenge is locked
                 if (!challenge.isUnlocked) {
                     val message = when (challenge.difficulty.lowercase()) {
-                        "medium" -> "Complete all Easy SQL challenges to unlock Medium difficulty"
-                        "hard" -> "Complete all Easy and Medium SQL challenges to unlock Hard difficulty"
-                        else -> "This SQL challenge is locked"
+                        "medium" -> "Complete all Easy SQL challenges to unlock Medium difficulty."
+                        "hard" -> "Complete all Easy and Medium SQL challenges to unlock Hard difficulty."
+                        else -> "This SQL challenge is currently locked."
                     }
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    DialogUtils.showLockedDialog(
+                        context = context,
+                        title = "🔒 SQL Challenge Locked",
+                        message = message
+                    )
                     return@setOnClickListener
                 }
 

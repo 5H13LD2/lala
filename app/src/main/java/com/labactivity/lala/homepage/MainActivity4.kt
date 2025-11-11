@@ -5,8 +5,8 @@ import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.labactivity.lala.UTILS.DialogUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
@@ -52,7 +52,6 @@ class MainActivity4 : BaseActivity() {
         // ==============================================
         binding.textAllPractice.setOnClickListener {
             Log.d("MainActivity4", "✅ textAllPractice clicked!")
-            Toast.makeText(this, "Opening All Courses...", Toast.LENGTH_SHORT).show()
 
             val intent = Intent(this, MainActivity3::class.java)
             startActivity(intent)

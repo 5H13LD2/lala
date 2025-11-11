@@ -18,7 +18,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.labactivity.lala.R
 import com.labactivity.lala.quiz.DynamicQuizActivity
 import com.labactivity.lala.quiz.QuizScoreManager
-import android.widget.Toast
+import com.labactivity.lala.UTILS.DialogUtils
 
 class ModuleAdapter(
     private val context: Context,
@@ -86,7 +86,7 @@ class ModuleAdapter(
                         if (!module.isValidModuleId()) {
                             Log.e(TAG, "Invalid module ID format: ${module.id}")
                             Log.e(TAG, "Expected format: coursename_module_number (e.g., python_module_1)")
-                            Toast.makeText(context, "Invalid module format: ${module.id}", Toast.LENGTH_LONG).show()
+                            DialogUtils.showErrorDialog(context, "Invalid Format", "Invalid module format: ${module.id}")
                             return@setOnClickListener
                         }
 
@@ -107,7 +107,7 @@ class ModuleAdapter(
                         context.startActivity(intent)
                     } catch (e: Exception) {
                         Log.e(TAG, "Error launching quiz for module ${module.id}", e)
-                        Toast.makeText(context, "Unable to start quiz", Toast.LENGTH_SHORT).show()
+                        DialogUtils.showErrorDialog(context, "Error", "Unable to start quiz")
                     }
                 }
             }

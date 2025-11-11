@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.labactivity.lala.R
 import com.labactivity.lala.REVIEWER.ResultActivity
+import com.labactivity.lala.UTILS.DialogUtils
 
 class DynamicQuizActivity : AppCompatActivity() {
 
@@ -103,14 +104,14 @@ class DynamicQuizActivity : AppCompatActivity() {
         // Validation
         if (moduleId.isEmpty()) {
             Log.e(TAG, "extractIntentData: ✗ ERROR - moduleId is EMPTY!")
-            Toast.makeText(this, "Error: No module ID provided", Toast.LENGTH_LONG).show()
+            DialogUtils.showErrorDialog(this, "Error", "No module ID provided")
             finish()
             return
         }
 
         if (quizId.isEmpty()) {
             Log.e(TAG, "extractIntentData: ✗ ERROR - quizId is EMPTY!")
-            Toast.makeText(this, "Error: No quiz ID provided", Toast.LENGTH_LONG).show()
+            DialogUtils.showErrorDialog(this, "Error", "No quiz ID provided")
             finish()
             return
         }
@@ -133,11 +134,11 @@ class DynamicQuizActivity : AppCompatActivity() {
 
                 if (documents.isEmpty) {
                     runOnUiThread {
-                        Toast.makeText(
+                        DialogUtils.showErrorDialog(
                             this,
-                            "No questions found for this module.\nModule: $moduleTitle",
-                            Toast.LENGTH_LONG
-                        ).show()
+                            "No Questions",
+                            "No questions found for this module.\nModule: $moduleTitle"
+                        )
                         finish()
                     }
                     return@addOnSuccessListener
@@ -163,7 +164,7 @@ class DynamicQuizActivity : AppCompatActivity() {
                 if (allQuestions.isEmpty()) {
                     Log.e(TAG, "loadQuizQuestions: ✗ ERROR - All documents failed to parse!")
                     runOnUiThread {
-                        Toast.makeText(this, "Error loading quiz questions", Toast.LENGTH_LONG).show()
+                        DialogUtils.showErrorDialog(this, "Error", "Error loading quiz questions")
                         finish()
                     }
                     return@addOnSuccessListener
@@ -183,11 +184,11 @@ class DynamicQuizActivity : AppCompatActivity() {
             }
             .addOnFailureListener { exception ->
                 runOnUiThread {
-                    Toast.makeText(
+                    DialogUtils.showErrorDialog(
                         this,
-                        "Error loading quiz: ${exception.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                        "Error",
+                        "Error loading quiz: ${exception.message}"
+                    )
                     finish()
                 }
             }

@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import com.labactivity.lala.UTILS.DialogUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -85,7 +85,7 @@ class CoreModule : AppCompatActivity() {
 
     private fun handleError(message: String) {
         Log.e(TAG, message)
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        DialogUtils.showErrorDialog(this, "Error", message)
         finish()
     }
 

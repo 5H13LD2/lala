@@ -8,11 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.labactivity.lala.PYTHONCOMPILER.CompilerActivity
 import com.labactivity.lala.R
+import com.labactivity.lala.UTILS.DialogUtils
 
 class TechnicalAssessmentAdapter(
     private val context: Context,
@@ -118,11 +118,15 @@ class TechnicalAssessmentAdapter(
                 // Check if challenge is locked
                 if (!challenge.isUnlocked) {
                     val message = when (challenge.difficulty.lowercase()) {
-                        "medium" -> "Complete all Easy challenges to unlock Medium difficulty"
-                        "hard" -> "Complete all Easy and Medium challenges to unlock Hard difficulty"
-                        else -> "This challenge is locked"
+                        "medium" -> "Complete all Easy challenges to unlock Medium difficulty."
+                        "hard" -> "Complete all Easy and Medium challenges to unlock Hard difficulty."
+                        else -> "This challenge is currently locked."
                     }
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    DialogUtils.showLockedDialog(
+                        context = context,
+                        title = "🔒 Challenge Locked",
+                        message = message
+                    )
                     return@setOnClickListener
                 }
 

@@ -10,8 +10,8 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.labactivity.lala.UTILS.DialogUtils
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
 import com.labactivity.lala.R
@@ -97,7 +97,7 @@ class PythonCompilerActivity : AppCompatActivity() {
         val userCode = codeEditText.text.toString().trim()
 
         if (userCode.isBlank()) {
-            Toast.makeText(this, "Please enter some Python code.", Toast.LENGTH_SHORT).show()
+            DialogUtils.showWarningDialog(this, "Empty Code", "Please enter some Python code.")
             return
         }
 
@@ -166,8 +166,7 @@ class PythonCompilerActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 handler.post {
-                    Toast.makeText(this, "Execution failed: ${e.message}", Toast.LENGTH_SHORT)
-                        .show()
+                    DialogUtils.showErrorDialog(this, "Execution Error", "Execution failed: ${e.message}")
                     outputTextView.text =
                         "Error: ${e.message}\n\nStack trace: ${e.stackTraceToString()}"
                     runButton.isEnabled = true
@@ -248,11 +247,11 @@ class PythonCompilerActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 handler.post {
-                    Toast.makeText(
+                    DialogUtils.showErrorDialog(
                         this,
-                        "Failed to submit input: ${e.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                        "Input Error",
+                        "Failed to submit input: ${e.message}"
+                    )
                 }
             }
         }
