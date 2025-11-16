@@ -45,6 +45,9 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.GridLayoutManager
 import com.labactivity.lala.R
 import kotlinx.coroutines.tasks.await
+import com.labactivity.lala.UTILS.setupWithSafeNavigation
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.labactivity.lala.SettingsActivity
 
 class ProfileMainActivity5 : BaseActivity() {
 
@@ -108,6 +111,7 @@ class ProfileMainActivity5 : BaseActivity() {
 
         setupRecyclerViews()
         setupClickListeners()
+        setupBottomNavigation()
         loadUserProfile()
         loadEnrolledCourses()
         loadQuizHistory()
@@ -161,10 +165,11 @@ class ProfileMainActivity5 : BaseActivity() {
     }
 
     private fun setupClickListeners() {
-        // Back button
+        // Back button - navigate to home
         binding.imageView2.setOnClickListener {
-            Log.d(TAG, "Back button clicked")
+            Log.d(TAG, "Back button clicked - navigating to home")
             val intent = Intent(this, MainActivity4::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
             finish()
         }
@@ -195,6 +200,23 @@ class ProfileMainActivity5 : BaseActivity() {
         binding.viewAllQuizzesBtn.setOnClickListener {
             showAllQuizzes()
         }
+    }
+
+    private fun setupBottomNavigation() {
+        val bottomNavigationView: BottomNavigationView = binding.bottomNavigationView
+
+        // Set the profile item as selected since we're on the profile page
+        bottomNavigationView.selectedItemId = R.id.nav_profile
+
+        bottomNavigationView.setupWithSafeNavigation(
+            this,
+            ProfileMainActivity5::class.java,
+            mapOf(
+                R.id.nav_home to MainActivity4::class.java,
+                R.id.nav_profile to ProfileMainActivity5::class.java,
+                R.id.nav_settings to SettingsActivity::class.java
+            )
+        )
     }
 
     private fun checkLeaderboardEligibility() {
@@ -846,7 +868,7 @@ class ProfileMainActivity5 : BaseActivity() {
             }
         }
     }
-//putangina ayaw gumana
+
     override fun onResume() {
         super.onResume()
         // Refresh user data when returning to the activity

@@ -4,7 +4,9 @@
       "Bash(git diff:*)",
       "Bash(./gradlew compileDebugKotlin:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(./gradlew clean:*)"
     ],
     "deny": [],
     "ask": []

@@ -198,8 +198,20 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
-                style="@style/Widget.Lala.RecyclerView.Vertical" />
+                style="@style/Widget.Lala.RecyclerView.Horizontal"
+                android:orientation="horizontal" />
 
+            <!-- Dots Indicator for RecyclerView -->
+            <me.relex.circleindicator.CircleIndicator2
+                android:id="@+id/indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="16dp"
+                app:ci_drawable="@drawable/indicator_dot_selected"
+                app:ci_drawable_unselected="@drawable/indicator_dot_unselected"
+                app:ci_margin="6dp" />
 
             <!-- Technical Assessment Section -->
             <LinearLayout

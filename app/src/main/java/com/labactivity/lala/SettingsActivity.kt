@@ -9,6 +9,9 @@ import com.labactivity.lala.databinding.ActivitySettingsBinding
 import com.labactivity.lala.homepage.MainActivity4
 import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
 import com.labactivity.lala.UTILS.DialogUtils
+import com.labactivity.lala.UTILS.setupWithSafeNavigation
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.labactivity.lala.ProfileMainActivity5.ProfileMainActivity5
 
 class SettingsActivity : BaseActivity() {
 
@@ -22,13 +25,33 @@ class SettingsActivity : BaseActivity() {
         setupToolbar()
         setupClickListeners()
         setupSwitches()
+        setupBottomNavigation()
     }
 
     private fun setupToolbar() {
         binding.toolbar.setNavigationOnClickListener {
             val intent = Intent(this, MainActivity4::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
+            finish()
         }
+    }
+
+    private fun setupBottomNavigation() {
+        val bottomNavigationView: BottomNavigationView = binding.bottomNavigationView
+
+        // Set the settings item as selected since we're on the settings page
+        bottomNavigationView.selectedItemId = R.id.nav_settings
+
+        bottomNavigationView.setupWithSafeNavigation(
+            this,
+            SettingsActivity::class.java,
+            mapOf(
+                R.id.nav_home to MainActivity4::class.java,
+                R.id.nav_profile to ProfileMainActivity5::class.java,
+                R.id.nav_settings to SettingsActivity::class.java
+            )
+        )
     }
 
     private fun setupClickListeners() {

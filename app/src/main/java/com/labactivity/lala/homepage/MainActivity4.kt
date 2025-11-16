@@ -30,6 +30,8 @@ import com.labactivity.lala.UTILS.AnimationUtils.scaleIn
 import com.labactivity.lala.UTILS.StreakManager
 import com.labactivity.lala.UTILS.AssessmentResultTracker
 import java.util.Calendar
+import me.relex.circleindicator.CircleIndicator2
+import androidx.recyclerview.widget.PagerSnapHelper
 
 class MainActivity4 : BaseActivity() {
 
@@ -274,6 +276,7 @@ class MainActivity4 : BaseActivity() {
         )
 
         val recyclerView: RecyclerView = binding.recyclerView
+        val indicator: CircleIndicator2 = binding.indicator
         val textMyLibrary: TextView = binding.textMyLibrary
         textMyLibrary.paintFlags = textMyLibrary.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
@@ -285,7 +288,19 @@ class MainActivity4 : BaseActivity() {
 
         recyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        recyclerView.adapter = CourseAdapter(courseList.toMutableList())
+
+        val adapter = CourseAdapter(courseList.toMutableList(), autoLoadEnrolled = false)
+        recyclerView.adapter = adapter
+
+        // Add snap helper for page-like scrolling
+        val snapHelper = PagerSnapHelper()
+        snapHelper.attachToRecyclerView(recyclerView)
+
+        // Attach the indicator to the RecyclerView with SnapHelper
+        indicator.attachToRecyclerView(recyclerView, snapHelper)
+
+        // Register adapter data observer to update indicator when data changes
+        adapter.registerAdapterDataObserver(indicator.adapterDataObserver)
     }
 
     // ==============================================

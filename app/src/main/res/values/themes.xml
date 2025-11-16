@@ -106,6 +106,8 @@
 
     <style name="Widget.Lala.RecyclerView.Horizontal" parent="Widget.Lala.RecyclerView">
         <item name="android:clipToPadding">false</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
         <item name="android:layout_marginBottom">@dimen/spacing_xl</item>
     </style>
 

@@ -21,7 +21,8 @@ import com.labactivity.lala.SQLCOMPILER.sqlcompiler
 import com.labactivity.lala.AVAILABLECOURSEPAGE.Course  // Use the full Course class from AVAILABLECOURSEPAGE
 
 class CourseAdapter(
-    private var courses: MutableList<Course> = mutableListOf()
+    private var courses: MutableList<Course> = mutableListOf(),
+    private val autoLoadEnrolled: Boolean = true
 ) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
 
     private val TAG = "HomepageCourseAdapter"
@@ -29,7 +30,9 @@ class CourseAdapter(
     private val auth = FirebaseAuth.getInstance()
 
     init {
-        loadEnrolledCourses()
+        if (autoLoadEnrolled && courses.isEmpty()) {
+            loadEnrolledCourses()
+        }
     }
 
     private fun loadEnrolledCourses() {
