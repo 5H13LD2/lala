@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/dialog_background">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvFeedbackTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="What can we improve?"
+        android:textSize="24sp"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Feedback Input Field -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#6B9EFF"
+        app:strokeWidth="2dp"
+        android:layout_marginBottom="12dp">
+
+        <EditText
+            android:id="@+id/etFeedback"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:background="@android:color/transparent"
+            android:gravity="top|start"
+            android:hint="Write here"
+            android:textColorHint="#A0A0A0"
+            android:padding="16dp"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:maxLength="1000"
+            android:inputType="textMultiLine|textCapSentences"
+            android:scrollbars="vertical" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Character Counter -->
+    <TextView
+        android:id="@+id/tvCharCounter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 / 1000"
+        android:textSize="14sp"
+        android:textColor="#808080"
+        android:layout_gravity="end"
+        android:layout_marginBottom="20dp" />
+
+    <!-- Send Feedback Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSendFeedback"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Send Feedback"
+        android:textSize="16sp"
+        android:textColor="@color/white"
+        android:textAllCaps="false"
+        app:backgroundTint="#4ADE80"
+        app:cornerRadius="12dp"
+        android:elevation="0dp" />
+
+</LinearLayout>

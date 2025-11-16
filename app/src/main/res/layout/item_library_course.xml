@@ -95,12 +95,16 @@
             android:id="@+id/practiceButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:minHeight="48dp"
             android:text="Practice"
             android:textAllCaps="false"
+            android:textSize="14sp"
+            android:paddingVertical="12dp"
             app:cornerRadius="8dp"
             app:icon="@android:drawable/ic_media_play"
             app:iconGravity="textStart"
-            app:iconPadding="8dp" />
+            app:iconPadding="8dp"
+            app:iconSize="18dp" />
 
     </LinearLayout>
 

@@ -1,10 +1,14 @@
 package com.labactivity.lala.LEADERBOARDPAGE
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageButton
-import android.widget.LinearLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,7 +22,7 @@ class Leaderboard : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: LeaderboardAdapter
-    private lateinit var ineligibleLayout: LinearLayout
+    private lateinit var ineligibleLayout: FrameLayout
     private lateinit var currentXpText: TextView
     private lateinit var requiredXpText: TextView
     private val userList = mutableListOf<User>()
@@ -29,8 +33,8 @@ class Leaderboard : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_leaderboard)
 
-        // Back button logic
-        findViewById<ImageButton>(R.id.imageButton).setOnClickListener {
+        // Back button logic for main leaderboard
+        findViewById<ImageButton>(R.id.imageButton)?.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
 
@@ -39,6 +43,11 @@ class Leaderboard : AppCompatActivity() {
         ineligibleLayout = findViewById(R.id.ineligibleLayout)
         currentXpText = findViewById(R.id.currentXpText)
         requiredXpText = findViewById(R.id.requiredXpText)
+
+        // Back button logic for ineligible layout
+        ineligibleLayout.findViewById<ImageButton>(R.id.btnBack)?.setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
 
         // Setup RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -53,7 +62,7 @@ class Leaderboard : AppCompatActivity() {
         val currentUser = auth.currentUser
         if (currentUser == null) {
             Log.w("Leaderboard", "No authenticated user")
-            showIneligibleScreen(0)
+            showIneligibleScreen(0, null)
             return
         }
 
@@ -64,6 +73,7 @@ class Leaderboard : AppCompatActivity() {
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
                     val totalXP = (document.getLong("totalXP") ?: 0).toInt()
+                    val profilePhotoBase64 = document.getString("profilePhotoBase64")
 
                     if (totalXP >= 500) {
                         // User is eligible, show leaderboard
@@ -72,16 +82,16 @@ class Leaderboard : AppCompatActivity() {
                     } else {
                         // User is not eligible, show blocked screen
                         Log.d("Leaderboard", "User not eligible with $totalXP XP")
-                        showIneligibleScreen(totalXP)
+                        showIneligibleScreen(totalXP, profilePhotoBase64)
                     }
                 } else {
                     Log.w("Leaderboard", "No user document found")
-                    showIneligibleScreen(0)
+                    showIneligibleScreen(0, null)
                 }
             }
             .addOnFailureListener { e ->
                 Log.e("Leaderboard", "Error checking eligibility", e)
-                showIneligibleScreen(0)
+                showIneligibleScreen(0, null)
             }
     }
 
@@ -92,7 +102,7 @@ class Leaderboard : AppCompatActivity() {
         listenToUserLeaderboard()
     }
 
-    private fun showIneligibleScreen(currentXP: Int) {
+    private fun showIneligibleScreen(currentXP: Int, profilePhotoBase64: String?) {
         recyclerView.visibility = View.GONE
         ineligibleLayout.visibility = View.VISIBLE
 
@@ -100,6 +110,19 @@ class Leaderboard : AppCompatActivity() {
         currentXpText.text = "Current XP: $currentXP"
         val remaining = 500 - currentXP
         requiredXpText.text = "Need $remaining more XP"
+
+        // Load user profile picture
+        val userProfileImage = ineligibleLayout.findViewById<ImageView>(R.id.userProfileImage)
+        if (!profilePhotoBase64.isNullOrEmpty()) {
+            try {
+                val decodedBytes = Base64.decode(profilePhotoBase64, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                userProfileImage.setImageBitmap(bitmap)
+            } catch (e: Exception) {
+                Log.e("Leaderboard", "Error loading profile image", e)
+                // Keep default placeholder image
+            }
+        }
     }
 
     private fun listenToUserLeaderboard() {

@@ -12,6 +12,8 @@ import com.labactivity.lala.UTILS.DialogUtils
 import com.labactivity.lala.UTILS.setupWithSafeNavigation
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.labactivity.lala.ProfileMainActivity5.ProfileMainActivity5
+import com.labactivity.lala.FEEDBACK.FeedbackDialog
+import com.labactivity.lala.FORGOTPASSWORD.ForgotPasswordActivity
 
 class SettingsActivity : BaseActivity() {
 
@@ -56,8 +58,8 @@ class SettingsActivity : BaseActivity() {
 
     private fun setupClickListeners() {
         binding.changePasswordLayout.setOnClickListener {
-            // Navigate to change password screen
-            DialogUtils.showInfoDialog(this, "Coming Soon", "Change Password feature coming soon")
+              val intent = Intent(this, ForgotPasswordActivity::class.java)
+            startActivity(intent)
         }
 
         binding.emailPreferencesLayout.setOnClickListener {
@@ -71,8 +73,8 @@ class SettingsActivity : BaseActivity() {
         }
 
         binding.sendFeedbackLayout.setOnClickListener {
-            // Navigate to send feedback screen
-            DialogUtils.showInfoDialog(this, "Coming Soon", "Send Feedback feature coming soon")
+            // Show feedback dialog
+            showFeedbackDialog()
         }
 
         binding.learningReminderLayout.setOnClickListener {
@@ -115,5 +117,10 @@ class SettingsActivity : BaseActivity() {
         getSharedPreferences("app_preferences", MODE_PRIVATE).edit()
             .putBoolean("haptic_feedback_enabled", enabled)
             .apply()
+    }
+
+    private fun showFeedbackDialog() {
+        val feedbackDialog = FeedbackDialog(this)
+        feedbackDialog.show()
     }
 }
