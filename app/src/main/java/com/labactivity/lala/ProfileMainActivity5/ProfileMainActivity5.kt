@@ -227,38 +227,13 @@ class ProfileMainActivity5 : BaseActivity() {
             return
         }
 
-        // Fetch user's current XP from Firestore
-        firestore.collection("users")
-            .document(currentUser.uid)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    val totalXP = (document.getLong("totalXP") ?: 0).toInt()
-
-                    if (totalXP >= 500) {
-                        // User is eligible, navigate to leaderboard
-                        Log.d(TAG, "User eligible for leaderboard with $totalXP XP")
-                        val intent = Intent(this, Leaderboard::class.java)
-                        startActivity(intent)
-                    } else {
-                        // User doesn't have enough XP
-                        val requiredXP = 500 - totalXP
-                        Log.d(TAG, "User not eligible. Current XP: $totalXP, Required: 500")
-                        DialogUtils.showInfoDialog(
-                            this,
-                            "XP Required",
-                            "You need 500 XP to access the leaderboard. You need $requiredXP more XP!"
-                        )
-                    }
-                } else {
-                    Log.w(TAG, "No user document found")
-                    DialogUtils.showInfoDialog(this, "XP Required", "You need 500 XP to access the leaderboard.")
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error checking leaderboard eligibility", e)
-                DialogUtils.showErrorDialog(this, "Error", "Failed to check eligibility. Please try again.")
-            }
+        // Always navigate to Leaderboard activity
+        // The Leaderboard activity will handle showing either:
+        // - The leaderboard (if XP >= 500)
+        // - The ineligible layout (if XP < 500)
+        Log.d(TAG, "Navigating to Leaderboard activity")
+        val intent = Intent(this, Leaderboard::class.java)
+        startActivity(intent)
     }
 
     private fun checkPermissionAndOpenPicker() {

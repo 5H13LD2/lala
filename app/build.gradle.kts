@@ -131,6 +131,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    // Firebase Functions - only needed for FeedbackDialogWithBackendEmail (Cloud Functions)
+    // implementation(libs.firebase.functions.ktx)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)

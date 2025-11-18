@@ -6,7 +6,8 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(./gradlew assembleDebug:*)",
-      "Bash(./gradlew clean:*)"
+      "Bash(./gradlew clean:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": [],
     "ask": []
