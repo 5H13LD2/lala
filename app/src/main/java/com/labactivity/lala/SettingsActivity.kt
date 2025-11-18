@@ -70,7 +70,7 @@ class SettingsActivity : BaseActivity() {
             DialogUtils.showInfoDialog(this, "Coming Soon", "Contact Support feature coming soon")
         }
 
-        binding.sendFeedbackLayout.setOnClickListener {
+        binding.sendFeedbackLayout.setOnClickListen er {
             // Navigate to send feedback screen
             DialogUtils.showInfoDialog(this, "Coming Soon", "Send Feedback feature coming soon")
         }

@@ -1,0 +1,5 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <size android:width="170dp" android:height="170dp" />
+    <solid android:color="#FF7043" /> <!-- orange/red ring area -->
+</shape>

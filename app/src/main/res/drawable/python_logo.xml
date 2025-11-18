@@ -1,0 +1,63 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+
+    <!-- Blue upper-left snake head (rounded circle) -->
+    <path
+        android:fillColor="#1976D2"
+        android:pathData="M30,18
+a22,22 0 1,0 0.001,0"
+        android:fillType="evenOdd" />
+
+
+    <!-- Yellow lower-right snake head -->
+    <path
+        android:fillColor="#FFCA28"
+        android:pathData="M70,82
+a22,22 0 1,0 -0.001,0"
+        android:fillType="evenOdd" />
+
+
+    <!-- Blue body rectangle to connect shapes (rounded) -->
+    <path
+        android:fillColor="#1976D2"
+        android:pathData="M30,40
+c18,0 34,10 38,22
+v4
+c-6,8 -20,18 -38,18
+z"
+        android:alpha="0.95" />
+
+
+    <!-- Yellow body rectangle to connect shapes -->
+    <path
+        android:fillColor="#FFCA28"
+        android:pathData="M70,60
+c-18,0 -34,-10 -38,-22
+v-4
+c6,-8 20,-18 38,-18
+z"
+        android:alpha="0.95" />
+
+
+    <!-- Eyes: small white circles -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,24 a2,2 0 1,0 0.001,0" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M38,24 a1,1 0 1,0 0.001,0" />
+
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M62,76 a2,2 0 1,0 0.001,0" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M62,76 a1,1 0 1,0 0.001,0" />
+
+
+</vector>
