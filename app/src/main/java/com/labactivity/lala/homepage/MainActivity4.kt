@@ -16,6 +16,8 @@ import com.labactivity.lala.PYTHONASSESMENT.AllAssessmentsActivity
 import com.labactivity.lala.PYTHONASSESMENT.AllInterviewsActivity
 import com.labactivity.lala.SQLCOMPILER.SQLASSESSMENT
 import com.labactivity.lala.SQLCOMPILER.AllSQLChallengesActivity
+import com.labactivity.lala.JAVACOMPILER.JAVAASSESSMENT
+import com.labactivity.lala.JAVACOMPILER.AllJavaChallengesActivity
 import com.labactivity.lala.ProfileMainActivity5.ProfileMainActivity5
 import com.labactivity.lala.R
 import com.labactivity.lala.SettingsActivity
@@ -129,6 +131,21 @@ class MainActivity4 : BaseActivity() {
         // Add navigation to AllSQLChallengesActivity
         binding.textViewAllSQLChallenges.setOnClickListener {
             val intent = Intent(this, AllSQLChallengesActivity::class.java)
+            startActivity(intent)
+        }
+
+        // ==============================================
+        // BIND JAVA CHALLENGES TO RECYCLER VIEW
+        // ==============================================
+        JAVAASSESSMENT.JavaTechnicalAssessment(
+            this,
+            binding.recyclerViewJavaChallenges,
+            binding.textViewAllJavaChallenges
+        )
+
+        // Add navigation to AllJavaChallengesActivity
+        binding.textViewAllJavaChallenges.setOnClickListener {
+            val intent = Intent(this, AllJavaChallengesActivity::class.java)
             startActivity(intent)
         }
 
@@ -329,6 +346,8 @@ class MainActivity4 : BaseActivity() {
         PYTHONASSESMENT.refreshChallenges(this, binding.recyclerViewAssessments)
         // Refresh SQL challenges to show updated progress
         SQLASSESSMENT.refreshChallenges(this, binding.recyclerViewSQLChallenges)
+        // Refresh Java challenges to show updated progress
+        JAVAASSESSMENT.refreshChallenges(this, binding.recyclerViewJavaChallenges)
     }
 
     // ==============================================
@@ -342,6 +361,7 @@ class MainActivity4 : BaseActivity() {
         binding.recyclerView.alpha = 0f
         binding.recyclerViewAssessments.alpha = 0f
         binding.recyclerViewSQLChallenges.alpha = 0f
+        binding.recyclerViewJavaChallenges.alpha = 0f
         binding.recyclerViewInterviews.alpha = 0f
         binding.cardViewPractice.alpha = 0f
 
@@ -360,8 +380,11 @@ class MainActivity4 : BaseActivity() {
         // Animate SQL Challenges section
         binding.recyclerViewSQLChallenges.slideUpFadeIn(duration = 400, startDelay = 350)
 
+        // Animate Java Challenges section
+        binding.recyclerViewJavaChallenges.slideUpFadeIn(duration = 400, startDelay = 380)
+
         // Animate Technical Interview section
-        binding.recyclerViewInterviews.slideUpFadeIn(duration = 400, startDelay = 400)
+        binding.recyclerViewInterviews.slideUpFadeIn(duration = 400, startDelay = 420)
 
         // Animate Practice Card
         binding.cardViewPractice.slideUpFadeIn(duration = 400, startDelay = 500)
@@ -377,6 +400,10 @@ class MainActivity4 : BaseActivity() {
 
         binding.recyclerViewSQLChallenges.post {
             binding.recyclerViewSQLChallenges.animateItems(itemDelay = 80, itemDuration = 300)
+        }
+
+        binding.recyclerViewJavaChallenges.post {
+            binding.recyclerViewJavaChallenges.animateItems(itemDelay = 80, itemDuration = 300)
         }
 
         binding.recyclerViewInterviews.post {

@@ -44,37 +44,82 @@ class FirestoreSQLHelper {
 
     /**
      * Fetches all active SQL challenges from Firestore with unlock status
+     * Only returns challenges for courses the user is enrolled in
      * @return List of SQLChallenge objects sorted by order
      */
     suspend fun getAllChallenges(): List<SQLChallenge> = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Fetching all SQL challenges from Firestore")
-
-            val snapshot = firestore.collection(COLLECTION_SQL_CHALLENGES)
-                .whereEqualTo("status", "active")
-                .orderBy("order", Query.Direction.ASCENDING)
-                .get()
-                .await()
-
-            val challenges = snapshot.documents.mapNotNull { doc ->
-                try {
-                    doc.toObject(SQLChallenge::class.java)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error parsing challenge document ${doc.id}: ${e.message}")
-                    null
-                }
+            val userId = auth.currentUser?.uid ?: run {
+                Log.w(TAG, "⚠️ User not authenticated")
+                return@withContext emptyList()
             }
 
-            Log.d(TAG, "Successfully fetched ${challenges.size} SQL challenges")
+            // Get enrolled course IDs
+            val enrolledCourseIds = getUserEnrolledCourseIds(userId)
+            Log.d(TAG, "✅ User enrolled in courses: $enrolledCourseIds")
+
+            if (enrolledCourseIds.isEmpty()) {
+                Log.d(TAG, "⚠️ No enrolled courses found")
+                return@withContext emptyList()
+            }
+
+            Log.d(TAG, "Fetching SQL challenges for enrolled courses from Firestore")
+
+            // Fetch challenges in batches (Firestore 'in' query limit is 10)
+            val allChallenges = mutableListOf<SQLChallenge>()
+            val batches = enrolledCourseIds.chunked(10)
+
+            for (batch in batches) {
+                val snapshot = firestore.collection(COLLECTION_SQL_CHALLENGES)
+                    .whereEqualTo("status", "active")
+                    .whereIn("courseId", batch)
+                    .orderBy("order", Query.Direction.ASCENDING)
+                    .get()
+                    .await()
+
+                val batchChallenges = snapshot.documents.mapNotNull { doc ->
+                    try {
+                        doc.toObject(SQLChallenge::class.java)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing challenge document ${doc.id}: ${e.message}")
+                        null
+                    }
+                }
+                allChallenges.addAll(batchChallenges)
+            }
+
+            Log.d(TAG, "Successfully fetched ${allChallenges.size} SQL challenges for enrolled courses")
 
             // Apply unlock logic
-            val challengesWithUnlockStatus = applyUnlockLogic(challenges)
+            val challengesWithUnlockStatus = applyUnlockLogic(allChallenges)
             Log.d(TAG, "✅ Applied unlock logic to ${challengesWithUnlockStatus.size} SQL challenges")
 
             challengesWithUnlockStatus
 
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching SQL challenges: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    /**
+     * Fetch user's enrolled course IDs
+     * @param userId The user ID
+     * @return List of enrolled course IDs
+     */
+    private suspend fun getUserEnrolledCourseIds(userId: String): List<String> {
+        return try {
+            val document = firestore.collection("users")
+                .document(userId)
+                .get()
+                .await()
+
+            val courseTaken = document.get("courseTaken") as? List<Map<String, Any>> ?: emptyList()
+            val ids = courseTaken.mapNotNull { it["courseId"] as? String }
+            Log.d(TAG, "📘 Found ${ids.size} enrolled courses")
+            ids
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error getting enrolled course IDs", e)
             emptyList()
         }
     }

@@ -9,6 +9,7 @@ import com.labactivity.lala.UTILS.DialogUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.R
 import com.labactivity.lala.databinding.ActivityCoreModuleBinding
@@ -18,6 +19,8 @@ class CoreModule : AppCompatActivity() {
     private var _binding: ActivityCoreModuleBinding? = null
     private val binding get() = _binding!!
     private val TAG = "CoreModule"
+    private val firestore = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,7 +47,8 @@ class CoreModule : AppCompatActivity() {
             return
         }
 
-        loadCourse(courseId, savedInstanceState)
+        // Check if user is enrolled in this course before loading
+        checkEnrollmentAndLoadCourse(courseId, savedInstanceState)
 
         // Add button click logic to go to MainActivity4
         binding.button2?.setOnClickListener {
@@ -52,8 +56,55 @@ class CoreModule : AppCompatActivity() {
         }
     }
 
+    /**
+     * Check if the user is enrolled in the course before loading the learning materials
+     */
+    private fun checkEnrollmentAndLoadCourse(courseId: String, savedInstanceState: Bundle?) {
+        val userId = auth.currentUser?.uid
+        if (userId == null) {
+            handleError("Error: User not authenticated")
+            return
+        }
+
+        Log.d(TAG, "Checking enrollment for courseId: $courseId")
+
+        firestore.collection("users")
+            .document(userId)
+            .get()
+            .addOnSuccessListener { userDoc ->
+                if (!userDoc.exists()) {
+                    handleError("Error: User profile not found")
+                    return@addOnSuccessListener
+                }
+
+                // Get enrolled courses
+                val courseTaken = userDoc.get("courseTaken") as? List<Map<String, Any>> ?: emptyList()
+                val enrolledCourseIds = courseTaken.mapNotNull { it["courseId"] as? String }
+
+                Log.d(TAG, "User enrolled courses: $enrolledCourseIds")
+
+                // Check if user is enrolled in this course
+                if (courseId in enrolledCourseIds) {
+                    Log.d(TAG, "✅ User is enrolled in course: $courseId")
+                    loadCourse(courseId, savedInstanceState)
+                } else {
+                    Log.w(TAG, "⚠️ User is NOT enrolled in course: $courseId")
+                    DialogUtils.showErrorDialog(
+                        this,
+                        "Access Denied",
+                        "You must enroll in this course to access the learning materials."
+                    )
+                    finish()
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error checking enrollment", e)
+                handleError("Error verifying enrollment")
+            }
+    }
+
     private fun loadCourse(courseId: String, savedInstanceState: Bundle?) {
-        FirebaseFirestore.getInstance().collection("courses")
+        firestore.collection("courses")
             .document(courseId)
             .get()
             .addOnSuccessListener { document ->

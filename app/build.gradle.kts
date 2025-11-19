@@ -24,6 +24,9 @@ android {
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
+        // Enable MultiDex for Janino
+        multiDexEnabled = true
+
         // Chaquopy config
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
@@ -117,6 +120,13 @@ android {
 
         // CircleIndicator for RecyclerView dots indicator
         implementation ("me.relex:circleindicator:2.1.6")
+
+        // Janino - Java Compiler for Android
+        implementation ("org.codehaus.janino:janino:3.1.10")
+        implementation ("org.codehaus.janino:commons-compiler:3.1.10")
+
+        // MultiDex support
+        implementation ("androidx.multidex:multidex:2.0.1")
     }
 }
 dependencies {
