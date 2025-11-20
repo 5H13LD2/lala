@@ -790,40 +790,130 @@ class ProfileMainActivity5 : BaseActivity() {
                 val totalXP = userDoc.getLong("totalXP")?.toInt() ?: 0
 
                 // Create list of all achievements with their unlock status
+                // Python Badges
                 val achievementList = listOf(
+                    // Python Bronze
                     AchievementBadgeItem(
-                        name = "Bronze",
-                        description = "500 XP",
+                        name = "Python Bronze",
+                        description = "500 XP in Python",
                         requiredXP = 500,
-                        badgeDrawable = R.drawable.badge_bronze,
+                        badgeDrawable = R.drawable.badge_python_bronze,
                         isUnlocked = totalXP >= 500
                     ),
+                    // Python Silver
                     AchievementBadgeItem(
-                        name = "Silver",
-                        description = "1,000 XP",
+                        name = "Python Silver",
+                        description = "1,000 XP in Python",
                         requiredXP = 1000,
-                        badgeDrawable = R.drawable.badge_silver,
+                        badgeDrawable = R.drawable.badge_python_silver,
                         isUnlocked = totalXP >= 1000
                     ),
+                    // Python Gold
                     AchievementBadgeItem(
-                        name = "Gold",
-                        description = "2,000 XP",
+                        name = "Python Gold",
+                        description = "2,000 XP in Python",
                         requiredXP = 2000,
-                        badgeDrawable = R.drawable.badge_gold,
+                        badgeDrawable = R.drawable.badge_python_gold,
                         isUnlocked = totalXP >= 2000
                     ),
+                    // Python Diamond
                     AchievementBadgeItem(
-                        name = "Platinum",
-                        description = "3,000 XP",
+                        name = "Python Diamond",
+                        description = "3,000 XP in Python",
                         requiredXP = 3000,
-                        badgeDrawable = R.drawable.badge_platinum,
+                        badgeDrawable = R.drawable.badge_python_diamond,
                         isUnlocked = totalXP >= 3000
                     ),
+                    // Python Master
                     AchievementBadgeItem(
-                        name = "Diamond",
-                        description = "5,000 XP",
+                        name = "Python Master",
+                        description = "5,000 XP in Python",
                         requiredXP = 5000,
-                        badgeDrawable = R.drawable.badge_diamond,
+                        badgeDrawable = R.drawable.badge_python_master,
+                        isUnlocked = totalXP >= 5000
+                    ),
+
+                    // Java Badges
+                    // Java Bronze
+                    AchievementBadgeItem(
+                        name = "Java Bronze",
+                        description = "500 XP in Java",
+                        requiredXP = 500,
+                        badgeDrawable = R.drawable.badge_java_bronze,
+                        isUnlocked = totalXP >= 500
+                    ),
+                    // Java Silver
+                    AchievementBadgeItem(
+                        name = "Java Silver",
+                        description = "1,000 XP in Java",
+                        requiredXP = 1000,
+                        badgeDrawable = R.drawable.badge_java_silver,
+                        isUnlocked = totalXP >= 1000
+                    ),
+                    // Java Gold
+                    AchievementBadgeItem(
+                        name = "Java Gold",
+                        description = "2,000 XP in Java",
+                        requiredXP = 2000,
+                        badgeDrawable = R.drawable.badge_java_gold,
+                        isUnlocked = totalXP >= 2000
+                    ),
+                    // Java Diamond
+                    AchievementBadgeItem(
+                        name = "Java Diamond",
+                        description = "3,000 XP in Java",
+                        requiredXP = 3000,
+                        badgeDrawable = R.drawable.badge_java_diamond,
+                        isUnlocked = totalXP >= 3000
+                    ),
+                    // Java Master
+                    AchievementBadgeItem(
+                        name = "Java Master",
+                        description = "5,000 XP in Java",
+                        requiredXP = 5000,
+                        badgeDrawable = R.drawable.badge_java_master,
+                        isUnlocked = totalXP >= 5000
+                    ),
+
+                    // SQL Badges
+                    // SQL Bronze
+                    AchievementBadgeItem(
+                        name = "SQL Bronze",
+                        description = "500 XP in SQL",
+                        requiredXP = 500,
+                        badgeDrawable = R.drawable.badge_sql_bronze,
+                        isUnlocked = totalXP >= 500
+                    ),
+                    // SQL Silver
+                    AchievementBadgeItem(
+                        name = "SQL Silver",
+                        description = "1,000 XP in SQL",
+                        requiredXP = 1000,
+                        badgeDrawable = R.drawable.badge_sql_silver,
+                        isUnlocked = totalXP >= 1000
+                    ),
+                    // SQL Gold
+                    AchievementBadgeItem(
+                        name = "SQL Gold",
+                        description = "2,000 XP in SQL",
+                        requiredXP = 2000,
+                        badgeDrawable = R.drawable.badge_sql_gold,
+                        isUnlocked = totalXP >= 2000
+                    ),
+                    // SQL Diamond
+                    AchievementBadgeItem(
+                        name = "SQL Diamond",
+                        description = "3,000 XP in SQL",
+                        requiredXP = 3000,
+                        badgeDrawable = R.drawable.badge_sql_diamond,
+                        isUnlocked = totalXP >= 3000
+                    ),
+                    // SQL Master
+                    AchievementBadgeItem(
+                        name = "SQL Master",
+                        description = "5,000 XP in SQL",
+                        requiredXP = 5000,
+                        badgeDrawable = R.drawable.badge_sql_master,
                         isUnlocked = totalXP >= 5000
                     )
                 )
@@ -834,9 +924,9 @@ class ProfileMainActivity5 : BaseActivity() {
 
                 // Update achievement count
                 val unlockedCount = achievementList.count { it.isUnlocked }
-                binding.achievementsCountBadge.text = "$unlockedCount/5"
+                binding.achievementsCountBadge.text = "$unlockedCount/15"
 
-                Log.d(TAG, "✅ Loaded achievements: $unlockedCount unlocked")
+                Log.d(TAG, "✅ Loaded achievements: $unlockedCount unlocked out of 15")
 
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error loading achievements", e)
