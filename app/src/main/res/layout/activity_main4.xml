@@ -215,6 +215,7 @@
 
             <!-- Technical Assessment Section -->
             <LinearLayout
+                android:id="@+id/layoutAssessmentsHeader"
                 style="@style/Widget.Lala.SectionHeader">
 
                 <TextView
@@ -246,6 +247,7 @@
 
             <!-- SQL Challenges Section -->
             <LinearLayout
+                android:id="@+id/layoutSQLChallengesHeader"
                 style="@style/Widget.Lala.SectionHeader">
 
                 <TextView
@@ -277,9 +279,11 @@
 
             <!-- Java Challenges Section -->
             <LinearLayout
+                android:id="@+id/layoutJavaChallengesHeader"
                 style="@style/Widget.Lala.SectionHeader">
 
                 <TextView
+                    android:id="@+id/textJavaChallengesTitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -307,9 +311,11 @@
 
             <!-- Technical Interview Section -->
             <LinearLayout
+                android:id="@+id/layoutInterviewsHeader"
                 style="@style/Widget.Lala.SectionHeader">
 
                 <TextView
+                    android:id="@+id/textInterviewsTitle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"

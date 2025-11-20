@@ -40,6 +40,10 @@
             android:exported="true" />
 
         <activity
+            android:name=".JAVACOMPILER.AllJavaChallengesActivity"
+            android:exported="true" />
+
+        <activity
             android:name=".PYTHONASSESMENT.AllAssessmentsActivity"
             android:exported="true" />
 
