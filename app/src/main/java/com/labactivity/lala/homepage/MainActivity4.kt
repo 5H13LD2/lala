@@ -4,11 +4,14 @@ import android.content.Intent
 import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.labactivity.lala.UTILS.DialogUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
 import com.labactivity.lala.AVAILABLECOURSEPAGE.Course  // Import the correct Course class
 import com.labactivity.lala.PYTHONASSESMENT.PYTHONASSESMENT
@@ -16,6 +19,8 @@ import com.labactivity.lala.PYTHONASSESMENT.AllAssessmentsActivity
 import com.labactivity.lala.PYTHONASSESMENT.AllInterviewsActivity
 import com.labactivity.lala.SQLCOMPILER.SQLASSESSMENT
 import com.labactivity.lala.SQLCOMPILER.AllSQLChallengesActivity
+import com.labactivity.lala.JAVACOMPILER.JAVAASSESSMENT
+import com.labactivity.lala.JAVACOMPILER.AllJavaChallengesActivity
 import com.labactivity.lala.ProfileMainActivity5.ProfileMainActivity5
 import com.labactivity.lala.R
 import com.labactivity.lala.SettingsActivity
@@ -98,55 +103,14 @@ class MainActivity4 : BaseActivity() {
         setupRecyclerView()
 
         // ==============================================
+        // CHECK ENROLLMENT AND SETUP ASSESSMENTS
+        // ==============================================
+        checkEnrollmentAndSetupSections()
+
+        // ==============================================
         // SETUP BOTTOM NAVIGATION
         // ==============================================
         setupBottomNavigation()
-
-        // ==============================================
-        // BIND ASSESSMENTS TO RECYCLER VIEW
-        // ==============================================
-        PYTHONASSESMENT.TechnicalAssesment(
-            this,
-            binding.recyclerViewAssessments,
-            binding.textViewAllAssessments
-        )
-
-        // Add navigation to AllAssessmentsActivity
-        binding.textViewAllAssessments.setOnClickListener {
-            val intent = Intent(this, AllAssessmentsActivity::class.java)
-            startActivity(intent)
-        }
-
-        // ==============================================
-        // BIND SQL CHALLENGES TO RECYCLER VIEW
-        // ==============================================
-        SQLASSESSMENT.SQLTechnicalAssessment(
-            this,
-            binding.recyclerViewSQLChallenges,
-            binding.textViewAllSQLChallenges
-        )
-
-        // Add navigation to AllSQLChallengesActivity
-        binding.textViewAllSQLChallenges.setOnClickListener {
-            val intent = Intent(this, AllSQLChallengesActivity::class.java)
-            startActivity(intent)
-        }
-
-        // ==============================================
-        // BIND INTERVIEWS TO RECYCLER VIEW
-        // ==============================================
-        PYTHONASSESMENT.TechnicalInterview(
-            this,
-            binding.recyclerViewInterviews,
-            binding.textViewAllInterviews,
-            binding.textViewAllInterviews
-        )
-
-        // Add navigation to AllInterviewsActivity
-        binding.textViewAllInterviews.setOnClickListener {
-            val intent = Intent(this, AllInterviewsActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     // ==============================================
@@ -248,33 +212,6 @@ class MainActivity4 : BaseActivity() {
     // SETUP COURSE RECYCLERVIEW (HORIZONTAL)
     // ==============================================
     private fun setupRecyclerView() {
-        val courseList = listOf(
-            Course(
-                courseId = "python_basics",
-                name = "Python Basics",
-                imageResId = R.drawable.python,
-                description = "Learn Python programming from scratch",
-                category = "Programming",
-                difficulty = "Beginner"
-            ),
-            Course(
-                courseId = "java_fundamentals",
-                name = "Java Fundamentals",
-                imageResId = R.drawable.java,
-                description = "Master Java programming fundamentals",
-                category = "Programming",
-                difficulty = "Beginner"
-            ),
-            Course(
-                courseId = "sql_basics",
-                name = "SQL Basics",
-                imageResId = R.drawable.sql,
-                description = "Learn database management with SQL",
-                category = "Database",
-                difficulty = "Beginner"
-            )
-        )
-
         val recyclerView: RecyclerView = binding.recyclerView
         val indicator: CircleIndicator2 = binding.indicator
         val textMyLibrary: TextView = binding.textMyLibrary
@@ -289,7 +226,8 @@ class MainActivity4 : BaseActivity() {
         recyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        val adapter = CourseAdapter(courseList.toMutableList(), autoLoadEnrolled = false)
+        // Auto-load only enrolled courses from Firestore
+        val adapter = CourseAdapter(autoLoadEnrolled = true)
         recyclerView.adapter = adapter
 
         // Add snap helper for page-like scrolling
@@ -301,6 +239,135 @@ class MainActivity4 : BaseActivity() {
 
         // Register adapter data observer to update indicator when data changes
         adapter.registerAdapterDataObserver(indicator.adapterDataObserver)
+    }
+
+    // ==============================================
+    // CHECK ENROLLMENT AND SETUP ASSESSMENT SECTIONS
+    // ==============================================
+    private fun checkEnrollmentAndSetupSections() {
+        val auth = FirebaseAuth.getInstance()
+        val firestore = FirebaseFirestore.getInstance()
+
+        auth.currentUser?.let { user ->
+            firestore.collection("users")
+                .document(user.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    val enrolledCourses = document.get("courseTaken") as? List<Map<String, Any>> ?: listOf()
+
+                    // Check if user is enrolled in Python
+                    val hasPython = enrolledCourses.any { course ->
+                        val courseId = course["courseId"] as? String ?: ""
+                        courseId.contains("python", ignoreCase = true)
+                    }
+
+                    // Check if user is enrolled in SQL
+                    val hasSQL = enrolledCourses.any { course ->
+                        val courseId = course["courseId"] as? String ?: ""
+                        courseId.contains("sql", ignoreCase = true)
+                    }
+
+                    // Check if user is enrolled in Java
+                    val hasJava = enrolledCourses.any { course ->
+                        val courseId = course["courseId"] as? String ?: ""
+                        courseId.contains("java", ignoreCase = true)
+                    }
+
+                    // Show/Hide Technical Assessment (Python)
+                    if (hasPython) {
+                        binding.textTechAssessmentTitle.visibility = View.VISIBLE
+                        binding.textViewAllAssessments.visibility = View.VISIBLE
+                        binding.recyclerViewAssessments.visibility = View.VISIBLE
+
+                        PYTHONASSESMENT.TechnicalAssesment(
+                            this,
+                            binding.recyclerViewAssessments,
+                            binding.textViewAllAssessments
+                        )
+
+                        binding.textViewAllAssessments.setOnClickListener {
+                            val intent = Intent(this, AllAssessmentsActivity::class.java)
+                            startActivity(intent)
+                        }
+                    } else {
+                        binding.textTechAssessmentTitle.visibility = View.GONE
+                        binding.textViewAllAssessments.visibility = View.GONE
+                        binding.recyclerViewAssessments.visibility = View.GONE
+                    }
+
+                    // Show/Hide SQL Challenges
+                    if (hasSQL) {
+                        binding.textSQLChallengesTitle.visibility = View.VISIBLE
+                        binding.textViewAllSQLChallenges.visibility = View.VISIBLE
+                        binding.recyclerViewSQLChallenges.visibility = View.VISIBLE
+
+                        SQLASSESSMENT.SQLTechnicalAssessment(
+                            this,
+                            binding.recyclerViewSQLChallenges,
+                            binding.textViewAllSQLChallenges
+                        )
+
+                        binding.textViewAllSQLChallenges.setOnClickListener {
+                            val intent = Intent(this, AllSQLChallengesActivity::class.java)
+                            startActivity(intent)
+                        }
+                    } else {
+                        binding.textSQLChallengesTitle.visibility = View.GONE
+                        binding.textViewAllSQLChallenges.visibility = View.GONE
+                        binding.recyclerViewSQLChallenges.visibility = View.GONE
+                    }
+
+                    // Show/Hide Java Challenges
+                    if (hasJava) {
+                        binding.textJavaChallengesTitle.visibility = View.VISIBLE
+                        binding.textViewAllJavaChallenges.visibility = View.VISIBLE
+                        binding.recyclerViewJavaChallenges.visibility = View.VISIBLE
+
+                        JAVAASSESSMENT.JavaTechnicalAssessment(
+                            this,
+                            binding.recyclerViewJavaChallenges,
+                            binding.textViewAllJavaChallenges
+                        )
+
+                        binding.textViewAllJavaChallenges.setOnClickListener {
+                            val intent = Intent(this, AllJavaChallengesActivity::class.java)
+                            startActivity(intent)
+                        }
+                    } else {
+                        binding.textJavaChallengesTitle.visibility = View.GONE
+                        binding.textViewAllJavaChallenges.visibility = View.GONE
+                        binding.recyclerViewJavaChallenges.visibility = View.GONE
+                    }
+
+                    // Show/Hide Technical Interviews (Python)
+                    if (hasPython) {
+                        binding.textInterviewsTitle.visibility = View.VISIBLE
+                        binding.textViewAllInterviews.visibility = View.VISIBLE
+                        binding.recyclerViewInterviews.visibility = View.VISIBLE
+
+                        PYTHONASSESMENT.TechnicalInterview(
+                            this,
+                            binding.recyclerViewInterviews,
+                            binding.textViewAllInterviews,
+                            binding.textViewAllInterviews
+                        )
+
+                        binding.textViewAllInterviews.setOnClickListener {
+                            val intent = Intent(this, AllInterviewsActivity::class.java)
+                            startActivity(intent)
+                        }
+                    } else {
+                        binding.textInterviewsTitle.visibility = View.GONE
+                        binding.textViewAllInterviews.visibility = View.GONE
+                        binding.recyclerViewInterviews.visibility = View.GONE
+                    }
+
+                    Log.d("MainActivity4", "Enrollment check: Python=$hasPython, SQL=$hasSQL, Java=$hasJava")
+                }
+                .addOnFailureListener { e ->
+                    Log.e("MainActivity4", "Error checking enrollment", e)
+                }
+        }
     }
 
     // ==============================================
@@ -325,10 +392,8 @@ class MainActivity4 : BaseActivity() {
     // ==============================================
     override fun onResume() {
         super.onResume()
-        // Refresh assessments to show updated status
-        PYTHONASSESMENT.refreshChallenges(this, binding.recyclerViewAssessments)
-        // Refresh SQL challenges to show updated progress
-        SQLASSESSMENT.refreshChallenges(this, binding.recyclerViewSQLChallenges)
+        // Re-check enrollment and refresh sections
+        checkEnrollmentAndSetupSections()
     }
 
     // ==============================================
@@ -342,6 +407,7 @@ class MainActivity4 : BaseActivity() {
         binding.recyclerView.alpha = 0f
         binding.recyclerViewAssessments.alpha = 0f
         binding.recyclerViewSQLChallenges.alpha = 0f
+        binding.recyclerViewJavaChallenges.alpha = 0f
         binding.recyclerViewInterviews.alpha = 0f
         binding.cardViewPractice.alpha = 0f
 
@@ -360,8 +426,11 @@ class MainActivity4 : BaseActivity() {
         // Animate SQL Challenges section
         binding.recyclerViewSQLChallenges.slideUpFadeIn(duration = 400, startDelay = 350)
 
+        // Animate Java Challenges section
+        binding.recyclerViewJavaChallenges.slideUpFadeIn(duration = 400, startDelay = 380)
+
         // Animate Technical Interview section
-        binding.recyclerViewInterviews.slideUpFadeIn(duration = 400, startDelay = 400)
+        binding.recyclerViewInterviews.slideUpFadeIn(duration = 400, startDelay = 420)
 
         // Animate Practice Card
         binding.cardViewPractice.slideUpFadeIn(duration = 400, startDelay = 500)
@@ -377,6 +446,10 @@ class MainActivity4 : BaseActivity() {
 
         binding.recyclerViewSQLChallenges.post {
             binding.recyclerViewSQLChallenges.animateItems(itemDelay = 80, itemDuration = 300)
+        }
+
+        binding.recyclerViewJavaChallenges.post {
+            binding.recyclerViewJavaChallenges.animateItems(itemDelay = 80, itemDuration = 300)
         }
 
         binding.recyclerViewInterviews.post {
