@@ -13,6 +13,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FieldValue
 import com.labactivity.lala.LOGINPAGE.MainActivity
 import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
 import com.labactivity.lala.R
@@ -63,7 +64,8 @@ class MainActivity2 : AppCompatActivity() {
                             val user = hashMapOf(
                                 "username" to username,
                                 "email" to email,
-                                "isEnrolled" to false  // ✅ Explicitly set to false upon registration
+                                "isEnrolled" to false,  // ✅ Explicitly set to false upon registration
+                                "createdAt" to FieldValue.serverTimestamp()  // ✅ Add timestamp
                             )
 
                             firestore.collection("users").document(userId)
@@ -104,7 +106,8 @@ class MainActivity2 : AppCompatActivity() {
                         val user = hashMapOf(
                             "username" to account.displayName,
                             "email" to account.email,
-                            "isEnrolled" to false // ✅ Set to false for new Google users
+                            "isEnrolled" to false, // ✅ Set to false for new Google users
+                            "createdAt" to FieldValue.serverTimestamp()  // ✅ Add timestamp
                         )
 
                         if (userId != null) {
