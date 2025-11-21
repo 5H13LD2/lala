@@ -1,12 +1,11 @@
 package com.labactivity.lala.SplashScreen
 
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.labactivity.lala.R
-import com.labactivity.lala.LOGINPAGE.MainActivity
+import com.labactivity.lala.UTILS.AuthManager
 
 class SplashActivity : AppCompatActivity() {
 
@@ -20,11 +19,11 @@ class SplashActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        // Siguraduhin na magla-launch lang habang nasa foreground pa
+        // Check authentication state and navigate accordingly after splash delay
         Handler(Looper.getMainLooper()).postDelayed({
             if (!isFinishing) {
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
+                // Use AuthManager to handle navigation based on auth state
+                AuthManager.navigateBasedOnAuthState(this, finishCurrent = true)
             }
         }, splashDelay)
     }

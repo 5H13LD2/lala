@@ -79,7 +79,7 @@ object JAVAASSESSMENT {
 
                 // Update adapter with 5 second delay (shows skeleton for 5 seconds minimum)
                 // This matches PYTHONASSESMENT behavior
-                adapter.setChallengesWithProgressAndDelay(challenges, progressMap, 5000)
+                adapter.setChallengesWithProgressAndDelay(challenges, progressMap, 2000)
 
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error loading Java challenges", e)

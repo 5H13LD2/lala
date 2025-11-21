@@ -22,7 +22,8 @@ import com.labactivity.lala.AVAILABLECOURSEPAGE.Course  // Use the full Course c
 
 class CourseAdapter(
     private var courses: MutableList<Course> = mutableListOf(),
-    private val autoLoadEnrolled: Boolean = true
+    private val autoLoadEnrolled: Boolean = true,
+    private val onCoursesLoaded: ((isEmpty: Boolean) -> Unit)? = null
 ) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
 
     private val TAG = "HomepageCourseAdapter"
@@ -58,9 +59,11 @@ class CourseAdapter(
                         )
                     }
                     notifyDataSetChanged()
+                    onCoursesLoaded?.invoke(courses.isEmpty())
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, "Error loading enrolled courses", e)
+                    onCoursesLoaded?.invoke(true)
                 }
         }
     }

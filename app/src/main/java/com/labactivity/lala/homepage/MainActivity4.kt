@@ -212,33 +212,45 @@ class MainActivity4 : BaseActivity() {
     // SETUP COURSE RECYCLERVIEW (HORIZONTAL)
     // ==============================================
     private fun setupRecyclerView() {
-        val recyclerView: RecyclerView = binding.recyclerView
-        val indicator: CircleIndicator2 = binding.indicator
-        val textMyLibrary: TextView = binding.textMyLibrary
-        textMyLibrary.paintFlags = textMyLibrary.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+        binding.textMyLibrary.paintFlags = binding.textMyLibrary.paintFlags or Paint.UNDERLINE_TEXT_FLAG
 
         // Add click listener to "My Library" text
-        textMyLibrary.setOnClickListener {
+        binding.textMyLibrary.setOnClickListener {
             val intent = Intent(this, com.labactivity.lala.MYLIBRARY.MyLibraryActivity::class.java)
             startActivity(intent)
         }
 
-        recyclerView.layoutManager =
+        binding.recyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        // Auto-load only enrolled courses from Firestore
-        val adapter = CourseAdapter(autoLoadEnrolled = true)
-        recyclerView.adapter = adapter
+        // Auto-load only enrolled courses from Firestore with callback
+        val adapter = CourseAdapter(autoLoadEnrolled = true, onCoursesLoaded = ::updateRecentCourseVisibility)
+        binding.recyclerView.adapter = adapter
 
         // Add snap helper for page-like scrolling
         val snapHelper = PagerSnapHelper()
-        snapHelper.attachToRecyclerView(recyclerView)
+        snapHelper.attachToRecyclerView(binding.recyclerView)
 
         // Attach the indicator to the RecyclerView with SnapHelper
-        indicator.attachToRecyclerView(recyclerView, snapHelper)
+        binding.indicator.attachToRecyclerView(binding.recyclerView, snapHelper)
 
         // Register adapter data observer to update indicator when data changes
-        adapter.registerAdapterDataObserver(indicator.adapterDataObserver)
+        adapter.registerAdapterDataObserver(binding.indicator.adapterDataObserver)
+    }
+
+    // ==============================================
+    // UPDATE RECENT COURSE SECTION VISIBILITY
+    // ==============================================
+    private fun updateRecentCourseVisibility(isEmpty: Boolean) {
+        if (isEmpty) {
+            binding.layoutRecentCourseHeader.visibility = View.GONE
+            binding.recyclerView.visibility = View.GONE
+            binding.indicator.visibility = View.GONE
+        } else {
+            binding.layoutRecentCourseHeader.visibility = View.VISIBLE
+            binding.recyclerView.visibility = View.VISIBLE
+            binding.indicator.visibility = View.VISIBLE
+        }
     }
 
     // ==============================================

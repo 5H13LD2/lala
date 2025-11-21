@@ -48,6 +48,8 @@ import kotlinx.coroutines.tasks.await
 import com.labactivity.lala.UTILS.setupWithSafeNavigation
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.labactivity.lala.SettingsActivity
+import com.labactivity.lala.ProfileMainActivity5.TechnicalAssessmentItem
+import com.labactivity.lala.ProfileMainActivity5.TechnicalAssessmentsAdapter
 
 class ProfileMainActivity5 : BaseActivity() {
 
@@ -58,8 +60,8 @@ class ProfileMainActivity5 : BaseActivity() {
 
     private var selectedImageUri: Uri? = null
 
-    // Adapters for courses and quizzes
-    private lateinit var enrolledCoursesAdapter: EnrolledCoursesAdapter
+    // Adapters for assessments and quizzes
+    private lateinit var technicalAssessmentsAdapter: TechnicalAssessmentsAdapter
     private lateinit var quizHistoryAdapter: QuizHistoryAdapter
     private lateinit var achievementBadgeAdapter: AchievementBadgeAdapter
     private lateinit var progressManager: ModuleProgressManager
@@ -67,6 +69,7 @@ class ProfileMainActivity5 : BaseActivity() {
     private lateinit var xpManager: XPManager
     private lateinit var achievementManager: AchievementManager
     private var allQuizHistory: List<QuizHistoryItem> = listOf()
+    private var allAssessments: List<TechnicalAssessmentItem> = listOf()
 
     // Permission launcher
     private val permissionLauncher = registerForActivityResult(
@@ -113,29 +116,44 @@ class ProfileMainActivity5 : BaseActivity() {
         setupClickListeners()
         setupBottomNavigation()
         loadUserProfile()
-        loadEnrolledCourses()
+        loadTechnicalAssessments()
         loadQuizHistory()
         loadAchievements()
     }
 
     private fun setupRecyclerViews() {
-        // Setup enrolled courses RecyclerView
-        enrolledCoursesAdapter = EnrolledCoursesAdapter(
+        // Setup technical assessments RecyclerView
+        technicalAssessmentsAdapter = TechnicalAssessmentsAdapter(
             this,
             mutableListOf()
-        ) { course ->
-            // Navigate to CoreModule when course is clicked
-            val intent = Intent(this, CoreModule::class.java).apply {
-                putExtra("COURSE_ID", course.courseId)
-                putExtra("COURSE_NAME", course.courseName)
-                putExtra("COURSE_DESC", "")
+        ) { assessment ->
+            // Navigate to CompilerActivity when assessment is clicked
+            if (!assessment.isUnlocked) {
+                val message = when (assessment.difficulty.lowercase()) {
+                    "medium" -> "Complete all Easy challenges to unlock Medium difficulty."
+                    "hard" -> "Complete all Easy and Medium challenges to unlock Hard difficulty."
+                    else -> "This assessment is currently locked."
+                }
+                DialogUtils.showLockedDialog(
+                    context = this,
+                    title = "🔒 Assessment Locked",
+                    message = message
+                )
+                return@TechnicalAssessmentsAdapter
             }
-            startActivity(intent)
+
+            // Open the appropriate compiler based on category
+            val compilerIntent = Intent(this, com.labactivity.lala.PYTHONCOMPILER.CompilerActivity::class.java).apply {
+                putExtra("CHALLENGE_ID", assessment.id)
+                putExtra("CHALLENGE_TITLE", assessment.title)
+                putExtra("COURSE_ID", assessment.courseId)
+            }
+            startActivity(compilerIntent)
         }
 
         binding.enrolledCoursesRecyclerView.apply {
             layoutManager = LinearLayoutManager(this@ProfileMainActivity5)
-            adapter = enrolledCoursesAdapter
+            adapter = technicalAssessmentsAdapter
         }
 
         // Setup quiz history RecyclerView
@@ -199,6 +217,31 @@ class ProfileMainActivity5 : BaseActivity() {
         // View All Quizzes button
         binding.viewAllQuizzesBtn.setOnClickListener {
             showAllQuizzes()
+        }
+
+        // View All Assessments button
+        binding.viewAllAssessmentsBtn.setOnClickListener {
+            showAllAssessments()
+        }
+
+        // Courses Stat Card - Navigate to Home page courses section
+        binding.coursesStatCard.setOnClickListener {
+            Log.d(TAG, "Courses card clicked - navigating to home")
+            val intent = Intent(this, MainActivity4::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
+            finish()
+        }
+
+        // Quizzes Stat Card - Scroll to quiz history section
+        binding.quizzesStatCard.setOnClickListener {
+            Log.d(TAG, "Quizzes card clicked - scrolling to quiz history")
+            // Scroll to quiz history section
+            binding.scrollView.post {
+                val quizHistoryCard = binding.quizHistoryCard
+                val scrollY = quizHistoryCard.top
+                binding.scrollView.smoothScrollTo(0, scrollY)
+            }
         }
     }
 
@@ -398,11 +441,14 @@ class ProfileMainActivity5 : BaseActivity() {
                             val username = document.getString("username") ?: "@${currentUser.email?.split("@")?.get(0)}"
                             val email = document.getString("email") ?: currentUser.email ?: "No email"
                             val totalXP = (document.getLong("totalXP") ?: 0).toInt()
-                            val coursesCompleted = (document.getLong("coursesCompleted") ?: 0).toInt()
                             val quizzesTaken = (document.getLong("quizzesTaken") ?: 0).toInt()
                             val technicalAssessments = (document.getLong("technicalAssessmentsCompleted") ?: 0).toInt()
                             val profilePhotoBase64 = document.getString("profilePhotoBase64")
                             val currentBadge = document.getString("currentBadge") ?: Achievement.TIER_NONE
+
+                            // Get actual enrolled courses count
+                            val enrolledCoursesData = document.get("courseTaken") as? List<Map<String, Any>> ?: listOf()
+                            val coursesCount = enrolledCoursesData.size
 
                             // Calculate level and progress using XPManager
                             val level = xpManager.calculateLevel(totalXP)
@@ -432,7 +478,8 @@ class ProfileMainActivity5 : BaseActivity() {
 
                             // Display level and XP
                             binding.textXpValue.text = "${xpManager.getLevelString(totalXP)} — $totalXP XP"
-                            binding.textCoursesValue.text = coursesCompleted.toString()
+                            // Display dynamic counts
+                            binding.textCoursesValue.text = coursesCount.toString()
                             binding.textExercisesValue.text = quizzesTaken.toString()
 
                             // Update progress bar with checkpoints
@@ -551,7 +598,7 @@ class ProfileMainActivity5 : BaseActivity() {
         Log.d(TAG, "Completed levels: $completedLevels, Current level: $currentLevel")
     }
 
-    private fun loadEnrolledCourses() {
+    private fun loadTechnicalAssessments() {
         val currentUser = auth.currentUser
         if (currentUser == null) {
             Log.w(TAG, "No authenticated user")
@@ -559,125 +606,149 @@ class ProfileMainActivity5 : BaseActivity() {
             return
         }
 
-        Log.d(TAG, "Loading enrolled courses for user: ${currentUser.uid}")
+        Log.d(TAG, "Loading taken technical assessments for user: ${currentUser.uid}")
 
-        firestore.collection("users")
-            .document(currentUser.uid)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null && document.exists()) {
-                    val enrolledCoursesData = document.get("courseTaken") as? List<Map<String, Any>> ?: listOf()
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                // Fetch only assessments that the user has taken (from user_progress)
+                val userProgressSnapshot = withContext(Dispatchers.IO) {
+                    firestore.collection("user_progress")
+                        .document(currentUser.uid)
+                        .collection("technical_assessment_progress")
+                        .get()
+                        .await()
+                }
 
-                    Log.d(TAG, "Found ${enrolledCoursesData.size} enrolled courses")
-
-                    if (enrolledCoursesData.isEmpty()) {
-                        binding.enrolledCoursesRecyclerView.visibility = View.GONE
-                        binding.noCoursesText.visibility = View.VISIBLE
-                        binding.coursesCountBadge.text = "0"
-                        return@addOnSuccessListener
-                    }
-
-                    val coursesList = mutableListOf<EnrolledCourseItem>()
-
-                    // Process each enrolled course
-                    enrolledCoursesData.forEach { courseData ->
-                        val courseId = courseData["courseId"] as? String ?: ""
-                        val courseName = courseData["courseName"] as? String ?: "Unknown Course"
-                        val category = courseData["category"] as? String ?: "General"
-                        val difficulty = courseData["difficulty"] as? String ?: "Beginner"
-                        val enrolledAt = courseData["enrolledAt"] as? Long ?: 0L
-
-                        // Calculate progress for this course
-                        progressManager.loadCompletedLessons(courseId) { completedLessons ->
-                            // Get total lessons for this course from Firestore
-                            firestore.collection("courses")
-                                .document(courseId)
-                                .collection("modules")
-                                .get()
-                                .addOnSuccessListener { modulesSnapshot ->
-                                    var totalLessons = 0
-                                    var processedModules = 0
-                                    val moduleCount = modulesSnapshot.size()
-
-                                    if (moduleCount == 0) {
-                                        // No modules, add course with 0% progress
-                                        coursesList.add(
-                                            EnrolledCourseItem(
-                                                courseId = courseId,
-                                                courseName = courseName,
-                                                category = category,
-                                                difficulty = difficulty,
-                                                enrolledAt = enrolledAt,
-                                                progress = 0
-                                            )
-                                        )
-                                        updateCoursesUI(coursesList)
-                                        return@addOnSuccessListener
-                                    }
-
-                                    modulesSnapshot.documents.forEach { moduleDoc ->
-                                        firestore.collection("courses")
-                                            .document(courseId)
-                                            .collection("modules")
-                                            .document(moduleDoc.id)
-                                            .collection("lessons")
-                                            .get()
-                                            .addOnSuccessListener { lessonsSnapshot ->
-                                                totalLessons += lessonsSnapshot.size()
-                                                processedModules++
-
-                                                if (processedModules == moduleCount) {
-                                                    val progress = if (totalLessons > 0) {
-                                                        (completedLessons.size * 100) / totalLessons
-                                                    } else 0
-
-                                                    coursesList.add(
-                                                        EnrolledCourseItem(
-                                                            courseId = courseId,
-                                                            courseName = courseName,
-                                                            category = category,
-                                                            difficulty = difficulty,
-                                                            enrolledAt = enrolledAt,
-                                                            progress = progress
-                                                        )
-                                                    )
-                                                    updateCoursesUI(coursesList)
-                                                }
-                                            }
-                                    }
-                                }
-                        }
-                    }
-                } else {
+                if (userProgressSnapshot.isEmpty) {
+                    // Hide assessment section if no assessments taken
+                    binding.coursesCard.visibility = View.GONE
                     binding.enrolledCoursesRecyclerView.visibility = View.GONE
                     binding.noCoursesText.visibility = View.VISIBLE
                     binding.coursesCountBadge.text = "0"
+                    Log.d(TAG, "No assessments taken yet")
+                    return@launch
                 }
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "Error loading enrolled courses", e)
+
+                // Show assessment section
+                binding.coursesCard.visibility = View.VISIBLE
+
+                val assessmentsList = mutableListOf<TechnicalAssessmentItem>()
+
+                // For each taken assessment, fetch the challenge details
+                for (progressDoc in userProgressSnapshot.documents) {
+                    val challengeId = progressDoc.id
+                    val progressStatus = progressDoc.getString("status") ?: "not_started"
+                    val bestScore = progressDoc.getLong("bestScore")?.toInt() ?: 0
+                    val attempts = progressDoc.getLong("attempts")?.toInt() ?: 0
+                    val passed = progressDoc.getBoolean("passed") ?: false
+                    val challengeTitle = progressDoc.getString("challengeTitle") ?: ""
+
+                    // Fetch the challenge details from technical_assesment collection
+                    val challengeDoc = withContext(Dispatchers.IO) {
+                        firestore.collection("technical_assesment")
+                            .document(challengeId)
+                            .get()
+                            .await()
+                    }
+
+                    if (challengeDoc.exists()) {
+                        val title = challengeDoc.getString("title") ?: challengeTitle
+                        val difficulty = challengeDoc.getString("difficulty") ?: "Unknown"
+                        val courseId = challengeDoc.getString("courseId") ?: ""
+                        val category = challengeDoc.getString("category") ?: ""
+
+                        assessmentsList.add(
+                            TechnicalAssessmentItem(
+                                id = challengeId,
+                                title = title,
+                                difficulty = difficulty,
+                                courseId = courseId,
+                                category = category,
+                                status = progressStatus,
+                                isUnlocked = true,  // Already taken, so unlocked
+                                bestScore = bestScore,
+                                attempts = attempts,
+                                passed = passed
+                            )
+                        )
+                    } else {
+                        // If challenge doc doesn't exist, use data from progress
+                        Log.w(TAG, "Challenge document not found for ID: $challengeId, using progress data")
+                        assessmentsList.add(
+                            TechnicalAssessmentItem(
+                                id = challengeId,
+                                title = challengeTitle,
+                                difficulty = "Unknown",
+                                courseId = "",
+                                category = "Assessment",
+                                status = progressStatus,
+                                isUnlocked = true,
+                                bestScore = bestScore,
+                                attempts = attempts,
+                                passed = passed
+                            )
+                        )
+                    }
+                }
+
+                // Sort by status (completed last) and then by difficulty
+                val sortedAssessments = assessmentsList.sortedWith(
+                    compareBy<TechnicalAssessmentItem> { it.passed }
+                        .thenBy {
+                            when(it.difficulty.lowercase()) {
+                                "easy" -> 1
+                                "medium" -> 2
+                                "hard" -> 3
+                                else -> 4
+                            }
+                        }
+                )
+
+                updateAssessmentsUI(sortedAssessments)
+
+                Log.d(TAG, "Loaded ${sortedAssessments.size} taken technical assessments")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading technical assessments", e)
                 binding.enrolledCoursesRecyclerView.visibility = View.GONE
                 binding.noCoursesText.visibility = View.VISIBLE
                 binding.coursesCountBadge.text = "0"
             }
+        }
     }
 
-    private fun updateCoursesUI(coursesList: List<EnrolledCourseItem>) {
-        Log.d(TAG, "updateCoursesUI called with ${coursesList.size} courses")
-        coursesList.forEach { course ->
-            Log.d(TAG, "  Course: ${course.courseName}, Progress: ${course.progress}%")
+    private fun updateAssessmentsUI(assessmentsList: List<TechnicalAssessmentItem>) {
+        Log.d(TAG, "updateAssessmentsUI called with ${assessmentsList.size} assessments")
+        assessmentsList.forEach { assessment ->
+            Log.d(TAG, "  Assessment: ${assessment.title}, Status: ${assessment.status}, Locked: ${!assessment.isUnlocked}")
         }
 
-        if (coursesList.isEmpty()) {
+        // Store all assessments
+        allAssessments = assessmentsList
+
+        if (assessmentsList.isEmpty()) {
             binding.enrolledCoursesRecyclerView.visibility = View.GONE
             binding.noCoursesText.visibility = View.VISIBLE
+            binding.viewAllAssessmentsBtn.visibility = View.GONE
             binding.coursesCountBadge.text = "0"
         } else {
+            // Show only first 2 assessments
+            val displayedList = assessmentsList.take(2)
+
             binding.enrolledCoursesRecyclerView.visibility = View.VISIBLE
             binding.noCoursesText.visibility = View.GONE
-            binding.coursesCountBadge.text = coursesList.size.toString()
-            enrolledCoursesAdapter.updateCourses(coursesList)
-            Log.d(TAG, "RecyclerView updated and made visible")
+            binding.coursesCountBadge.text = assessmentsList.size.toString()
+            technicalAssessmentsAdapter.updateAssessments(displayedList)
+
+            // Show "View All" button only if there are more than 2 assessments
+            if (assessmentsList.size > 2) {
+                binding.viewAllAssessmentsBtn.visibility = View.VISIBLE
+                binding.viewAllAssessmentsBtn.text = "View All (${assessmentsList.size})"
+            } else {
+                binding.viewAllAssessmentsBtn.visibility = View.GONE
+            }
+
+            Log.d(TAG, "RecyclerView updated with ${displayedList.size} assessments (${assessmentsList.size} total)")
         }
     }
 
@@ -763,6 +834,59 @@ class ProfileMainActivity5 : BaseActivity() {
             )
         }
         recyclerView.adapter = allQuizzesAdapter
+        recyclerView.setPadding(16, 16, 16, 16)
+
+        dialogBuilder.setView(recyclerView)
+        dialogBuilder.setPositiveButton("Close") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = dialogBuilder.create()
+        dialog.show()
+    }
+
+    private fun showAllAssessments() {
+        if (allAssessments.isEmpty()) {
+            DialogUtils.showInfoDialog(this, "No Assessments", "No assessments taken yet")
+            return
+        }
+
+        // Create a dialog to show all assessments
+        val dialogBuilder = android.app.AlertDialog.Builder(this)
+        dialogBuilder.setTitle("All Technical Assessments (${allAssessments.size})")
+
+        // Create a RecyclerView for the dialog
+        val recyclerView = androidx.recyclerview.widget.RecyclerView(this)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val allAssessmentsAdapter = TechnicalAssessmentsAdapter(
+            this,
+            allAssessments.toMutableList()
+        ) { assessment ->
+            // Navigate to CompilerActivity when assessment is clicked
+            if (!assessment.isUnlocked) {
+                val message = when (assessment.difficulty.lowercase()) {
+                    "medium" -> "Complete all Easy challenges to unlock Medium difficulty."
+                    "hard" -> "Complete all Easy and Medium challenges to unlock Hard difficulty."
+                    else -> "This assessment is currently locked."
+                }
+                DialogUtils.showLockedDialog(
+                    context = this,
+                    title = "🔒 Assessment Locked",
+                    message = message
+                )
+                return@TechnicalAssessmentsAdapter
+            }
+
+            // Open the appropriate compiler based on category
+            val compilerIntent = Intent(this, com.labactivity.lala.PYTHONCOMPILER.CompilerActivity::class.java).apply {
+                putExtra("CHALLENGE_ID", assessment.id)
+                putExtra("CHALLENGE_TITLE", assessment.title)
+                putExtra("COURSE_ID", assessment.courseId)
+            }
+            startActivity(compilerIntent)
+        }
+        recyclerView.adapter = allAssessmentsAdapter
         recyclerView.setPadding(16, 16, 16, 16)
 
         dialogBuilder.setView(recyclerView)
@@ -938,7 +1062,7 @@ class ProfileMainActivity5 : BaseActivity() {
         super.onResume()
         // Refresh user data when returning to the activity
         loadUserProfile()
-        loadEnrolledCourses()
+        loadTechnicalAssessments()
         loadQuizHistory()
         loadAchievements()
     }

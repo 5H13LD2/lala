@@ -3,7 +3,9 @@ package com.labactivity.lala
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.labactivity.lala.LOGINPAGE.MainActivity
 import com.labactivity.lala.databinding.ActivitySettingsBinding
 import com.labactivity.lala.homepage.MainActivity4
@@ -18,11 +20,16 @@ import com.labactivity.lala.FORGOTPASSWORD.ForgotPasswordActivity
 class SettingsActivity : BaseActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
+    private lateinit var auth: FirebaseAuth
+    private val TAG = "SettingsActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Initialize Firebase Auth
+        auth = FirebaseAuth.getInstance()
 
         setupToolbar()
         setupClickListeners()
@@ -86,10 +93,15 @@ class SettingsActivity : BaseActivity() {
 
 
         binding.logoutButton.setOnClickListener {
-            DialogUtils.showInfoDialog(this, "Logging Out", "Logging out...")
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            // Add your logout logic here
+            // Show confirmation dialog before logging out
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Logout") { _, _ ->
+                    performLogout()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
     }
 
@@ -122,5 +134,19 @@ class SettingsActivity : BaseActivity() {
     private fun showFeedbackDialog() {
         val feedbackDialog = FeedbackDialog(this)
         feedbackDialog.show()
+    }
+
+    private fun performLogout() {
+        try {
+            Log.d(TAG, "Performing logout for user: ${com.labactivity.lala.UTILS.AuthManager.getUserEmail()}")
+
+            // Use AuthManager to handle logout
+            com.labactivity.lala.UTILS.AuthManager.logout(this)
+
+            Log.d(TAG, "Logout successful")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during logout", e)
+            DialogUtils.showErrorDialog(this, "Error", "Failed to logout: ${e.message}")
+        }
     }
 }

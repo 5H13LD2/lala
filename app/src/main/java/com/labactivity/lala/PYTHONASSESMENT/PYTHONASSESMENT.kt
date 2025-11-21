@@ -54,7 +54,7 @@ object PYTHONASSESMENT {
                 Log.d(TAG, "✅ Loaded ${challenges.size} challenges")
 
                 // 🔸 Update adapter with 5 second delay (shows skeleton for 5 seconds minimum)
-                adapter.setChallengesWithDelay(challenges, 5000)
+                adapter.setChallengesWithDelay(challenges, 1000)
 
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error loading challenges", e)

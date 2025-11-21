@@ -259,6 +259,7 @@
 
                 <!-- Courses Stat Card -->
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/coursesStatCard"
                     android:layout_width="0dp"
                     android:layout_height="140dp"
                     android:layout_weight="1"
@@ -267,7 +268,10 @@
                     app:cardCornerRadius="16dp"
                     app:cardElevation="4dp"
                     app:strokeWidth="0dp"
-                    android:backgroundTint="#FFFFFF">
+                    android:backgroundTint="#FFFFFF"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -306,6 +310,7 @@
 
                 <!-- Quizzes Stat Card -->
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/quizzesStatCard"
                     android:layout_width="0dp"
                     android:layout_height="140dp"
                     android:layout_weight="1"
@@ -313,7 +318,10 @@
                     app:cardCornerRadius="16dp"
                     app:cardElevation="4dp"
                     app:strokeWidth="0dp"
-                    android:backgroundTint="#FFFFFF">
+                    android:backgroundTint="#FFFFFF"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -866,7 +874,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- My Courses Section -->
+            <!-- Technical Assessments Section -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/coursesCard"
                 android:layout_width="match_parent"
@@ -903,7 +911,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginStart="12dp"
-                            android:text="My Enrolled Courses"
+                            android:text="Technical Assessments"
                             android:textColor="@color/modern_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -933,11 +941,27 @@
                         android:minHeight="100dp" />
 
                     <TextView
+                        android:id="@+id/viewAllAssessmentsBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="12dp"
+                        android:text="View All"
+                        android:textColor="@color/modern_accent"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:padding="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:visibility="gone" />
+
+                    <TextView
                         android:id="@+id/noCoursesText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="No enrolled courses yet. Start learning!"
+                        android:text="No assessments taken yet. Start practicing!"
                         android:textColor="@color/modern_text_secondary"
                         android:textSize="14sp"
                         android:textAlignment="center"

@@ -170,6 +170,7 @@
 
             <!-- Recent Course & My Library Section -->
             <LinearLayout
+                android:id="@+id/layoutRecentCourseHeader"
                 style="@style/Widget.Lala.SectionHeader">
 
                 <TextView
