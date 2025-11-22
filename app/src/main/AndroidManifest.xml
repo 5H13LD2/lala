@@ -36,6 +36,10 @@
             android:exported="true" />
 
         <activity
+            android:name=".DAILYPROBLEMPAGE.ProblemOfDayActivity"
+            android:exported="true" />
+
+        <activity
             android:name=".SQLCOMPILER.AllSQLChallengesActivity"
             android:exported="true" />
 
@@ -144,6 +148,11 @@
         <!-- Leaderboard Page -->
         <activity
             android:name=".LEADERBOARDPAGE.Leaderboard"
+            android:exported="false" />
+
+        <!-- User Progress Page -->
+        <activity
+            android:name=".PROGRESSPAGE.UserProgressActivity"
             android:exported="false" />
     </application>
 

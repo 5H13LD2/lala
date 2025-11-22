@@ -4,46 +4,122 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E6F3FF"
+    android:background="@drawable/profile_gradient_background"
     tools:context=".REVIEWER.ReviewActivity">
 
-    <!-- Review Questions Title -->
-    <TextView
-        android:id="@+id/module_title_text"
+    <!-- ========================================== -->
+    <!-- HEADER CARD - Title Section -->
+    <!-- ========================================== -->
+    <!--
+        Customization Options:
+        - cardCornerRadius: Change roundness (current: 20dp)
+        - cardElevation: Adjust shadow depth (current: 8dp)
+        - backgroundTint: Change card color (current: @color/brand_blue)
+        - layout_margin: Adjust spacing (current: 16dp sides, 24dp top)
+    -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/header_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:text="Module Quiz Review"
-        android:textAlignment="center"
-        android:textColor="@color/primary"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
+        app:strokeWidth="0dp"
+        android:backgroundTint="@color/brand_blue"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- RecyclerView for Questions -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:gravity="center">
+
+            <!-- Review Icon -->
+            <TextView
+                android:id="@+id/review_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📋"
+                android:textSize="48sp"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- Review Title -->
+            <TextView
+                android:id="@+id/module_title_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Quiz Review"
+                android:textAlignment="center"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"/>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- ========================================== -->
+    <!-- QUESTIONS RECYCLERVIEW -->
+    <!-- ========================================== -->
+    <!--
+        Customization Options:
+        - layout_marginTop: Space below header (current: 16dp)
+        - layout_marginBottom: Space above button (current: 16dp)
+        - padding: Add horizontal padding if needed
+    -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/questions_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="16dp"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp"
         app:layout_constraintBottom_toTopOf="@+id/home_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/module_title_text"
+        app:layout_constraintTop_toBottomOf="@+id/header_card"
         android:contentDescription="List of review questions" />
 
-    <!-- Return to Home Button -->
-    <Button
+    <!-- ========================================== -->
+    <!-- RETURN HOME BUTTON - Customize style below -->
+    <!-- ========================================== -->
+    <!--
+        Customization Options:
+        - layout_width: Change to match_parent for full width (current: 0dp with constraints)
+        - layout_height: Change button height (current: 56dp)
+        - layout_marginBottom: Adjust to move button higher/lower (current: 48dp - positioned at ~30% from bottom)
+        - backgroundTint: Change button color (current: @color/brand_teal)
+        - textSize: Adjust text size (current: 16sp)
+        - cornerRadius: Change roundness (current: 16dp)
+        - icon: Change or remove icon (current: @android:drawable/ic_menu_revert)
+    -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/home_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="48dp"
+        android:backgroundTint="@color/brand_teal"
         android:text="Return to Home"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textAllCaps="false"
+        android:fontFamily="sans-serif-medium"
+        app:cornerRadius="16dp"
+        app:elevation="4dp"
+        app:icon="@android:drawable/ic_menu_revert"
+        app:iconTint="#FFFFFF"
+        app:iconGravity="textStart"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

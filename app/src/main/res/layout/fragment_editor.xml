@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#2B2B2B"
+    android:padding="16dp">
+
+    <!-- Code/Output Toggle -->
+    <LinearLayout
+        android:id="@+id/toggleLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/modern_card_background"
+        android:padding="4dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/btnCodeTab"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Code"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:background="@drawable/modern_button_primary"
+            android:padding="12dp" />
+
+        <TextView
+            android:id="@+id/btnOutputTab"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Output"
+            android:textColor="#888888"
+            android:gravity="center"
+            android:padding="12dp" />
+    </LinearLayout>
+
+    <!-- Code Editor -->
+    <EditText
+        android:id="@+id/etCodeEditor"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/modern_card_background"
+        android:padding="16dp"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#666666"
+        android:hint="//Do not change the function name\nvar solve = function(arr, callback, initialValue) {\n\n};"
+        android:fontFamily="monospace"
+        android:textSize="14sp"
+        android:gravity="start|top"
+        android:inputType="textMultiLine"
+        app:layout_constraintTop_toBottomOf="@id/toggleLayout"
+        app:layout_constraintBottom_toTopOf="@id/buttonLayout" />
+
+    <!-- Output Display (Initially Hidden) -->
+    <ScrollView
+        android:id="@+id/svOutput"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/modern_card_background"
+        android:padding="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/toggleLayout"
+        app:layout_constraintBottom_toTopOf="@id/buttonLayout">
+
+        <TextView
+            android:id="@+id/tvOutput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FF6B6B"
+            android:fontFamily="monospace"
+            android:textSize="14sp" />
+    </ScrollView>
+
+    <!-- Run and Submit Buttons -->
+    <LinearLayout
+        android:id="@+id/buttonLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+            android:id="@+id/btnRun"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="Run ▷"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/modern_button_secondary"
+            android:layout_marginEnd="8dp"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnSubmit"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="Submit ▷"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/modern_button_primary"
+            android:layout_marginStart="8dp"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

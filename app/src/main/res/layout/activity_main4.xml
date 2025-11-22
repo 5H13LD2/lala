@@ -22,151 +22,191 @@
             android:padding="@dimen/spacing_md"
             android:paddingTop="@dimen/spacing_xl">
 
-            <!-- Streak Badge - Modern Futuristic Design -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/streakBadgeContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="@dimen/spacing_lg"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/streak_badge_background"
-                    android:orientation="horizontal"
-                    android:paddingStart="20dp"
-                    android:paddingEnd="20dp"
-                    android:paddingTop="12dp"
-                    android:paddingBottom="12dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:id="@+id/iconStreakBadge"
-                        android:layout_width="28dp"
-                        android:layout_height="28dp"
-                        android:src="@drawable/ic_lightning_bolt"
-                        android:tint="#FFFFFF"
-                        android:layout_marginEnd="10dp" />
-
-                    <TextView
-                        android:id="@+id/textStreakCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textColor="#FFFFFF"
-                        android:textStyle="bold"
-                        android:textSize="24sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:layout_marginEnd="6dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="day streak"
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp"
-                        android:fontFamily="sans-serif" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Day Selector -->
-            <LinearLayout
-                android:id="@+id/day_selector_container"
+            <!-- Problem of the Day Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardProblemOfDay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
                 android:layout_marginBottom="@dimen/spacing_lg"
-                android:layout_marginTop="@dimen/spacing_md">
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/card_background">
 
-                <com.labactivity.lala.homepage.DayCircleView
-                    android:id="@+id/day_monday"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/day_circle_selector"
-                    android:text="M"
-                    android:gravity="center"
-                    android:textColor="@color/day_text_color_selector"
-                    android:textSize="16sp"/>
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp">
 
-                <com.labactivity.lala.homepage.DayCircleView
-                    android:id="@+id/day_tuesday"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/day_circle_selector"
-                    android:text="T"
-                    android:gravity="center"
-                    android:textColor="@color/day_text_color_selector"
-                    android:textSize="16sp"/>
+                    <!-- Header Text -->
+                    <TextView
+                        android:id="@+id/textProblemHeader"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Problem of the day"
+                        android:textColor="@color/modern_text_secondary"
+                        android:textSize="15sp"
+                        android:fontFamily="sans-serif"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                <com.labactivity.lala.homepage.DayCircleView
-                    android:id="@+id/day_wednesday"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/day_circle_selector"
-                    android:text="W"
-                    android:gravity="center"
-                    android:textColor="@color/day_text_color_selector"
-                    android:textSize="16sp"/>
+                    <!-- Timer Section -->
+                    <LinearLayout
+                        android:id="@+id/layoutTimer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingTop="4dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
-                <com.labactivity.lala.homepage.DayCircleView
-                    android:id="@+id/day_thursday"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/day_circle_selector"
-                    android:text="TH"
-                    android:gravity="center"
-                    android:textColor="@color/day_text_color_selector"
-                    android:textSize="16sp"/>
+                        <!-- Hours -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center">
 
-                <com.labactivity.lala.homepage.DayCircleView
-                    android:id="@+id/day_friday"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/day_circle_selector"
-                    android:text="F"
-                    android:gravity="center"
-                    android:textColor="@color/day_text_color_selector"
-                    android:textSize="16sp"/>
+                            <TextView
+                                android:id="@+id/textHours"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="20"
+                                android:textColor="@color/modern_text_primary"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium" />
 
-                <com.labactivity.lala.homepage.DayCircleView
-                    android:id="@+id/day_saturday"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/day_circle_selector"
-                    android:text="SAT"
-                    android:gravity="center"
-                    android:textColor="@color/day_text_color_selector"
-                    android:textSize="16sp"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Hrs"
+                                android:textColor="@color/modern_text_secondary"
+                                android:textSize="10sp" />
+                        </LinearLayout>
 
-                <com.labactivity.lala.homepage.DayCircleView
-                    android:id="@+id/day_sunday"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_weight="1"
-                    android:layout_margin="4dp"
-                    android:background="@drawable/day_circle_selector"
-                    android:text="S"
-                    android:gravity="center"
-                    android:textColor="@color/day_text_color_selector"
-                    android:textSize="16sp"/>
-            </LinearLayout>
+                        <!-- Separator -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=":"
+                            android:textColor="@color/modern_text_primary"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:paddingHorizontal="4dp"
+                            android:paddingBottom="12dp" />
+
+                        <!-- Minutes -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/textMinutes"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="32"
+                                android:textColor="@color/modern_text_primary"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="mins"
+                                android:textColor="@color/modern_text_secondary"
+                                android:textSize="10sp" />
+                        </LinearLayout>
+
+                        <!-- Separator -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=":"
+                            android:textColor="@color/modern_text_primary"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:paddingHorizontal="4dp"
+                            android:paddingBottom="12dp" />
+
+                        <!-- Seconds -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/textSeconds"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="38"
+                                android:textColor="@color/modern_text_primary"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="secs"
+                                android:textColor="@color/modern_text_secondary"
+                                android:textSize="10sp" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Date -->
+                    <TextView
+                        android:id="@+id/textDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="22nd November"
+                        android:textColor="@color/modern_text_primary"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/textProblemHeader" />
+
+                    <!-- Question -->
+                    <TextView
+                        android:id="@+id/textQuestion"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="What is the role of Webpack in a React application?"
+                        android:textColor="@color/modern_text_primary"
+                        android:textSize="14sp"
+                        android:lineHeight="20dp"
+                        android:fontFamily="sans-serif"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/textDate" />
+
+                    <!-- Description -->
+                    <TextView
+                        android:id="@+id/textDescription"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Webpack is a module bundler used in React applications, that transforms assets like JavaS..."
+                        android:textColor="@color/modern_text_secondary"
+                        android:textSize="12sp"
+                        android:lineHeight="18dp"
+                        android:fontFamily="sans-serif"
+                        android:layout_marginTop="4dp"
+                        android:ellipsize="end"
+                        android:maxLines="2"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/textQuestion" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
 
             <!-- Recent Course & My Library Section -->
             <LinearLayout
@@ -215,31 +255,9 @@
                 app:ci_margin="6dp" />
 
             <!-- Technical Assessment Section -->
-            <LinearLayout
+            <include
                 android:id="@+id/layoutAssessmentsHeader"
-                style="@style/Widget.Lala.SectionHeader">
-
-                <TextView
-                    android:id="@+id/textTechAssessmentTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Technical Assessment"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/modern_text_primary"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:id="@+id/textViewAllAssessments"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="View All"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/modern_accent_secondary"
-                    android:fontFamily="sans-serif-medium" />
-            </LinearLayout>
+                layout="@layout/layout_section_header" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewAssessments"
@@ -247,31 +265,9 @@
                 android:orientation="horizontal" />
 
             <!-- SQL Challenges Section -->
-            <LinearLayout
+            <include
                 android:id="@+id/layoutSQLChallengesHeader"
-                style="@style/Widget.Lala.SectionHeader">
-
-                <TextView
-                    android:id="@+id/textSQLChallengesTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="SQL Challenges"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/modern_text_primary"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:id="@+id/textViewAllSQLChallenges"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="View All"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/modern_accent_secondary"
-                    android:fontFamily="sans-serif-medium" />
-            </LinearLayout>
+                layout="@layout/layout_section_header" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewSQLChallenges"
@@ -279,31 +275,9 @@
                 android:orientation="horizontal" />
 
             <!-- Java Challenges Section -->
-            <LinearLayout
+            <include
                 android:id="@+id/layoutJavaChallengesHeader"
-                style="@style/Widget.Lala.SectionHeader">
-
-                <TextView
-                    android:id="@+id/textJavaChallengesTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Java Challenges"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/modern_text_primary"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:id="@+id/textViewAllJavaChallenges"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="View All"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/modern_accent_secondary"
-                    android:fontFamily="sans-serif-medium" />
-            </LinearLayout>
+                layout="@layout/layout_section_header" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewJavaChallenges"
@@ -311,31 +285,9 @@
                 android:orientation="horizontal" />
 
             <!-- Technical Interview Section -->
-            <LinearLayout
+            <include
                 android:id="@+id/layoutInterviewsHeader"
-                style="@style/Widget.Lala.SectionHeader">
-
-                <TextView
-                    android:id="@+id/textInterviewsTitle"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Technical Interview"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/modern_text_primary"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:id="@+id/textViewAllInterviews"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="View All"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/modern_accent_secondary"
-                    android:fontFamily="sans-serif-medium" />
-            </LinearLayout>
+                layout="@layout/layout_section_header" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewInterviews"

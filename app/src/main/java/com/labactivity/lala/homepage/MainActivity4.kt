@@ -10,10 +10,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.labactivity.lala.UTILS.DialogUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.auth.FirebaseAuth
+
 import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
-import com.labactivity.lala.AVAILABLECOURSEPAGE.Course  // Import the correct Course class
+import com.labactivity.lala.AVAILABLECOURSEPAGE.Course
 import com.labactivity.lala.PYTHONASSESMENT.PYTHONASSESMENT
 import com.labactivity.lala.PYTHONASSESMENT.AllAssessmentsActivity
 import com.labactivity.lala.PYTHONASSESMENT.AllInterviewsActivity
@@ -22,6 +22,7 @@ import com.labactivity.lala.SQLCOMPILER.AllSQLChallengesActivity
 import com.labactivity.lala.JAVACOMPILER.JAVAASSESSMENT
 import com.labactivity.lala.JAVACOMPILER.AllJavaChallengesActivity
 import com.labactivity.lala.ProfileMainActivity5.ProfileMainActivity5
+import com.labactivity.lala.PROGRESSPAGE.UserProgressActivity
 import com.labactivity.lala.R
 import com.labactivity.lala.SettingsActivity
 import com.labactivity.lala.databinding.ActivityMain4Binding
@@ -30,23 +31,35 @@ import com.labactivity.lala.UTILS.setupWithSafeNavigation
 import com.labactivity.lala.UTILS.AnimationUtils.animateCardPress
 import com.labactivity.lala.UTILS.AnimationUtils.slideUpFadeIn
 import com.labactivity.lala.UTILS.AnimationUtils.animateItems
-import com.labactivity.lala.UTILS.AnimationUtils.pulse
-import com.labactivity.lala.UTILS.AnimationUtils.scaleIn
-import com.labactivity.lala.UTILS.StreakManager
-import com.labactivity.lala.UTILS.AssessmentResultTracker
-import java.util.Calendar
 import me.relex.circleindicator.CircleIndicator2
 import androidx.recyclerview.widget.PagerSnapHelper
+import com.labactivity.lala.DAILYPROBLEMPAGE.DailyProblemViewModel
+import com.labactivity.lala.PROGRESSPAGE.ProgressService
+import androidx.lifecycle.lifecycleScope
+import androidx.activity.viewModels
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import java.util.Calendar
 
 class MainActivity4 : BaseActivity() {
 
     private lateinit var binding: ActivityMain4Binding
-    private lateinit var dayViews: Array<DayCircleView>
+    private val dailyProblemViewModel: DailyProblemViewModel by viewModels()
+    private val progressService = ProgressService()
+    private val auth = FirebaseAuth.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMain4Binding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // ==============================================
+        // RECORD USER LOGIN
+        // ==============================================
+        recordUserLogin()
 
         // ==============================================
         // ANIMATE UI ELEMENTS ON SCREEN LOAD
@@ -55,14 +68,11 @@ class MainActivity4 : BaseActivity() {
 
         // ==============================================
         // ALL COURSES BUTTON → punta sa MainActivity3
-        // With smooth animation
         // ==============================================
         binding.textAllPractice.setOnClickListener {
             Log.d("MainActivity4", "✅ textAllPractice clicked!")
-
             val intent = Intent(this, MainActivity3::class.java)
             startActivity(intent)
-
             Log.d("MainActivity4", "➡️ Intent to MainActivity3 triggered!")
         }
 
@@ -72,33 +82,7 @@ class MainActivity4 : BaseActivity() {
         }
 
         // ==============================================
-        // SETUP DAY CIRCLE VIEW (M T W TH F SAT SUN)
-        // ==============================================
-        dayViews = arrayOf(
-            binding.dayMonday,
-            binding.dayTuesday,
-            binding.dayWednesday,
-            binding.dayThursday,
-            binding.dayFriday,
-            binding.daySaturday,
-            binding.daySunday
-        )
-        dayViews.forEachIndexed { index, view ->
-            view.setOnClickListener { toggleDay(index) }
-        }
-
-        // ==============================================
-        // SETUP STREAK BADGE
-        // ==============================================
-        setupStreakBadge()
-
-        // ==============================================
-        // UPDATE DAY STATES WITH QUIZ RESULTS
-        // ==============================================
-        updateDayStates()
-
-        // ==============================================
-        // SETUP COURSE RECYCLER VIEW (PYTHON, JAVA, SQL)
+        // SETUP COURSE RECYCLER VIEW
         // ==============================================
         setupRecyclerView()
 
@@ -111,101 +95,11 @@ class MainActivity4 : BaseActivity() {
         // SETUP BOTTOM NAVIGATION
         // ==============================================
         setupBottomNavigation()
-    }
 
-    // ==============================================
-    // TOGGLE DAY CLICK STATE
-    // ==============================================
-    private fun toggleDay(dayIndex: Int) {
-        dayViews[dayIndex].setChecked(!dayViews[dayIndex].isChecked())
-    }
-
-    // ==============================================
-    // UPDATE CURRENT DAY HIGHLIGHT + QUIZ RESULTS
-    // ==============================================
-    private fun updateDayStates() {
-        // Get quiz results for the week
-        val weekResults = AssessmentResultTracker.getWeekResults(this)
-
-        // Update each day with its status and water animation
-        dayViews.forEachIndexed { index, view ->
-            view.setChecked(false)
-
-            val dailyResult = weekResults[index]
-            if (dailyResult != null && dailyResult.totalCount > 0) {
-                // Set water fill animation based on results
-                view.setDayStatus(
-                    status = dailyResult.getStatus(),
-                    fillPercentage = dailyResult.getFillPercentage(),
-                    animate = true
-                )
-            } else {
-                // No activity for this day
-                view.setDayStatus(DayStatus.NONE, 0f, animate = false)
-            }
-        }
-
-        // Check current day
-        val calendar = Calendar.getInstance()
-        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-        val index = when (dayOfWeek) {
-            Calendar.MONDAY -> 0
-            Calendar.TUESDAY -> 1
-            Calendar.WEDNESDAY -> 2
-            Calendar.THURSDAY -> 3
-            Calendar.FRIDAY -> 4
-            Calendar.SATURDAY -> 5
-            Calendar.SUNDAY -> 6
-            else -> -1
-        }
-        if (index != -1) dayViews[index].setChecked(true)
-    }
-
-    // ==============================================
-    // SETUP STREAK BADGE
-    // ==============================================
-    private fun setupStreakBadge() {
-        // Record activity (this updates streak if user hasn't been active today)
-        val streak = StreakManager.recordActivity(this)
-
-        // Update UI
-        binding.textStreakCount.text = streak.toString()
-
-        // Animate badge if milestone reached
-        if (StreakManager.shouldAnimateStreak(streak)) {
-            binding.iconStreakBadge.pulse(duration = 1000, repeatCount = 3)
-            binding.streakBadgeContainer.scaleIn(duration = 500, startDelay = 200)
-        }
-
-        // Make badge clickable to show stats
-        binding.streakBadgeContainer.setOnClickListener {
-            showStreakStats()
-        }
-    }
-
-    // ==============================================
-    // SHOW STREAK STATISTICS DIALOG
-    // ==============================================
-    private fun showStreakStats() {
-        val currentStreak = StreakManager.getCurrentStreak(this)
-        val longestStreak = StreakManager.getLongestStreak(this)
-        val totalDays = StreakManager.getTotalDaysActive(this)
-        val totalAssessments = AssessmentResultTracker.getTotalAssessmentsTaken(this)
-        val passedAssessments = AssessmentResultTracker.getTotalPassedAssessments(this)
-
-        val message = """
-            🔥 Current Streak: $currentStreak days
-            🏆 Longest Streak: $longestStreak days
-            📅 Total Active Days: $totalDays
-            ✍️ Total Assessments: $totalAssessments
-            ✅ Passed: $passedAssessments
-        """.trimIndent()
-
-        android.app.AlertDialog.Builder(this)
-            .setTitle("Your Progress")
-            .setMessage(message)
-            .setPositiveButton("Keep Going!") { dialog, _ -> dialog.dismiss() }
-            .show()
+        // ==============================================
+        // SETUP DAILY PROBLEM OF THE DAY
+        // ==============================================
+        setupDailyProblem()
     }
 
     // ==============================================
@@ -276,101 +170,120 @@ class MainActivity4 : BaseActivity() {
                     // Check if user is enrolled in SQL
                     val hasSQL = enrolledCourses.any { course ->
                         val courseId = course["courseId"] as? String ?: ""
-                        courseId.contains("sql", ignoreCase = true)
+                        val result = courseId.contains("sql", ignoreCase = true)
+                        if (result) {
+                            Log.d("MainActivity4", "✅ Found SQL course: $courseId")
+                        }
+                        result
                     }
 
                     // Check if user is enrolled in Java
                     val hasJava = enrolledCourses.any { course ->
                         val courseId = course["courseId"] as? String ?: ""
-                        courseId.contains("java", ignoreCase = true)
+                        val result = courseId.contains("java", ignoreCase = true)
+                        if (result) {
+                            Log.d("MainActivity4", "✅ Found Java course: $courseId")
+                        }
+                        result
                     }
+
+                    Log.d("MainActivity4", "📊 Enrollment check complete: Python=$hasPython, SQL=$hasSQL, Java=$hasJava")
+                    Log.d("MainActivity4", "📋 All enrolled courseIds: ${enrolledCourses.map { it["courseId"] }}")
 
                     // Show/Hide Technical Assessment (Python)
                     if (hasPython) {
-                        binding.textTechAssessmentTitle.visibility = View.VISIBLE
-                        binding.textViewAllAssessments.visibility = View.VISIBLE
+                        val assessmentHeader = findViewById<View>(R.id.layoutAssessmentsHeader)
+                        assessmentHeader.visibility = View.VISIBLE
+                        val assessmentTitle = assessmentHeader.findViewById<TextView>(R.id.textSectionTitle)
+                        assessmentTitle.text = "Technical Assessment"
                         binding.recyclerViewAssessments.visibility = View.VISIBLE
 
+                        val assessmentViewAll = assessmentHeader.findViewById<TextView>(R.id.textViewAll)
                         PYTHONASSESMENT.TechnicalAssesment(
                             this,
                             binding.recyclerViewAssessments,
-                            binding.textViewAllAssessments
+                            assessmentViewAll
                         )
 
-                        binding.textViewAllAssessments.setOnClickListener {
+                        assessmentViewAll.setOnClickListener {
                             val intent = Intent(this, AllAssessmentsActivity::class.java)
                             startActivity(intent)
                         }
                     } else {
-                        binding.textTechAssessmentTitle.visibility = View.GONE
-                        binding.textViewAllAssessments.visibility = View.GONE
+                        findViewById<View>(R.id.layoutAssessmentsHeader).visibility = View.GONE
                         binding.recyclerViewAssessments.visibility = View.GONE
                     }
 
                     // Show/Hide SQL Challenges
                     if (hasSQL) {
-                        binding.textSQLChallengesTitle.visibility = View.VISIBLE
-                        binding.textViewAllSQLChallenges.visibility = View.VISIBLE
+                        val sqlHeader = findViewById<View>(R.id.layoutSQLChallengesHeader)
+                        sqlHeader.visibility = View.VISIBLE
+                        val sqlTitle = sqlHeader.findViewById<TextView>(R.id.textSectionTitle)
+                        sqlTitle.text = "SQL Challenges"
                         binding.recyclerViewSQLChallenges.visibility = View.VISIBLE
 
+                        val sqlViewAll = sqlHeader.findViewById<TextView>(R.id.textViewAll)
                         SQLASSESSMENT.SQLTechnicalAssessment(
                             this,
                             binding.recyclerViewSQLChallenges,
-                            binding.textViewAllSQLChallenges
+                            sqlViewAll
                         )
 
-                        binding.textViewAllSQLChallenges.setOnClickListener {
+                        sqlViewAll.setOnClickListener {
                             val intent = Intent(this, AllSQLChallengesActivity::class.java)
                             startActivity(intent)
                         }
                     } else {
-                        binding.textSQLChallengesTitle.visibility = View.GONE
-                        binding.textViewAllSQLChallenges.visibility = View.GONE
+                        findViewById<View>(R.id.layoutSQLChallengesHeader).visibility = View.GONE
                         binding.recyclerViewSQLChallenges.visibility = View.GONE
                     }
 
                     // Show/Hide Java Challenges
                     if (hasJava) {
-                        binding.textJavaChallengesTitle.visibility = View.VISIBLE
-                        binding.textViewAllJavaChallenges.visibility = View.VISIBLE
+                        val javaHeader = findViewById<View>(R.id.layoutJavaChallengesHeader)
+                        javaHeader.visibility = View.VISIBLE
+                        val javaTitle = javaHeader.findViewById<TextView>(R.id.textSectionTitle)
+                        javaTitle.text = "Java Challenges"
                         binding.recyclerViewJavaChallenges.visibility = View.VISIBLE
 
+                        val javaViewAll = javaHeader.findViewById<TextView>(R.id.textViewAll)
                         JAVAASSESSMENT.JavaTechnicalAssessment(
                             this,
                             binding.recyclerViewJavaChallenges,
-                            binding.textViewAllJavaChallenges
+                            javaViewAll
                         )
 
-                        binding.textViewAllJavaChallenges.setOnClickListener {
+                        javaViewAll.setOnClickListener {
                             val intent = Intent(this, AllJavaChallengesActivity::class.java)
                             startActivity(intent)
                         }
                     } else {
-                        binding.textJavaChallengesTitle.visibility = View.GONE
-                        binding.textViewAllJavaChallenges.visibility = View.GONE
+                        findViewById<View>(R.id.layoutJavaChallengesHeader).visibility = View.GONE
                         binding.recyclerViewJavaChallenges.visibility = View.GONE
                     }
 
                     // Show/Hide Technical Interviews (Python)
                     if (hasPython) {
-                        binding.textInterviewsTitle.visibility = View.VISIBLE
-                        binding.textViewAllInterviews.visibility = View.VISIBLE
+                        val interviewHeader = findViewById<View>(R.id.layoutInterviewsHeader)
+                        interviewHeader.visibility = View.VISIBLE
+                        val interviewTitle = interviewHeader.findViewById<TextView>(R.id.textSectionTitle)
+                        interviewTitle.text = "Technical Interview"
                         binding.recyclerViewInterviews.visibility = View.VISIBLE
 
+                        val interviewViewAll = interviewHeader.findViewById<TextView>(R.id.textViewAll)
                         PYTHONASSESMENT.TechnicalInterview(
                             this,
                             binding.recyclerViewInterviews,
-                            binding.textViewAllInterviews,
-                            binding.textViewAllInterviews
+                            interviewViewAll,
+                            interviewViewAll
                         )
 
-                        binding.textViewAllInterviews.setOnClickListener {
+                        interviewViewAll.setOnClickListener {
                             val intent = Intent(this, AllInterviewsActivity::class.java)
                             startActivity(intent)
                         }
                     } else {
-                        binding.textInterviewsTitle.visibility = View.GONE
-                        binding.textViewAllInterviews.visibility = View.GONE
+                        findViewById<View>(R.id.layoutInterviewsHeader).visibility = View.GONE
                         binding.recyclerViewInterviews.visibility = View.GONE
                     }
 
@@ -380,6 +293,84 @@ class MainActivity4 : BaseActivity() {
                     Log.e("MainActivity4", "Error checking enrollment", e)
                 }
         }
+    }
+
+    // ==============================================
+    // SETUP DAILY PROBLEM OF THE DAY
+    // ==============================================
+    private fun setupDailyProblem() {
+        // Initially hide the card
+        binding.cardProblemOfDay.visibility = View.GONE
+
+        lifecycleScope.launch {
+            // Observe active problem
+            launch {
+                dailyProblemViewModel.activeProblem.collect { problem ->
+                    if (problem != null) {
+                        binding.cardProblemOfDay.visibility = View.VISIBLE
+                        binding.textQuestion.text = problem.title
+                        binding.textDescription.text = problem.description
+
+                        // Format and set date
+                        problem.createdAt?.let { timestamp ->
+                            val date = timestamp.toDate()
+                            val dayOfMonth = date.date
+                            val suffix = when {
+                                dayOfMonth in 11..13 -> "th"
+                                dayOfMonth % 10 == 1 -> "st"
+                                dayOfMonth % 10 == 2 -> "nd"
+                                dayOfMonth % 10 == 3 -> "rd"
+                                else -> "th"
+                            }
+                            val dateFormat = SimpleDateFormat("d'$suffix' MMMM", Locale.getDefault())
+                            binding.textDate.text = dateFormat.format(date)
+                        }
+
+                        // Click to open problem
+                        binding.cardProblemOfDay.setOnClickListener {
+                            navigateToDailyProblem(problem.problemId, problem.courseId, problem.compilerType)
+                        }
+
+                        // Animate card appearance
+                        binding.cardProblemOfDay.slideUpFadeIn(duration = 400, startDelay = 100)
+                    } else {
+                        binding.cardProblemOfDay.visibility = View.GONE
+                    }
+                }
+            }
+
+            // Observe countdown timer
+            launch {
+                dailyProblemViewModel.timeRemaining.collect { time ->
+                    binding.textHours.text = String.format("%02d", time.hours)
+                    binding.textMinutes.text = String.format("%02d", time.minutes)
+                    binding.textSeconds.text = String.format("%02d", time.seconds)
+                }
+            }
+
+            // Observe problem expiration
+            launch {
+                dailyProblemViewModel.isProblemExpired.collect { isExpired ->
+                    if (isExpired) {
+                        binding.cardProblemOfDay.visibility = View.GONE
+                    }
+                }
+            }
+        }
+    }
+
+    // ==============================================
+    // NAVIGATE TO DAILY PROBLEM ACTIVITY
+    // ==============================================
+    private fun navigateToDailyProblem(problemId: String, courseId: String, compilerType: String) {
+        Log.d("MainActivity4", "Navigate to daily problem: $problemId, type: $compilerType")
+
+        val intent = Intent(this, com.labactivity.lala.DAILYPROBLEMPAGE.ProblemOfDayActivity::class.java).apply {
+            putExtra(com.labactivity.lala.DAILYPROBLEMPAGE.ProblemOfDayActivity.EXTRA_PROBLEM_ID, problemId)
+            putExtra(com.labactivity.lala.DAILYPROBLEMPAGE.ProblemOfDayActivity.EXTRA_COURSE_ID, courseId)
+            putExtra(com.labactivity.lala.DAILYPROBLEMPAGE.ProblemOfDayActivity.EXTRA_COMPILER_TYPE, compilerType)
+        }
+        startActivity(intent)
     }
 
     // ==============================================
@@ -394,7 +385,8 @@ class MainActivity4 : BaseActivity() {
             mapOf(
                 R.id.nav_home to MainActivity4::class.java,
                 R.id.nav_profile to ProfileMainActivity5::class.java,
-                R.id.nav_settings to SettingsActivity::class.java
+                R.id.nav_settings to SettingsActivity::class.java,
+                R.id.user_progress to UserProgressActivity::class.java
             )
         )
     }
@@ -410,24 +402,15 @@ class MainActivity4 : BaseActivity() {
 
     // ==============================================
     // ANIMATION: INITIAL SCREEN LOAD
-    // Animates all major sections with staggered delays
     // ==============================================
     private fun animateInitialLoad() {
         // Hide all elements initially
-        binding.streakBadgeContainer.alpha = 0f
-        binding.daySelectorContainer.alpha = 0f
         binding.recyclerView.alpha = 0f
         binding.recyclerViewAssessments.alpha = 0f
         binding.recyclerViewSQLChallenges.alpha = 0f
         binding.recyclerViewJavaChallenges.alpha = 0f
         binding.recyclerViewInterviews.alpha = 0f
         binding.cardViewPractice.alpha = 0f
-
-        // Animate streak badge first
-        binding.streakBadgeContainer.scaleIn(duration = 500, startDelay = 50)
-
-        // Animate day selector with slide up
-        binding.daySelectorContainer.slideUpFadeIn(duration = 400, startDelay = 150)
 
         // Animate Recent Course section
         binding.recyclerView.slideUpFadeIn(duration = 400, startDelay = 200)
@@ -466,6 +449,30 @@ class MainActivity4 : BaseActivity() {
 
         binding.recyclerViewInterviews.post {
             binding.recyclerViewInterviews.animateItems(itemDelay = 80, itemDuration = 300)
+        }
+    }
+
+    // ==============================================
+    // RECORD USER LOGIN FOR TRACKING
+    // ==============================================
+    private fun recordUserLogin() {
+        val userId = auth.currentUser?.uid ?: return
+
+        val today = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.time
+
+        val todayTimestamp = Timestamp(today)
+
+        progressService.recordLogin(userId, todayTimestamp) { success ->
+            if (success) {
+                Log.d("MainActivity4", "Login tracked for today")
+            } else {
+                Log.e("MainActivity4", "Failed to track login")
+            }
         }
     }
 }

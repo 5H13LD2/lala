@@ -14,6 +14,7 @@ import com.labactivity.lala.UTILS.DialogUtils
 import com.labactivity.lala.UTILS.setupWithSafeNavigation
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.labactivity.lala.ProfileMainActivity5.ProfileMainActivity5
+import com.labactivity.lala.PROGRESSPAGE.UserProgressActivity
 import com.labactivity.lala.FEEDBACK.FeedbackDialog
 import com.labactivity.lala.FORGOTPASSWORD.ForgotPasswordActivity
 
@@ -38,7 +39,7 @@ class SettingsActivity : BaseActivity() {
     }
 
     private fun setupToolbar() {
-        binding.toolbar.setNavigationOnClickListener {
+        binding.toolbar.setOnClickListener {
             val intent = Intent(this, MainActivity4::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             startActivity(intent)
@@ -58,7 +59,8 @@ class SettingsActivity : BaseActivity() {
             mapOf(
                 R.id.nav_home to MainActivity4::class.java,
                 R.id.nav_profile to ProfileMainActivity5::class.java,
-                R.id.nav_settings to SettingsActivity::class.java
+                R.id.nav_settings to SettingsActivity::class.java,
+                R.id.user_progress to UserProgressActivity::class.java
             )
         )
     }

@@ -9,7 +9,9 @@
       "Bash(./gradlew clean:*)",
       "Bash(firebase deploy:*)",
       "Bash(./gradlew:*)",
-      "Bash(adb devices:*)"
+      "Bash(adb devices:*)",
+      "Bash(cat:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

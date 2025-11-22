@@ -48,19 +48,32 @@ class ResultActivity : AppCompatActivity() {
             )
         }
 
+        // Calculate percentage
+        val percentage = if (total > 0) (score.toFloat() / total.toFloat() * 100).toInt() else 0
+
+        // Update score text
         val scoreTextView = findViewById<TextView>(R.id.score_text)
         scoreTextView.text = "You got $score out of $total correct!"
 
-        // Determine if passing and set appropriate color
-        val isPassing = score >= (total * 0.7).toInt()
+        // Update percentage display
+        val scorePercentageView = findViewById<TextView>(R.id.score_percentage)
+        scorePercentageView.text = "$percentage%"
+
+        // Determine if passing and set appropriate color and icon
+        val isPassing = percentage >= 70
         val resultMessageView = findViewById<TextView>(R.id.result_message)
+        val resultIconView = findViewById<TextView>(R.id.result_icon)
 
         if (isPassing) {
+            resultIconView.text = "🎉"
             resultMessageView.text = "Congratulations! You passed the quiz."
             resultMessageView.setTextColor(ContextCompat.getColor(this, R.color.success_green))
+            scorePercentageView.setTextColor(ContextCompat.getColor(this, R.color.brand_blue))
         } else {
+            resultIconView.text = "📚"
             resultMessageView.text = "You didn't pass this time. Keep studying and try again!"
             resultMessageView.setTextColor(ContextCompat.getColor(this, R.color.error_red))
+            scorePercentageView.setTextColor(ContextCompat.getColor(this, R.color.brand_mauve))
         }
 
         val reviewAnswersButton = findViewById<Button>(R.id.review_answers_button)

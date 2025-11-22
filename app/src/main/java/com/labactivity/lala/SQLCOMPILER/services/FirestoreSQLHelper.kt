@@ -63,7 +63,31 @@ class FirestoreSQLHelper {
                 return@withContext emptyList()
             }
 
-            Log.d(TAG, "Fetching SQL challenges for enrolled courses from Firestore")
+            // Check if user is enrolled in any SQL-related course
+            val hasSQLCourse = enrolledCourseIds.any { it.contains("sql", ignoreCase = true) }
+            if (!hasSQLCourse) {
+                Log.d(TAG, "⚠️ User not enrolled in any SQL course. Enrolled courses: $enrolledCourseIds")
+                return@withContext emptyList()
+            }
+
+            Log.d(TAG, "Fetching SQL challenges for enrolled courses from Firestore collection: $COLLECTION_SQL_CHALLENGES")
+
+            // First, try to fetch ALL active SQL challenges to see what's available
+            val allActiveSnapshot = firestore.collection(COLLECTION_SQL_CHALLENGES)
+                .whereEqualTo("status", "active")
+                .orderBy("order", Query.Direction.ASCENDING)
+                .get()
+                .await()
+
+            Log.d(TAG, "📊 Total active SQL challenges in Firestore: ${allActiveSnapshot.size()}")
+
+            // Log all available challenges and their courseIds for debugging
+            allActiveSnapshot.documents.forEach { doc ->
+                val title = doc.getString("title") ?: "Unknown"
+                val courseId = doc.getString("courseId") ?: "No courseId"
+                val difficulty = doc.getString("difficulty") ?: "No difficulty"
+                Log.d(TAG, "  📝 Challenge: $title | courseId: $courseId | difficulty: $difficulty")
+            }
 
             // Fetch challenges in batches (Firestore 'in' query limit is 10)
             val allChallenges = mutableListOf<SQLChallenge>()
@@ -77,18 +101,34 @@ class FirestoreSQLHelper {
                     .get()
                     .await()
 
+                Log.d(TAG, "  🔍 Batch query for courseIds $batch returned ${snapshot.size()} challenges")
+
                 val batchChallenges = snapshot.documents.mapNotNull { doc ->
                     try {
                         doc.toObject(SQLChallenge::class.java)
                     } catch (e: Exception) {
-                        Log.e(TAG, "Error parsing challenge document ${doc.id}: ${e.message}")
+                        Log.e(TAG, "❌ Error parsing challenge document ${doc.id}: ${e.message}")
                         null
                     }
                 }
                 allChallenges.addAll(batchChallenges)
             }
 
-            Log.d(TAG, "Successfully fetched ${allChallenges.size} SQL challenges for enrolled courses")
+            // If no challenges found with exact courseId match, fall back to showing all SQL challenges
+            if (allChallenges.isEmpty()) {
+                Log.w(TAG, "⚠️ No SQL challenges found matching enrolled courseIds. Loading ALL active SQL challenges as fallback.")
+                val fallbackChallenges = allActiveSnapshot.documents.mapNotNull { doc ->
+                    try {
+                        doc.toObject(SQLChallenge::class.java)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "❌ Error parsing challenge document ${doc.id}: ${e.message}")
+                        null
+                    }
+                }
+                allChallenges.addAll(fallbackChallenges)
+            }
+
+            Log.d(TAG, "✅ Successfully fetched ${allChallenges.size} SQL challenges")
 
             // Apply unlock logic
             val challengesWithUnlockStatus = applyUnlockLogic(allChallenges)
@@ -97,7 +137,8 @@ class FirestoreSQLHelper {
             challengesWithUnlockStatus
 
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching SQL challenges: ${e.message}", e)
+            Log.e(TAG, "❌ Error fetching SQL challenges: ${e.message}", e)
+            e.printStackTrace()
             emptyList()
         }
     }

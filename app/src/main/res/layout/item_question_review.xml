@@ -1,67 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ========================================== -->
+<!-- QUESTION REVIEW ITEM CARD - Modern Design -->
+<!-- ========================================== -->
+<!--
+    Customization Options:
+    CARD:
+    - cardCornerRadius: Change roundness (current: 18dp)
+    - cardElevation: Adjust shadow depth (current: 4dp)
+    - layout_margin: Adjust spacing between items (current: 12dp horizontal, 8dp vertical)
+    - backgroundTint: Change card color (current: #FFFFFF)
+
+    QUESTION HEADER:
+    - Question number color: Change textColor (current: brand_blue)
+    - Question number size: Adjust textSize (current: 14sp)
+    - Question text size: Adjust textSize (current: 18sp)
+    - Question text color: Change textColor (current: modern_text_primary)
+
+    OPTIONS:
+    - Options label size: Adjust textSize (current: 15sp)
+    - Options label color: Change textColor (current: modern_text_secondary)
+
+    EXPLANATION:
+    - Background color: Change background (current: light_blue with 50% alpha)
+    - Text size: Adjust textSize (current: 14sp)
+    - Border radius: Change via shape drawable
+-->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="0dp"
+    android:backgroundTint="#FFFFFF">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
-        <TextView
-            android:id="@+id/question_id_text"
-            android:layout_width="match_parent"
+        <!-- ========================================== -->
+        <!-- QUESTION HEADER - Number Badge -->
+        <!-- ========================================== -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary"
-            android:layout_marginBottom="8dp"
-            android:text="Question 1" />
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="@color/brand_blue">
 
+            <TextView
+                android:id="@+id/question_id_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:text="Question 1" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ========================================== -->
+        <!-- QUESTION TEXT -->
+        <!-- ========================================== -->
         <TextView
             android:id="@+id/question_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_marginBottom="12dp"
+            android:textColor="@color/modern_text_primary"
+            android:fontFamily="sans-serif-medium"
+            android:lineSpacingExtra="4dp"
+            android:layout_marginBottom="16dp"
             android:text="What is the correct way to create a variable in Python?" />
 
+        <!-- ========================================== -->
+        <!-- OPTIONS LABEL -->
+        <!-- ========================================== -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Options:"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textStyle="bold"
-            android:layout_marginBottom="8dp"
+            android:textColor="@color/modern_text_secondary"
+            android:fontFamily="sans-serif-medium"
+            android:layout_marginBottom="12dp"
             android:layout_marginTop="4dp" />
 
+        <!-- ========================================== -->
+        <!-- OPTIONS CONTAINER - Dynamic Options List -->
+        <!-- ========================================== -->
         <LinearLayout
             android:id="@+id/options_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="16dp" />
 
+        <!-- ========================================== -->
+        <!-- DIVIDER LINE -->
+        <!-- ========================================== -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#E0E0E0"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="12dp" />
+            android:layout_height="2dp"
+            android:background="@color/modern_border"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp" />
 
-        <TextView
-            android:id="@+id/explanation_text"
+        <!-- ========================================== -->
+        <!-- EXPLANATION SECTION - With Background -->
+        <!-- ========================================== -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@android:color/black"
-            android:lineSpacingExtra="4dp"
-            android:text="Explanation: The 'def' keyword is used to define a function in Python." />
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            android:backgroundTint="#80E6F5FB">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Explanation Label -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💡 Explanation"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/brand_blue"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Explanation Text -->
+                <TextView
+                    android:id="@+id/explanation_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/modern_text_primary"
+                    android:fontFamily="sans-serif"
+                    android:lineSpacingExtra="4dp"
+                    android:text="The 'def' keyword is used to define a function in Python." />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

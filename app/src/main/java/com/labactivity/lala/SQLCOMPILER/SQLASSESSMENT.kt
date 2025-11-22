@@ -63,26 +63,40 @@ object SQLASSESSMENT {
     private fun loadChallenges(adapter: SQLChallengeAdapter) {
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                Log.d(TAG, "Loading SQL challenges from Firestore...")
+                Log.d(TAG, "🔄 Loading SQL challenges from Firestore...")
 
                 // Fetch challenges and progress in parallel
                 val (challenges, userProgress) = withContext(Dispatchers.IO) {
+                    Log.d(TAG, "  📡 Fetching challenges...")
                     val challengesList = sqlHelper.getAllChallenges()
+                    Log.d(TAG, "  ✅ Fetched ${challengesList.size} challenges")
+
+                    Log.d(TAG, "  📡 Fetching progress...")
                     val progressList = sqlHelper.getAllUserProgress()
+                    Log.d(TAG, "  ✅ Fetched ${progressList.size} progress records")
+
                     Pair(challengesList, progressList)
                 }
 
                 Log.d(TAG, "✅ Loaded ${challenges.size} SQL challenges with ${userProgress.size} progress records")
 
+                if (challenges.isEmpty()) {
+                    Log.w(TAG, "⚠️ WARNING: No SQL challenges loaded! This means:")
+                    Log.w(TAG, "   1. User might not be enrolled in a SQL course, OR")
+                    Log.w(TAG, "   2. No SQL challenges exist in Firestore collection 'technical_assesment', OR")
+                    Log.w(TAG, "   3. The courseId in challenges doesn't match enrolled course IDs")
+                }
+
                 // Build progress map
                 val progressMap = userProgress.associateBy { it.challengeId }
 
-                // Update adapter with 5 second delay (shows skeleton for 5 seconds minimum)
+                // Update adapter with 3 second delay (shows skeleton for 3 seconds minimum)
                 // This matches PYTHONASSESMENT behavior
                 adapter.setChallengesWithProgressAndDelay(challenges, progressMap, 3000)
 
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Error loading SQL challenges", e)
+                Log.e(TAG, "❌ Error loading SQL challenges: ${e.message}", e)
+                e.printStackTrace()
                 // Fallback: empty list with delay
                 adapter.setChallengesWithProgressAndDelay(emptyList(), emptyMap(), 5000)
             }

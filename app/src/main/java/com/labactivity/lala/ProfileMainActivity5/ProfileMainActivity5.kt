@@ -48,6 +48,7 @@ import kotlinx.coroutines.tasks.await
 import com.labactivity.lala.UTILS.setupWithSafeNavigation
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.labactivity.lala.SettingsActivity
+import com.labactivity.lala.PROGRESSPAGE.UserProgressActivity
 import com.labactivity.lala.ProfileMainActivity5.TechnicalAssessmentItem
 import com.labactivity.lala.ProfileMainActivity5.TechnicalAssessmentsAdapter
 
@@ -257,7 +258,8 @@ class ProfileMainActivity5 : BaseActivity() {
             mapOf(
                 R.id.nav_home to MainActivity4::class.java,
                 R.id.nav_profile to ProfileMainActivity5::class.java,
-                R.id.nav_settings to SettingsActivity::class.java
+                R.id.nav_settings to SettingsActivity::class.java,
+                R.id.user_progress to UserProgressActivity::class.java
             )
         )
     }

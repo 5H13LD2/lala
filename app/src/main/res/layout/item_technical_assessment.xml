@@ -1,14 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ========================================== -->
+<!-- TECHNICAL ASSESSMENT ITEM CARD - Modern Design -->
+<!-- ========================================== -->
+<!--
+    Customization Options:
+    CARD:
+    - cardCornerRadius: Change roundness (current: 20dp)
+    - cardElevation: Adjust shadow depth (current: 6dp)
+    - layout_margin: Adjust spacing between items (current: 12dp horizontal, 8dp vertical)
+    - cardBackgroundColor: Change card color (current: #FFFFFF)
+
+    ICON:
+    - Icon size: Change width/height (current: 64dp)
+    - Icon background: MaterialCardView with brand_blue (current: 64dp card, 14dp corners)
+    - Icon tint: Change via app:tint (current: #FFFFFF)
+
+    TITLE & CATEGORY:
+    - Title size: Adjust textSize (current: 18sp)
+    - Title color: Change textColor (current: modern_text_primary)
+    - Category size: Adjust textSize (current: 13sp)
+    - Category color: Change textColor (current: modern_text_secondary)
+
+    DIFFICULTY BADGE:
+    - Badge size: Adjust textSize (current: 12sp)
+    - Badge colors: Set via difficulty (Easy/Medium/Hard)
+    - Badge roundness: Change via @drawable/difficulty_badge
+
+    STATUS TEXT:
+    - Status size: Adjust textSize (current: 14sp)
+    - Status color: Changes based on availability (brand_blue/modern_text_secondary)
+-->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/assessmentCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="4dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="#E0E0E0"
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="6dp"
+    app:strokeWidth="0dp"
     app:cardBackgroundColor="#FFFFFF"
     android:clickable="true"
     android:focusable="true"
@@ -18,26 +51,42 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
+        <!-- ========================================== -->
+        <!-- HEADER SECTION - Icon, Title, Difficulty -->
+        <!-- ========================================== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <ImageView
-                android:id="@+id/assessmentIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/book"
-                app:tint="@color/modern_accent" />
+            <!-- Assessment Icon Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="3dp"
+                app:strokeWidth="0dp"
+                android:backgroundTint="@color/brand_blue">
 
+                <ImageView
+                    android:id="@+id/assessmentIcon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="16dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/book"
+                    app:tint="#FFFFFF" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Title and Category -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="12dp"
+                android:layout_marginStart="16dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -46,8 +95,10 @@
                     android:layout_height="wrap_content"
                     android:text="Assessment Title"
                     android:textColor="@color/modern_text_primary"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:lineSpacingExtra="2dp"
                     android:maxLines="2"
                     android:ellipsize="end" />
 
@@ -55,52 +106,93 @@
                     android:id="@+id/assessmentCategory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="6dp"
                     android:text="Category"
                     android:textColor="@color/modern_text_secondary"
-                    android:textSize="12sp" />
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif" />
             </LinearLayout>
 
+            <!-- Difficulty & Lock Badge Container -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:orientation="vertical"
+                android:gravity="end">
 
+                <!-- Lock Icon (for locked assessments) -->
                 <ImageView
                     android:id="@+id/lockIcon"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_marginEnd="4dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginBottom="8dp"
                     android:src="@drawable/ic_lock"
                     android:visibility="gone"
-                    app:tint="@android:color/darker_gray" />
+                    app:tint="@color/modern_text_secondary" />
 
-                <TextView
-                    android:id="@+id/assessmentDifficulty"
+                <!-- Difficulty Badge -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Easy"
-                    android:textColor="#00C48C"
-                    android:textSize="12sp"
-                    android:textStyle="bold"
-                    android:background="@drawable/difficulty_badge"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp" />
+                    app:cardCornerRadius="10dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp"
+                    android:backgroundTint="@color/success_green">
+
+                    <TextView
+                        android:id="@+id/assessmentDifficulty"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Easy"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:paddingTop="5dp"
+                        android:paddingBottom="5dp" />
+                </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Status Text -->
-        <TextView
-            android:id="@+id/assessmentStatus"
-            android:layout_width="wrap_content"
+        <!-- ========================================== -->
+        <!-- DIVIDER LINE -->
+        <!-- ========================================== -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/modern_border"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="12dp" />
+
+        <!-- ========================================== -->
+        <!-- STATUS TEXT - Shows availability -->
+        <!-- ========================================== -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Available"
-            android:textColor="@color/modern_primary"
-            android:textSize="13sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Status: "
+                android:textColor="@color/modern_text_secondary"
+                android:textSize="14sp"
+                android:fontFamily="sans-serif" />
+
+            <TextView
+                android:id="@+id/assessmentStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Available"
+                android:textColor="@color/brand_blue"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -29,16 +29,6 @@ service cloud.firestore {
       match /quizResults/{resultId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
-
-      // 🔹 Daily Problem Progress subcollection (user's submissions for daily problems)
-      match /daily_problem_progress/{problemId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-
-      // 🔹 Login Tracking subcollection (tracks user's daily login history)
-      match /login_tracking/{progressId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
     }
 
     // 🔹 Global Achievements Collection (template list of all achievements)
@@ -139,13 +129,12 @@ service cloud.firestore {
       allow write: if request.auth != null;
     }
 
-    // 🔹 Daily Problem Collection (Global - problem definitions)
-    match /daily_problem/{docId} {
-      // Allow authenticated users to read active daily problems
-      allow read: if request.auth != null;
+     }
 
-      // Only admins can create/update/delete daily problems
-      allow write: if request.auth != null && request.auth.token.admin == true;
+    // daily_problem collection for user
+    match /daily_problem/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null;
     }
 
     // 🔹 Catch-all deny (safety net)
