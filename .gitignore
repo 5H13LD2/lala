@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firebase sensitive files - DO NOT COMMIT
+serviceAccountKey.json
+*-firebase-adminsdk-*.json
+google-services.json

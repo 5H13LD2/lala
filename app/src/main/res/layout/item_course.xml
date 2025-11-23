@@ -4,27 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="8dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="@color/modern_border"
-    android:backgroundTint="@color/modern_card_bg">
+    android:layout_marginStart="12dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="#FFFFFF">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="20dp">
+        android:padding="24dp">
 
         <!-- Modern Course Icon with Gradient Background -->
         <androidx.cardview.widget.CardView
             android:id="@+id/courseIconCard"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            app:cardCornerRadius="12dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            app:cardCornerRadius="16dp"
             app:cardElevation="0dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -34,7 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/modern_course_icon_bg"
-                android:padding="16dp"
+                android:padding="18dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/logo2"
                 android:tint="#FFFFFF" />
@@ -45,14 +44,15 @@
             android:id="@+id/courseTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="18dp"
             android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
             android:maxLines="2"
             android:text="Course Name"
-            android:textColor="@color/modern_text_primary"
-            android:textSize="18sp"
+            android:textColor="#1A1A2E"
+            android:textSize="19sp"
             android:textStyle="bold"
+            android:letterSpacing="-0.01"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/courseIconCard"
             app:layout_constraintTop_toTopOf="@+id/courseIconCard" />
@@ -62,13 +62,14 @@
             android:id="@+id/courseSubtitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginTop="6dp"
             android:ellipsize="end"
-            android:maxLines="1"
+            android:maxLines="2"
             android:text="Continue your learning journey"
-            android:textColor="@color/modern_text_secondary"
-            android:textSize="13sp"
+            android:textColor="#6B7280"
+            android:textSize="14sp"
+            android:lineSpacingExtra="2dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/courseIconCard"
             app:layout_constraintTop_toBottomOf="@+id/courseTitle" />
@@ -77,16 +78,17 @@
         <Button
             android:id="@+id/btnContinueLearning"
             android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="20dp"
+            android:layout_height="52dp"
+            android:layout_marginTop="24dp"
             android:background="@drawable/modern_button_primary"
-            android:elevation="0dp"
+            android:elevation="2dp"
             android:fontFamily="sans-serif-medium"
             android:stateListAnimator="@null"
-            android:text="Continue Learning"
+            android:text="Continue Learning →"
             android:textColor="#FFFFFF"
-            android:textSize="15sp"
+            android:textSize="16sp"
             android:textStyle="bold"
+            android:letterSpacing="0.02"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/courseIconCard" />
@@ -96,7 +98,7 @@
             android:id="@+id/actionButtonsLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:orientation="horizontal"
             android:weightSum="2"
             app:layout_constraintEnd_toEndOf="parent"
@@ -108,23 +110,23 @@
                 android:id="@+id/btnPractice"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="6dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/modern_button_practice"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingTop="14dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="14dp">
+                android:paddingStart="14dp"
+                android:paddingTop="16dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="16dp">
 
                 <ImageView
                     android:id="@+id/practiceIcon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="10dp"
                     android:src="@drawable/ic_practice_modern"
                     android:tint="#FFFFFF" />
 
@@ -135,7 +137,7 @@
                     android:fontFamily="sans-serif-medium"
                     android:text="Practice"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
 
@@ -144,23 +146,23 @@
                 android:id="@+id/btnFlashcard"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:background="@drawable/modern_button_flashcard"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:paddingStart="16dp"
-                android:paddingTop="14dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="14dp">
+                android:paddingStart="14dp"
+                android:paddingTop="16dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="16dp">
 
                 <ImageView
                     android:id="@+id/flashcardIcon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_marginEnd="10dp"
                     android:src="@drawable/ic_flashcard_modern"
                     android:tint="#FFFFFF" />
 
@@ -171,7 +173,7 @@
                     android:fontFamily="sans-serif-medium"
                     android:text="Reviewer"
                     android:textColor="#FFFFFF"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
 

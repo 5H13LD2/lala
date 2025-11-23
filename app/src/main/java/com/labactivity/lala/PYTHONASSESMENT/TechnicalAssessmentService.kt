@@ -98,6 +98,7 @@ class TechnicalAssessmentService {
                         title = title ?: "Untitled Challenge",
                         difficulty = doc.getString("difficulty") ?: "Unknown",
                         courseId = doc.getString("courseId") ?: "",
+                        compilerType = doc.getString("compilerType") ?: "python", // Default to python if not specified
                         brokenCode = doc.getString("brokenCode") ?: "",
                         correctOutput = doc.getString("correctOutput") ?: "",
                         hint = doc.getString("hint") ?: "",

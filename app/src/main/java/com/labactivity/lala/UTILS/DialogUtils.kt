@@ -1,5 +1,6 @@
 package com.labactivity.lala.UTILS
 
+import android.app.Activity
 import android.content.Context
 import androidx.appcompat.app.AlertDialog
 import com.labactivity.lala.R
@@ -9,6 +10,13 @@ import com.labactivity.lala.R
  * Replaces Toast messages with proper modal dialogs
  */
 object DialogUtils {
+
+    /**
+     * Checks if the context is valid for showing dialogs
+     */
+    private fun isContextValid(context: Context): Boolean {
+        return context is Activity && !context.isFinishing && !context.isDestroyed
+    }
 
     /**
      * Shows an information dialog with a single OK button
@@ -23,6 +31,8 @@ object DialogUtils {
         message: String,
         onDismiss: (() -> Unit)? = null
     ) {
+        if (!isContextValid(context)) return
+
         AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)
@@ -47,6 +57,8 @@ object DialogUtils {
         message: String,
         onDismiss: (() -> Unit)? = null
     ) {
+        if (!isContextValid(context)) return
+
         AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)
@@ -71,6 +83,8 @@ object DialogUtils {
         message: String,
         onDismiss: (() -> Unit)? = null
     ) {
+        if (!isContextValid(context)) return
+
         AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)
@@ -95,6 +109,8 @@ object DialogUtils {
         message: String,
         onDismiss: (() -> Unit)? = null
     ) {
+        if (!isContextValid(context)) return
+
         AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)
@@ -121,6 +137,8 @@ object DialogUtils {
         onConfirm: () -> Unit,
         onCancel: (() -> Unit)? = null
     ) {
+        if (!isContextValid(context)) return
+
         AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)
@@ -147,6 +165,8 @@ object DialogUtils {
         title: String = "💡 Hint",
         hint: String
     ) {
+        if (!isContextValid(context)) return
+
         AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(hint)
@@ -168,6 +188,8 @@ object DialogUtils {
         title: String = "🔒 Locked",
         message: String
     ) {
+        if (!isContextValid(context)) return
+
         AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)

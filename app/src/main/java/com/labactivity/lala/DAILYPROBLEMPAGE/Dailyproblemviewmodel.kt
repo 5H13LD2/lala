@@ -144,6 +144,20 @@ class DailyProblemViewModel(
         _error.value = null
     }
 
+    /**
+     * Load a specific problem by ID (for EditorFragment)
+     */
+    fun loadProblemById(problemId: String, callback: (DailyProblem?) -> Unit) {
+        viewModelScope.launch {
+            repository.getDailyProblemById(problemId).onSuccess { problem ->
+                callback(problem)
+            }.onFailure { exception ->
+                _error.value = exception.message ?: "Failed to load problem"
+                callback(null)
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
         stopCountdown()

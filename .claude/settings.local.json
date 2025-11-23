@@ -12,7 +12,8 @@
       "Bash(adb devices:*)",
       "Bash(cat:*)",
       "Bash(git checkout:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(adb shell:*)"
     ],
     "deny": [],
     "ask": []

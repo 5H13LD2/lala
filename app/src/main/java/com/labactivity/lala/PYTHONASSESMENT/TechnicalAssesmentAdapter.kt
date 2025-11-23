@@ -10,7 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.labactivity.lala.PYTHONCOMPILER.CompilerActivity
+import com.labactivity.lala.UNIFIEDCOMPILER.ui.UnifiedCompilerActivity
 import com.labactivity.lala.R
 import com.labactivity.lala.UTILS.DialogUtils
 
@@ -203,13 +203,14 @@ class TechnicalAssessmentAdapter(
     }
 
     private fun openCompiler(challenge: Challenge) {
-        val intent = Intent(context, CompilerActivity::class.java).apply {
+        val intent = Intent(context, UnifiedCompilerActivity::class.java).apply {
             putExtra("CHALLENGE_ID", challenge.id)
             putExtra("CHALLENGE_TITLE", challenge.title)
             putExtra("CHALLENGE_CODE", challenge.brokenCode)
             putExtra("CORRECT_OUTPUT", challenge.correctOutput)
             putExtra("HINT", challenge.hint)
             putExtra("COURSE_ID", challenge.courseId)
+            putExtra("COMPILER_TYPE", challenge.compilerType) // Pass compiler type for unified compiler
         }
         context.startActivity(intent)
     }

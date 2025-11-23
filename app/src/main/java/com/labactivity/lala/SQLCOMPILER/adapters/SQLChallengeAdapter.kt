@@ -13,7 +13,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.labactivity.lala.R
-import com.labactivity.lala.SQLCOMPILER.SQLChallengeActivity
+import com.labactivity.lala.UNIFIEDCOMPILER.ui.UnifiedCompilerActivity
 import com.labactivity.lala.SQLCOMPILER.models.SQLChallenge
 import com.labactivity.lala.SQLCOMPILER.models.SQLChallengeProgress
 import com.labactivity.lala.UTILS.DialogUtils
@@ -209,8 +209,9 @@ class SQLChallengeAdapter(
      * Opens the SQL Challenge Activity
      */
     private fun openChallenge(challenge: SQLChallenge) {
-        val intent = Intent(context, SQLChallengeActivity::class.java).apply {
-            putExtra(SQLChallengeActivity.EXTRA_CHALLENGE_ID, challenge.id)
+        val intent = Intent(context, UnifiedCompilerActivity::class.java).apply {
+            putExtra("CHALLENGE_ID", challenge.id)
+            putExtra("COURSE_ID", "sql")
         }
         context.startActivity(intent)
     }

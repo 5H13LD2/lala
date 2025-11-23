@@ -7,20 +7,10 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.labactivity.lala.UTILS.DialogUtils
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
-
 import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.AVAILABLECOURSEPAGE.MainActivity3
-import com.labactivity.lala.AVAILABLECOURSEPAGE.Course
 import com.labactivity.lala.PYTHONASSESMENT.PYTHONASSESMENT
-import com.labactivity.lala.PYTHONASSESMENT.AllAssessmentsActivity
-import com.labactivity.lala.PYTHONASSESMENT.AllInterviewsActivity
-import com.labactivity.lala.SQLCOMPILER.SQLASSESSMENT
-import com.labactivity.lala.SQLCOMPILER.AllSQLChallengesActivity
-import com.labactivity.lala.JAVACOMPILER.JAVAASSESSMENT
-import com.labactivity.lala.JAVACOMPILER.AllJavaChallengesActivity
 import com.labactivity.lala.ProfileMainActivity5.ProfileMainActivity5
 import com.labactivity.lala.PROGRESSPAGE.UserProgressActivity
 import com.labactivity.lala.R
@@ -31,7 +21,6 @@ import com.labactivity.lala.UTILS.setupWithSafeNavigation
 import com.labactivity.lala.UTILS.AnimationUtils.animateCardPress
 import com.labactivity.lala.UTILS.AnimationUtils.slideUpFadeIn
 import com.labactivity.lala.UTILS.AnimationUtils.animateItems
-import me.relex.circleindicator.CircleIndicator2
 import androidx.recyclerview.widget.PagerSnapHelper
 import com.labactivity.lala.DAILYPROBLEMPAGE.DailyProblemViewModel
 import com.labactivity.lala.PROGRESSPAGE.ProgressService
@@ -159,7 +148,8 @@ class MainActivity4 : BaseActivity() {
                 .document(user.uid)
                 .get()
                 .addOnSuccessListener { document ->
-                    val enrolledCourses = document.get("courseTaken") as? List<Map<String, Any>> ?: listOf()
+                    val enrolledCourses =
+                        document.get("courseTaken") as? List<Map<String, Any>> ?: listOf()
 
                     // Check if user is enrolled in Python
                     val hasPython = enrolledCourses.any { course ->
@@ -167,133 +157,64 @@ class MainActivity4 : BaseActivity() {
                         courseId.contains("python", ignoreCase = true)
                     }
 
-                    // Check if user is enrolled in SQL
-                    val hasSQL = enrolledCourses.any { course ->
-                        val courseId = course["courseId"] as? String ?: ""
-                        val result = courseId.contains("sql", ignoreCase = true)
-                        if (result) {
-                            Log.d("MainActivity4", "✅ Found SQL course: $courseId")
-                        }
-                        result
-                    }
-
-                    // Check if user is enrolled in Java
-                    val hasJava = enrolledCourses.any { course ->
-                        val courseId = course["courseId"] as? String ?: ""
-                        val result = courseId.contains("java", ignoreCase = true)
-                        if (result) {
-                            Log.d("MainActivity4", "✅ Found Java course: $courseId")
-                        }
-                        result
-                    }
-
-                    Log.d("MainActivity4", "📊 Enrollment check complete: Python=$hasPython, SQL=$hasSQL, Java=$hasJava")
-                    Log.d("MainActivity4", "📋 All enrolled courseIds: ${enrolledCourses.map { it["courseId"] }}")
-
                     // Show/Hide Technical Assessment (Python)
                     if (hasPython) {
                         val assessmentHeader = findViewById<View>(R.id.layoutAssessmentsHeader)
                         assessmentHeader.visibility = View.VISIBLE
-                        val assessmentTitle = assessmentHeader.findViewById<TextView>(R.id.textSectionTitle)
+                        val assessmentTitle =
+                            assessmentHeader.findViewById<TextView>(R.id.textSectionTitle)
                         assessmentTitle.text = "Technical Assessment"
                         binding.recyclerViewAssessments.visibility = View.VISIBLE
 
-                        val assessmentViewAll = assessmentHeader.findViewById<TextView>(R.id.textViewAll)
+                        val assessmentViewAll =
+                            assessmentHeader.findViewById<TextView>(R.id.textViewAll)
+                        // Setup Technical Assessment RecyclerView
                         PYTHONASSESMENT.TechnicalAssesment(
                             this,
                             binding.recyclerViewAssessments,
                             assessmentViewAll
                         )
 
-                        assessmentViewAll.setOnClickListener {
-                            val intent = Intent(this, AllAssessmentsActivity::class.java)
-                            startActivity(intent)
-                        }
-                    } else {
-                        findViewById<View>(R.id.layoutAssessmentsHeader).visibility = View.GONE
-                        binding.recyclerViewAssessments.visibility = View.GONE
-                    }
-
-                    // Show/Hide SQL Challenges
-                    if (hasSQL) {
-                        val sqlHeader = findViewById<View>(R.id.layoutSQLChallengesHeader)
-                        sqlHeader.visibility = View.VISIBLE
-                        val sqlTitle = sqlHeader.findViewById<TextView>(R.id.textSectionTitle)
-                        sqlTitle.text = "SQL Challenges"
-                        binding.recyclerViewSQLChallenges.visibility = View.VISIBLE
-
-                        val sqlViewAll = sqlHeader.findViewById<TextView>(R.id.textViewAll)
-                        SQLASSESSMENT.SQLTechnicalAssessment(
-                            this,
-                            binding.recyclerViewSQLChallenges,
-                            sqlViewAll
-                        )
-
-                        sqlViewAll.setOnClickListener {
-                            val intent = Intent(this, AllSQLChallengesActivity::class.java)
-                            startActivity(intent)
-                        }
-                    } else {
-                        findViewById<View>(R.id.layoutSQLChallengesHeader).visibility = View.GONE
-                        binding.recyclerViewSQLChallenges.visibility = View.GONE
-                    }
-
-                    // Show/Hide Java Challenges
-                    if (hasJava) {
-                        val javaHeader = findViewById<View>(R.id.layoutJavaChallengesHeader)
-                        javaHeader.visibility = View.VISIBLE
-                        val javaTitle = javaHeader.findViewById<TextView>(R.id.textSectionTitle)
-                        javaTitle.text = "Java Challenges"
-                        binding.recyclerViewJavaChallenges.visibility = View.VISIBLE
-
-                        val javaViewAll = javaHeader.findViewById<TextView>(R.id.textViewAll)
-                        JAVAASSESSMENT.JavaTechnicalAssessment(
-                            this,
-                            binding.recyclerViewJavaChallenges,
-                            javaViewAll
-                        )
-
-                        javaViewAll.setOnClickListener {
-                            val intent = Intent(this, AllJavaChallengesActivity::class.java)
-                            startActivity(intent)
-                        }
-                    } else {
-                        findViewById<View>(R.id.layoutJavaChallengesHeader).visibility = View.GONE
-                        binding.recyclerViewJavaChallenges.visibility = View.GONE
-                    }
-
-                    // Show/Hide Technical Interviews (Python)
-                    if (hasPython) {
+                        // Setup Technical Interview Section
                         val interviewHeader = findViewById<View>(R.id.layoutInterviewsHeader)
                         interviewHeader.visibility = View.VISIBLE
-                        val interviewTitle = interviewHeader.findViewById<TextView>(R.id.textSectionTitle)
+                        val interviewTitle =
+                            interviewHeader.findViewById<TextView>(R.id.textSectionTitle)
                         interviewTitle.text = "Technical Interview"
                         binding.recyclerViewInterviews.visibility = View.VISIBLE
 
-                        val interviewViewAll = interviewHeader.findViewById<TextView>(R.id.textViewAll)
+                        val interviewViewAll =
+                            interviewHeader.findViewById<TextView>(R.id.textViewAll)
                         PYTHONASSESMENT.TechnicalInterview(
                             this,
                             binding.recyclerViewInterviews,
-                            interviewViewAll,
                             interviewViewAll
                         )
-
-                        interviewViewAll.setOnClickListener {
-                            val intent = Intent(this, AllInterviewsActivity::class.java)
-                            startActivity(intent)
-                        }
                     } else {
+                        // User is enrolled but not in Python (hide sections)
+                        findViewById<View>(R.id.layoutAssessmentsHeader).visibility = View.GONE
+                        binding.recyclerViewAssessments.visibility = View.GONE
                         findViewById<View>(R.id.layoutInterviewsHeader).visibility = View.GONE
                         binding.recyclerViewInterviews.visibility = View.GONE
                     }
-
-                    Log.d("MainActivity4", "Enrollment check: Python=$hasPython, SQL=$hasSQL, Java=$hasJava")
                 }
-                .addOnFailureListener { e ->
-                    Log.e("MainActivity4", "Error checking enrollment", e)
+                .addOnFailureListener {
+                    // Handle Firestore read failure
+                    Log.e("MainActivity4", "Error fetching user document", it)
+                    findViewById<View>(R.id.layoutAssessmentsHeader).visibility = View.GONE
+                    binding.recyclerViewAssessments.visibility = View.GONE
+                    findViewById<View>(R.id.layoutInterviewsHeader).visibility = View.GONE
+                    binding.recyclerViewInterviews.visibility = View.GONE
                 }
+        } ?: run {
+            // User is not logged in (hide sections)
+            findViewById<View>(R.id.layoutAssessmentsHeader).visibility = View.GONE
+            binding.recyclerViewAssessments.visibility = View.GONE
+            findViewById<View>(R.id.layoutInterviewsHeader).visibility = View.GONE
+            binding.recyclerViewInterviews.visibility = View.GONE
         }
     }
+
 
     // ==============================================
     // SETUP DAILY PROBLEM OF THE DAY
@@ -407,9 +328,7 @@ class MainActivity4 : BaseActivity() {
         // Hide all elements initially
         binding.recyclerView.alpha = 0f
         binding.recyclerViewAssessments.alpha = 0f
-        binding.recyclerViewSQLChallenges.alpha = 0f
-        binding.recyclerViewJavaChallenges.alpha = 0f
-        binding.recyclerViewInterviews.alpha = 0f
+        // binding.recyclerViewInterviews.alpha = 0f // This view is mentioned but not animated below, keeping structure similar.
         binding.cardViewPractice.alpha = 0f
 
         // Animate Recent Course section
@@ -418,13 +337,7 @@ class MainActivity4 : BaseActivity() {
         // Animate Technical Assessment section
         binding.recyclerViewAssessments.slideUpFadeIn(duration = 400, startDelay = 300)
 
-        // Animate SQL Challenges section
-        binding.recyclerViewSQLChallenges.slideUpFadeIn(duration = 400, startDelay = 350)
-
-        // Animate Java Challenges section
-        binding.recyclerViewJavaChallenges.slideUpFadeIn(duration = 400, startDelay = 380)
-
-        // Animate Technical Interview section
+        // Animate Technical Interview section (assuming this view exists in the layout)
         binding.recyclerViewInterviews.slideUpFadeIn(duration = 400, startDelay = 420)
 
         // Animate Practice Card
@@ -439,13 +352,6 @@ class MainActivity4 : BaseActivity() {
             binding.recyclerViewAssessments.animateItems(itemDelay = 80, itemDuration = 300)
         }
 
-        binding.recyclerViewSQLChallenges.post {
-            binding.recyclerViewSQLChallenges.animateItems(itemDelay = 80, itemDuration = 300)
-        }
-
-        binding.recyclerViewJavaChallenges.post {
-            binding.recyclerViewJavaChallenges.animateItems(itemDelay = 80, itemDuration = 300)
-        }
 
         binding.recyclerViewInterviews.post {
             binding.recyclerViewInterviews.animateItems(itemDelay = 80, itemDuration = 300)

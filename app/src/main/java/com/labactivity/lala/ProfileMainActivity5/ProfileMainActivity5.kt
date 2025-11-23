@@ -144,7 +144,7 @@ class ProfileMainActivity5 : BaseActivity() {
             }
 
             // Open the appropriate compiler based on category
-            val compilerIntent = Intent(this, com.labactivity.lala.PYTHONCOMPILER.CompilerActivity::class.java).apply {
+            val compilerIntent = Intent(this, com.labactivity.lala.UNIFIEDCOMPILER.ui.UnifiedCompilerActivity::class.java).apply {
                 putExtra("CHALLENGE_ID", assessment.id)
                 putExtra("CHALLENGE_TITLE", assessment.title)
                 putExtra("COURSE_ID", assessment.courseId)
@@ -881,7 +881,7 @@ class ProfileMainActivity5 : BaseActivity() {
             }
 
             // Open the appropriate compiler based on category
-            val compilerIntent = Intent(this, com.labactivity.lala.PYTHONCOMPILER.CompilerActivity::class.java).apply {
+            val compilerIntent = Intent(this, com.labactivity.lala.UNIFIEDCOMPILER.ui.UnifiedCompilerActivity::class.java).apply {
                 putExtra("CHALLENGE_ID", assessment.id)
                 putExtra("CHALLENGE_TITLE", assessment.title)
                 putExtra("COURSE_ID", assessment.courseId)
@@ -921,35 +921,35 @@ class ProfileMainActivity5 : BaseActivity() {
                         name = "Bronze Star",
                         description = "Earn 500 XP",
                         requiredXP = 500,
-                        badgeDrawable = R.drawable.ic_star,
+                        badgeDrawable = R.drawable.badge_bronze,
                         isUnlocked = totalXP >= 500
                     ),
                     AchievementBadgeItem(
                         name = "Silver Star",
                         description = "Earn 1,000 XP",
                         requiredXP = 1000,
-                        badgeDrawable = R.drawable.ic_star,
+                        badgeDrawable = R.drawable.badge_silver,
                         isUnlocked = totalXP >= 1000
                     ),
                     AchievementBadgeItem(
                         name = "Gold Star",
                         description = "Earn 2,000 XP",
                         requiredXP = 2000,
-                        badgeDrawable = R.drawable.ic_star,
+                        badgeDrawable = R.drawable.badge_gold,
                         isUnlocked = totalXP >= 2000
                     ),
                     AchievementBadgeItem(
                         name = "Diamond Star",
                         description = "Earn 3,000 XP",
                         requiredXP = 3000,
-                        badgeDrawable = R.drawable.ic_star,
+                        badgeDrawable = R.drawable.badge_diamond,
                         isUnlocked = totalXP >= 3000
                     ),
                     AchievementBadgeItem(
                         name = "Master Star",
                         description = "Earn 5,000 XP",
                         requiredXP = 5000,
-                        badgeDrawable = R.drawable.ic_star,
+                        badgeDrawable = R.drawable.badge_platinum,
                         isUnlocked = totalXP >= 5000
                     )
                 )

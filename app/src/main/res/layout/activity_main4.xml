@@ -264,26 +264,6 @@
                 style="@style/Widget.Lala.RecyclerView.Horizontal"
                 android:orientation="horizontal" />
 
-            <!-- SQL Challenges Section -->
-            <include
-                android:id="@+id/layoutSQLChallengesHeader"
-                layout="@layout/layout_section_header" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewSQLChallenges"
-                style="@style/Widget.Lala.RecyclerView.Horizontal"
-                android:orientation="horizontal" />
-
-            <!-- Java Challenges Section -->
-            <include
-                android:id="@+id/layoutJavaChallengesHeader"
-                layout="@layout/layout_section_header" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewJavaChallenges"
-                style="@style/Widget.Lala.RecyclerView.Horizontal"
-                android:orientation="horizontal" />
-
             <!-- Technical Interview Section -->
             <include
                 android:id="@+id/layoutInterviewsHeader"

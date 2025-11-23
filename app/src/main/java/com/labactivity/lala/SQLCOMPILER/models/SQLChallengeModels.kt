@@ -113,20 +113,6 @@ data class ExpectedResult(
     val rows: List<List<Any>> = emptyList()
 ) {
     /**
-     * Converts this ExpectedResult to QueryResult format
-     * for use with QueryEvaluator
-     */
-    fun toQueryResult(): com.labactivity.lala.SQLCOMPILER.QueryResult {
-        return com.labactivity.lala.SQLCOMPILER.QueryResult(
-            success = true,
-            columns = columns,
-            rows = rows,
-            errorMessage = null,
-            executionTime = 0
-        )
-    }
-
-    /**
      * Returns the number of expected rows
      */
     val rowCount: Int

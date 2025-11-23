@@ -15,9 +15,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.FLASHCARD.FlashcardActivity
 import com.labactivity.lala.LEARNINGMATERIAL.CoreModule
-import com.labactivity.lala.PYTHONCOMPILER.MainActivity7
 import com.labactivity.lala.R
-import com.labactivity.lala.SQLCOMPILER.sqlcompiler
+import com.labactivity.lala.SQLCOMPILER.AllSQLChallengesActivity
+import com.labactivity.lala.UNIFIEDCOMPILER.ui.UnifiedCompilerActivity
 import com.labactivity.lala.AVAILABLECOURSEPAGE.Course  // Use the full Course class from AVAILABLECOURSEPAGE
 
 class CourseAdapter(
@@ -145,10 +145,20 @@ class CourseAdapter(
         holder.btnPractice.setOnClickListener {
             try {
                 val intent = when {
-                    course.courseId.contains("python", ignoreCase = true) -> 
-                        Intent(context, MainActivity7::class.java)
-                    course.courseId.contains("sql", ignoreCase = true) -> 
-                        Intent(context, sqlcompiler::class.java)
+                    course.courseId.contains("sql", ignoreCase = true) ->
+                        Intent(context, AllSQLChallengesActivity::class.java)
+                    course.courseId.contains("python", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java)
+                    course.courseId.contains("java", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java)
+                    course.courseId.contains("php", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java)
+                    course.courseId.contains("ruby", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java)
+                    course.courseId.contains("kotlin", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java)
+                    course.courseId.contains("javascript", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java)
                     else -> null
                 }
 

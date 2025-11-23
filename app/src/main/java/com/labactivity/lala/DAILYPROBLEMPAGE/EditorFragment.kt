@@ -8,11 +8,10 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.labactivity.lala.R
 import com.labactivity.lala.databinding.FragmentEditorBinding
-import com.labactivity.lala.JAVACOMPILER.JavaRunner
-import com.labactivity.lala.SQLCOMPILER.QueryValidator
-import com.labactivity.lala.SQLCOMPILER.DatabaseHelper
-import com.labactivity.lala.SQLCOMPILER.QueryEvaluator
+import com.labactivity.lala.UNIFIEDCOMPILER.CompilerFactory
+import com.labactivity.lala.UNIFIEDCOMPILER.models.CompilerConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,6 +29,7 @@ class EditorFragment : Fragment() {
     private var problemId: String = ""
     private var courseId: String = ""
     private var compilerType: String = ""
+    private var currentProblem: DailyProblem? = null
 
     private var isCodeView = true // Toggle between code and output
 
@@ -75,14 +75,34 @@ class EditorFragment : Fragment() {
         setupEditor()
         setupToggle()
         setupButtons()
+        loadProblemData()
+    }
+
+    private fun loadProblemData() {
+        // Load the specific problem by ID
+        viewModel.loadProblemById(problemId) { problem ->
+            currentProblem = problem
+            if (problem == null) {
+                Toast.makeText(context, "Failed to load problem data", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setupEditor() {
+        // Map old compiler types to new unified types
+        val normalizedType = when (compilerType.lowercase()) {
+            "javacompiler" -> "java"
+            "pythoncompiler" -> "python"
+            "sqlcompiler" -> "sql"
+            else -> compilerType.lowercase()
+        }
+
         // Set placeholder based on compiler type
-        val placeholder = when (compilerType.lowercase()) {
-            "javacompiler" -> "// Write your Java code here\npublic class Solution {\n    public void run() {\n        // Your code\n    }\n}"
-            "pythoncompiler" -> "# Write your Python code here\ndef solve():\n    # Your code\n    pass"
-            "sqlcompiler" -> "-- Write your SQL query here\nSELECT * FROM table_name;"
+        val placeholder = when (normalizedType) {
+            "java" -> "// Write your Java code here\npublic class Solution {\n    public void run() {\n        // Your code\n    }\n}"
+            "python" -> "# Write your Python code here\ndef solve():\n    # Your code\n    pass"
+            "sql" -> "-- Write your SQL query here\nSELECT * FROM table_name;"
+            "kotlin" -> "// Write your Kotlin code here\nfun solve() {\n    // Your code\n}"
             else -> "// Write your code here"
         }
         binding.etCodeEditor.hint = placeholder
@@ -101,20 +121,28 @@ class EditorFragment : Fragment() {
 
     private fun showCodeView() {
         isCodeView = true
-        binding.etCodeEditor.isVisible = true
-        binding.svOutput.isVisible = false
+        binding.editorCard.isVisible = true
+        binding.outputCard.isVisible = false
 
-        binding.btnCodeTab.setBackgroundResource(android.R.drawable.btn_default)
-        binding.btnOutputTab.setBackgroundResource(android.R.color.transparent)
+        // Update tab styling
+        binding.btnCodeTab.setBackgroundResource(R.drawable.modern_button_primary)
+        binding.btnCodeTab.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+
+        binding.btnOutputTab.setBackgroundColor(android.graphics.Color.parseColor("#252526"))
+        binding.btnOutputTab.setTextColor(android.graphics.Color.parseColor("#AAAAAA"))
     }
 
     private fun showOutputView() {
         isCodeView = false
-        binding.etCodeEditor.isVisible = false
-        binding.svOutput.isVisible = true
+        binding.editorCard.isVisible = false
+        binding.outputCard.isVisible = true
 
-        binding.btnCodeTab.setBackgroundResource(android.R.color.transparent)
-        binding.btnOutputTab.setBackgroundResource(android.R.drawable.btn_default)
+        // Update tab styling
+        binding.btnOutputTab.setBackgroundResource(R.drawable.modern_button_primary)
+        binding.btnOutputTab.setTextColor(android.graphics.Color.parseColor("#FFFFFF"))
+
+        binding.btnCodeTab.setBackgroundColor(android.graphics.Color.parseColor("#252526"))
+        binding.btnCodeTab.setTextColor(android.graphics.Color.parseColor("#AAAAAA"))
     }
 
     private fun setupButtons() {
@@ -199,38 +227,36 @@ class EditorFragment : Fragment() {
     private suspend fun executeCode(code: String, isTest: Boolean): String {
         return withContext(Dispatchers.IO) {
             try {
-                when (compilerType.lowercase()) {
-                    "javacompiler" -> executeJava(code)
-                    "pythoncompiler" -> executePython(code)
-                    "sqlcompiler" -> executeSQL(code)
-                    else -> "Unsupported compiler type: $compilerType"
+                // Normalize compiler type
+                val normalizedType = when (compilerType.lowercase()) {
+                    "javacompiler" -> "java"
+                    "pythoncompiler" -> "python"
+                    "sqlcompiler" -> "sql"
+                    else -> compilerType.lowercase()
                 }
+
+                // Get the appropriate compiler from unified system
+                val compiler = CompilerFactory.getCompiler(normalizedType)
+
+                // Execute code
+                val config = CompilerConfig(
+                    timeout = 30000,
+                    maxOutputLength = 10000
+                )
+
+                val result = compiler.compile(code, config)
+
+                // Return output or error
+                if (result.success) {
+                    result.output.ifEmpty { "Execution completed successfully (no output)" }
+                } else {
+                    "Error: ${result.error ?: "Unknown error"}"
+                }
+
             } catch (e: Exception) {
                 "Error: ${e.message}"
             }
         }
-    }
-
-    private fun executeJava(code: String): String {
-        val javaRunner = JavaRunner()
-        val className = extractJavaClassName(code)
-        val result = javaRunner.executeJavaCode(code, className, "run")
-        return if (result.success) (result.output ?: "") else (result.error ?: "Unknown error")
-    }
-
-    private fun executePython(code: String): String {
-        // TODO: Implement Python execution using Chaquopy
-        return "Python execution not yet implemented"
-    }
-
-    private fun executeSQL(code: String): String {
-        // TODO: Implement SQL execution
-        return "SQL execution not yet implemented"
-    }
-
-    private fun extractJavaClassName(code: String): String {
-        val regex = "class\\s+(\\w+)".toRegex()
-        return regex.find(code)?.groupValues?.get(1) ?: "Solution"
     }
 
     private data class ValidationResult(
@@ -244,20 +270,99 @@ class EditorFragment : Fragment() {
 
     private suspend fun validateSubmission(code: String): ValidationResult {
         return withContext(Dispatchers.IO) {
-            // TODO: Implement proper validation against test cases
-            val startTime = System.currentTimeMillis()
-            val output = executeCode(code, isTest = false)
-            val executionTime = System.currentTimeMillis() - startTime
+            try {
+                // Normalize compiler type
+                val normalizedType = when (compilerType.lowercase()) {
+                    "javacompiler" -> "java"
+                    "pythoncompiler" -> "python"
+                    "sqlcompiler" -> "sql"
+                    else -> compilerType.lowercase()
+                }
 
-            // Placeholder validation
-            ValidationResult(
-                passed = true,
-                score = 100,
-                executionTime = executionTime,
-                testCasesPassed = 3,
-                totalTestCases = 3,
-                output = output
-            )
+                // Get compiler from unified system
+                val compiler = CompilerFactory.getCompiler(normalizedType)
+
+                // Convert DailyProblem TestCases to CompilerConfig TestCases
+                val problem = currentProblem
+                val testCases = problem?.testCases?.map { tc ->
+                    com.labactivity.lala.UNIFIEDCOMPILER.models.TestCase(
+                        input = tc.input,
+                        expectedOutput = tc.expectedOutput
+                    )
+                } ?: emptyList()
+
+                // Build config with test cases
+                val config = CompilerConfig(
+                    timeout = 30000,
+                    maxOutputLength = 10000,
+                    testCases = testCases
+                )
+
+                val result = compiler.compile(code, config)
+
+                // Calculate score based on test cases passed
+                val totalTests = testCases.size
+                val passedTests = result.testCasesPassed
+                val score = if (totalTests > 0) {
+                    (passedTests * 100) / totalTests
+                } else {
+                    // If no test cases, just check if it executed successfully
+                    if (result.success) 100 else 0
+                }
+
+                val passed = if (totalTests > 0) {
+                    passedTests == totalTests
+                } else {
+                    result.success
+                }
+
+                // Build detailed output message
+                val outputMessage = buildString {
+                    if (totalTests > 0) {
+                        append("Test Results:\n")
+                        append("✓ Passed: $passedTests / $totalTests\n")
+                        append("Score: $score%\n\n")
+
+                        if (passed) {
+                            append("🎉 All test cases passed!\n")
+                        } else {
+                            append("❌ Some test cases failed\n")
+                            append("\nYour Output:\n${result.output}\n")
+                            if (result.error != null) {
+                                append("\nError: ${result.error}")
+                            }
+                        }
+                    } else {
+                        // No test cases - just show execution result
+                        if (result.success) {
+                            append("Execution successful!\n\n")
+                            append("Output:\n${result.output}")
+                        } else {
+                            append("Execution failed\n\n")
+                            append("Error: ${result.error ?: "Unknown error"}")
+                        }
+                    }
+                }
+
+                ValidationResult(
+                    passed = passed,
+                    score = score,
+                    executionTime = result.executionTime,
+                    testCasesPassed = passedTests,
+                    totalTestCases = totalTests,
+                    output = outputMessage
+                )
+
+            } catch (e: Exception) {
+                ValidationResult(
+                    passed = false,
+                    score = 0,
+                    executionTime = 0,
+                    testCasesPassed = 0,
+                    totalTestCases = 0,
+                    output = "Error: ${e.message}"
+                )
+            }
         }
     }
 

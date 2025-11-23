@@ -43,9 +43,14 @@
             android:name=".SQLCOMPILER.AllSQLChallengesActivity"
             android:exported="true" />
 
+        <!-- Unified Compiler System (Supports Python, Java, Kotlin, SQL, and future languages) -->
         <activity
-            android:name=".JAVACOMPILER.AllJavaChallengesActivity"
-            android:exported="true" />
+            android:name=".UNIFIEDCOMPILER.ui.UnifiedCompilerActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.Lala" />
+
+        
 
         <activity
             android:name=".PYTHONASSESMENT.AllAssessmentsActivity"

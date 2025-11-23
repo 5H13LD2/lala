@@ -45,13 +45,17 @@ enum class ProblemStatus {
 }
 
 enum class CompilerType(val value: String) {
-    JAVA("javacompiler"),
-    PYTHON("pythoncompiler"),
-    SQL("sqlcompiler");
+    PYTHON("python"),
+    JAVA("java"),
+    KOTLIN("kotlin"),
+    JAVASCRIPT("javascript"),
+    RUBY("ruby"),
+    PHP("php"),
+    SQL("sql");
 
     companion object {
         fun fromString(value: String): CompilerType? {
-            return values().find { it.value == value }
+            return values().find { it.value.equals(value, ignoreCase = true) }
         }
     }
 }

@@ -36,8 +36,9 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="Module 1 title, Fundamentals of Python"
                     android:textColor="@color/primary"
-                    android:textSize="18sp"
+                    android:textSize="20sp"
                     android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
                     tools:text="Module 1: Fundamentals of Python" />
 
                 <!-- Added TextView for quiz score -->
@@ -46,7 +47,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textSize="14sp"
+                    android:textSize="15sp"
                     android:textStyle="bold"
                     android:visibility="gone"
                     tools:text="Score: 10/10"
@@ -67,7 +68,8 @@
                         android:layout_marginTop="4dp"
                         android:contentDescription="Module description: Learn the basics of Python programming"
                         android:textColor="@color/text_secondary"
-                        android:textSize="14sp"
+                        android:textSize="15sp"
+                        android:lineSpacingExtra="2dp"
                         tools:text="Learn the basics of Python programming" />
                 </FrameLayout>
             </LinearLayout>
@@ -109,6 +111,7 @@
             android:backgroundTint="@color/primary"
             android:text="Take Quiz"
             android:textColor="@android:color/white"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:visibility="gone"
             tools:visibility="visible" />

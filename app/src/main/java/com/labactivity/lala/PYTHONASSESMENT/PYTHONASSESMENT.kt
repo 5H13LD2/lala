@@ -1,6 +1,7 @@
 package com.labactivity.lala.PYTHONASSESMENT
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -35,9 +36,10 @@ object PYTHONASSESMENT {
         // 🔹 Load challenges from Firestore (with shimmer/skeleton first)
         loadChallenges(adapter)
 
-        // 🔹 Optional click listener for "View All"
+        // 🔹 Click listener for "View All" → Navigate to AllAssessmentsActivity
         viewAllAssessments.setOnClickListener {
-            it.isSelected = true
+            val intent = Intent(context, AllAssessmentsActivity::class.java)
+            context.startActivity(intent)
         }
     }
 
@@ -84,7 +86,6 @@ object PYTHONASSESMENT {
     fun TechnicalInterview(
         context: Context,
         recyclerView: RecyclerView,
-        textAllPractice: TextView,
         viewAllInterviews: TextView
     ) {
         val topics = listOf(
@@ -109,7 +110,10 @@ object PYTHONASSESMENT {
         )
         recyclerView.adapter = TechnicalInterviewAdapter(context, topics)
 
-        textAllPractice.setOnClickListener { it.isSelected = true }
-        viewAllInterviews.setOnClickListener { it.isSelected = true }
+        // 🔹 Click listener for "View All" → Navigate to AllInterviewsActivity
+        viewAllInterviews.setOnClickListener {
+            val intent = Intent(context, AllInterviewsActivity::class.java)
+            context.startActivity(intent)
+        }
     }
 }

@@ -104,7 +104,19 @@ service cloud.firestore {
     }
 
     // 🔹 Technical Assessments (Challenge Definitions)
+    // This collection now supports ALL languages through the unified compiler system
+    // Each challenge document should have:
+    // - courseId: the course this challenge belongs to
+    // - difficulty: "Easy", "Medium", "Hard"
+    // - brokenCode, correctOutput, hint, etc.
+    // The compiler type is automatically determined from the course's compilerType field
     match /technical_assesment/{docId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth.token.admin == true;
+    }
+
+    // 🔹 SQL Challenges Collection (if you want separate SQL challenges)
+    match /sql_challenges/{docId} {
       allow read: if request.auth != null;
       allow write: if request.auth.token.admin == true;
     }

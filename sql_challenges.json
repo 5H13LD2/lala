@@ -1,0 +1,402 @@
+{
+  "collection": "sql_challenges",
+  "challenges": [
+    {
+      "id": "sql_challenge_001",
+      "title": "Select All Students",
+      "description": "Write a SQL query to select all columns from the 'students' table. This is the most basic SELECT statement you'll use frequently.",
+      "difficulty": "Easy",
+      "topic": "SELECT Basics",
+      "courseId": "sql_course",
+      "expected_query": "SELECT * FROM students;",
+      "expected_result": {
+        "columns": ["id", "name", "age", "grade"],
+        "rows": [
+          [1, "Alice Johnson", 20, "A"],
+          [2, "Bob Smith", 22, "B"],
+          [3, "Charlie Brown", 21, "A"],
+          [4, "Diana Prince", 23, "C"],
+          [5, "Eve Wilson", 20, "B"]
+        ]
+      },
+      "sample_table": {
+        "name": "students",
+        "columns": ["id", "name", "age", "grade"],
+        "rows": [
+          [1, "Alice Johnson", 20, "A"],
+          [2, "Bob Smith", 22, "B"],
+          [3, "Charlie Brown", 21, "A"],
+          [4, "Diana Prince", 23, "C"],
+          [5, "Eve Wilson", 20, "B"]
+        ]
+      },
+      "additional_tables": [],
+      "hints": [
+        "Use the SELECT keyword",
+        "* means all columns",
+        "Don't forget the FROM clause"
+      ],
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z",
+      "author": "System",
+      "status": "active",
+      "order": 1,
+      "tags": ["beginner", "select", "basic"],
+      "testCases": [
+        {
+          "id": 1,
+          "description": "Should return all rows",
+          "expectedRowCount": 5,
+          "expectedColumnCount": 4
+        }
+      ]
+    },
+    {
+      "id": "sql_challenge_002",
+      "title": "Filter Students by Grade",
+      "description": "Write a SQL query to select the name and age of all students who have grade 'A'.",
+      "difficulty": "Easy",
+      "topic": "WHERE Clause",
+      "courseId": "sql_course",
+      "expected_query": "SELECT name, age FROM students WHERE grade = 'A';",
+      "expected_result": {
+        "columns": ["name", "age"],
+        "rows": [
+          ["Alice Johnson", 20],
+          ["Charlie Brown", 21]
+        ]
+      },
+      "sample_table": {
+        "name": "students",
+        "columns": ["id", "name", "age", "grade"],
+        "rows": [
+          [1, "Alice Johnson", 20, "A"],
+          [2, "Bob Smith", 22, "B"],
+          [3, "Charlie Brown", 21, "A"],
+          [4, "Diana Prince", 23, "C"],
+          [5, "Eve Wilson", 20, "B"]
+        ]
+      },
+      "additional_tables": [],
+      "hints": [
+        "Use WHERE clause to filter",
+        "Compare grade with 'A' using =",
+        "Select only name and age columns"
+      ],
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z",
+      "author": "System",
+      "status": "active",
+      "order": 2,
+      "tags": ["beginner", "where", "filter"],
+      "testCases": [
+        {
+          "id": 1,
+          "description": "Should return only grade A students",
+          "expectedRowCount": 2,
+          "expectedColumnCount": 2
+        }
+      ]
+    },
+    {
+      "id": "sql_challenge_003",
+      "title": "Count Total Products",
+      "description": "Write a SQL query to count the total number of products in the 'products' table.",
+      "difficulty": "Easy",
+      "topic": "Aggregate Functions",
+      "courseId": "sql_course",
+      "expected_query": "SELECT COUNT(*) FROM products;",
+      "expected_result": {
+        "columns": ["COUNT(*)"],
+        "rows": [
+          [6]
+        ]
+      },
+      "sample_table": {
+        "name": "products",
+        "columns": ["id", "name", "price", "category"],
+        "rows": [
+          [1, "Laptop", 999.99, "Electronics"],
+          [2, "Mouse", 25.50, "Electronics"],
+          [3, "Desk", 199.99, "Furniture"],
+          [4, "Chair", 149.99, "Furniture"],
+          [5, "Monitor", 299.99, "Electronics"],
+          [6, "Keyboard", 79.99, "Electronics"]
+        ]
+      },
+      "additional_tables": [],
+      "hints": [
+        "Use COUNT() function",
+        "COUNT(*) counts all rows",
+        "You don't need a WHERE clause"
+      ],
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z",
+      "author": "System",
+      "status": "active",
+      "order": 3,
+      "tags": ["beginner", "count", "aggregate"],
+      "testCases": [
+        {
+          "id": 1,
+          "description": "Should return total count",
+          "expectedRowCount": 1,
+          "expectedColumnCount": 1
+        }
+      ]
+    },
+    {
+      "id": "sql_challenge_004",
+      "title": "Order Products by Price",
+      "description": "Write a SQL query to select all products ordered by price in descending order (highest price first).",
+      "difficulty": "Easy",
+      "topic": "ORDER BY",
+      "courseId": "sql_course",
+      "expected_query": "SELECT * FROM products ORDER BY price DESC;",
+      "expected_result": {
+        "columns": ["id", "name", "price", "category"],
+        "rows": [
+          [1, "Laptop", 999.99, "Electronics"],
+          [5, "Monitor", 299.99, "Electronics"],
+          [3, "Desk", 199.99, "Furniture"],
+          [4, "Chair", 149.99, "Furniture"],
+          [6, "Keyboard", 79.99, "Electronics"],
+          [2, "Mouse", 25.50, "Electronics"]
+        ]
+      },
+      "sample_table": {
+        "name": "products",
+        "columns": ["id", "name", "price", "category"],
+        "rows": [
+          [1, "Laptop", 999.99, "Electronics"],
+          [2, "Mouse", 25.50, "Electronics"],
+          [3, "Desk", 199.99, "Furniture"],
+          [4, "Chair", 149.99, "Furniture"],
+          [5, "Monitor", 299.99, "Electronics"],
+          [6, "Keyboard", 79.99, "Electronics"]
+        ]
+      },
+      "additional_tables": [],
+      "hints": [
+        "Use ORDER BY clause",
+        "DESC means descending order",
+        "Order by the price column"
+      ],
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z",
+      "author": "System",
+      "status": "active",
+      "order": 4,
+      "tags": ["beginner", "order", "sort"],
+      "testCases": [
+        {
+          "id": 1,
+          "description": "Should return all products sorted by price desc",
+          "expectedRowCount": 6,
+          "expectedColumnCount": 4
+        }
+      ]
+    },
+    {
+      "id": "sql_challenge_005",
+      "title": "Products in Electronics Category",
+      "description": "Write a SQL query to find all products in the 'Electronics' category with price greater than 50.",
+      "difficulty": "Medium",
+      "topic": "Multiple Conditions",
+      "courseId": "sql_course",
+      "expected_query": "SELECT * FROM products WHERE category = 'Electronics' AND price > 50;",
+      "expected_result": {
+        "columns": ["id", "name", "price", "category"],
+        "rows": [
+          [1, "Laptop", 999.99, "Electronics"],
+          [5, "Monitor", 299.99, "Electronics"],
+          [6, "Keyboard", 79.99, "Electronics"]
+        ]
+      },
+      "sample_table": {
+        "name": "products",
+        "columns": ["id", "name", "price", "category"],
+        "rows": [
+          [1, "Laptop", 999.99, "Electronics"],
+          [2, "Mouse", 25.50, "Electronics"],
+          [3, "Desk", 199.99, "Furniture"],
+          [4, "Chair", 149.99, "Furniture"],
+          [5, "Monitor", 299.99, "Electronics"],
+          [6, "Keyboard", 79.99, "Electronics"]
+        ]
+      },
+      "additional_tables": [],
+      "hints": [
+        "Use WHERE clause with multiple conditions",
+        "Use AND operator to combine conditions",
+        "Check both category and price"
+      ],
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z",
+      "author": "System",
+      "status": "active",
+      "order": 5,
+      "tags": ["intermediate", "where", "and"],
+      "testCases": [
+        {
+          "id": 1,
+          "description": "Should return electronics over $50",
+          "expectedRowCount": 3,
+          "expectedColumnCount": 4
+        }
+      ]
+    },
+    {
+      "id": "sql_challenge_006",
+      "title": "Average Product Price by Category",
+      "description": "Write a SQL query to calculate the average price of products for each category.",
+      "difficulty": "Medium",
+      "topic": "GROUP BY",
+      "courseId": "sql_course",
+      "expected_query": "SELECT category, AVG(price) FROM products GROUP BY category;",
+      "expected_result": {
+        "columns": ["category", "AVG(price)"],
+        "rows": [
+          ["Electronics", 351.37],
+          ["Furniture", 174.99]
+        ]
+      },
+      "sample_table": {
+        "name": "products",
+        "columns": ["id", "name", "price", "category"],
+        "rows": [
+          [1, "Laptop", 999.99, "Electronics"],
+          [2, "Mouse", 25.50, "Electronics"],
+          [3, "Desk", 199.99, "Furniture"],
+          [4, "Chair", 149.99, "Furniture"],
+          [5, "Monitor", 299.99, "Electronics"],
+          [6, "Keyboard", 79.99, "Electronics"]
+        ]
+      },
+      "additional_tables": [],
+      "hints": [
+        "Use GROUP BY clause",
+        "AVG() function calculates average",
+        "Group by category column"
+      ],
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z",
+      "author": "System",
+      "status": "active",
+      "order": 6,
+      "tags": ["intermediate", "group", "aggregate", "avg"],
+      "testCases": [
+        {
+          "id": 1,
+          "description": "Should return average per category",
+          "expectedRowCount": 2,
+          "expectedColumnCount": 2
+        }
+      ]
+    },
+    {
+      "id": "sql_challenge_007",
+      "title": "Join Orders with Customers",
+      "description": "Write a SQL query to display order_id, customer_name, and order_date by joining the orders and customers tables.",
+      "difficulty": "Medium",
+      "topic": "INNER JOIN",
+      "courseId": "sql_course",
+      "expected_query": "SELECT orders.order_id, customers.name, orders.order_date FROM orders INNER JOIN customers ON orders.customer_id = customers.id;",
+      "expected_result": {
+        "columns": ["order_id", "name", "order_date"],
+        "rows": [
+          [101, "John Doe", "2025-01-10"],
+          [102, "Jane Smith", "2025-01-11"],
+          [103, "John Doe", "2025-01-12"],
+          [104, "Bob Johnson", "2025-01-13"]
+        ]
+      },
+      "sample_table": {
+        "name": "orders",
+        "columns": ["order_id", "customer_id", "order_date", "amount"],
+        "rows": [
+          [101, 1, "2025-01-10", 150.00],
+          [102, 2, "2025-01-11", 200.00],
+          [103, 1, "2025-01-12", 75.00],
+          [104, 3, "2025-01-13", 300.00]
+        ]
+      },
+      "additional_tables": [
+        {
+          "name": "customers",
+          "columns": ["id", "name", "email"],
+          "rows": [
+            [1, "John Doe", "john@example.com"],
+            [2, "Jane Smith", "jane@example.com"],
+            [3, "Bob Johnson", "bob@example.com"]
+          ]
+        }
+      ],
+      "hints": [
+        "Use INNER JOIN to combine tables",
+        "Join ON customer_id = id",
+        "Select columns from both tables"
+      ],
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z",
+      "author": "System",
+      "status": "active",
+      "order": 7,
+      "tags": ["intermediate", "join", "inner join"],
+      "testCases": [
+        {
+          "id": 1,
+          "description": "Should join orders with customers",
+          "expectedRowCount": 4,
+          "expectedColumnCount": 3
+        }
+      ]
+    },
+    {
+      "id": "sql_challenge_008",
+      "title": "Find Students with Highest Age",
+      "description": "Write a SQL query to find all students who have the maximum age in the students table.",
+      "difficulty": "Hard",
+      "topic": "Subqueries",
+      "courseId": "sql_course",
+      "expected_query": "SELECT * FROM students WHERE age = (SELECT MAX(age) FROM students);",
+      "expected_result": {
+        "columns": ["id", "name", "age", "grade"],
+        "rows": [
+          [4, "Diana Prince", 23, "C"]
+        ]
+      },
+      "sample_table": {
+        "name": "students",
+        "columns": ["id", "name", "age", "grade"],
+        "rows": [
+          [1, "Alice Johnson", 20, "A"],
+          [2, "Bob Smith", 22, "B"],
+          [3, "Charlie Brown", 21, "A"],
+          [4, "Diana Prince", 23, "C"],
+          [5, "Eve Wilson", 20, "B"]
+        ]
+      },
+      "additional_tables": [],
+      "hints": [
+        "Use a subquery to find MAX(age)",
+        "Compare age with the result of subquery",
+        "Subquery goes inside parentheses"
+      ],
+      "createdAt": "2025-01-15T10:00:00Z",
+      "updatedAt": "2025-01-15T10:00:00Z",
+      "author": "System",
+      "status": "active",
+      "order": 8,
+      "tags": ["advanced", "subquery", "max"],
+      "testCases": [
+        {
+          "id": 1,
+          "description": "Should return student(s) with max age",
+          "expectedRowCount": 1,
+          "expectedColumnCount": 4
+        }
+      ]
+    }
+  ]
+}

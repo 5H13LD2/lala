@@ -18,7 +18,7 @@ android {
 
     defaultConfig {
         applicationId = "com.labactivity.lala"
-        minSdk = 24
+        minSdk = 26  // Increased from 24 to support Kotlin Scripting and JRuby
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -43,6 +43,25 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    // Packaging options to handle duplicate files
+    packaging {
+        resources {
+            // Exclude duplicate Kotlin builtin files from kotlin-compiler-embeddable and kotlin-stdlib
+            excludes += setOf(
+                "META-INF/*.kotlin_module",
+                "META-INF/kotlin/**",
+                "kotlin/**/*.kotlin_builtins",
+                "kotlin/kotlin.kotlin_builtins",
+                "kotlin/coroutines/coroutines.kotlin_builtins",
+                "kotlin/internal/internal.kotlin_builtins",
+                "kotlin/reflect/reflect.kotlin_builtins",
+                "kotlin/ranges/ranges.kotlin_builtins",
+                "kotlin/annotation/annotation.kotlin_builtins",
+                "kotlin/collections/collections.kotlin_builtins"
+            )
+        }
     }
 
     // Python configuration
@@ -127,6 +146,23 @@ android {
 
         // MultiDex support
         implementation ("androidx.multidex:multidex:2.0.1")
+
+        // ============================================
+        // UNIFIED COMPILER DEPENDENCIES
+        // ============================================
+
+        // Kotlin Scripting - for KotlinCompiler
+        implementation("org.jetbrains.kotlin:kotlin-scripting-jsr223:1.9.22")
+        implementation("org.jetbrains.kotlin:kotlin-scripting-common:1.9.22")
+        implementation("org.jetbrains.kotlin:kotlin-scripting-jvm:1.9.22")
+        implementation("org.jetbrains.kotlin:kotlin-scripting-dependencies:1.9.22")
+        implementation("org.jetbrains.kotlin:kotlin-script-runtime:1.9.22")
+
+        // Ruby - JRuby for RubyCompiler
+        implementation("org.jruby:jruby-complete:9.4.5.0")
+
+        // JavaScript - Rhino for future JavaScript support
+        implementation("org.mozilla:rhino:1.7.14")
     }
 }
 dependencies {

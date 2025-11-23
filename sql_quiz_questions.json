@@ -1,0 +1,285 @@
+{
+  "quiz_id": "sql_quiz",
+  "questions": [
+    {
+      "question": "What does SQL stand for?",
+      "options": [
+        "Structured Query Language",
+        "Simple Question Language",
+        "Standard Query List",
+        "System Query Language"
+      ],
+      "correctOptionIndex": 0,
+      "module_id": "sql_module_1",
+      "explanation": "SQL stands for Structured Query Language, which is used to communicate with databases.",
+      "difficulty": "EASY",
+      "order": 1
+    },
+    {
+      "question": "Which SQL command is used to retrieve data from a database?",
+      "options": [
+        "GET",
+        "SELECT",
+        "RETRIEVE",
+        "FETCH"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_1",
+      "explanation": "SELECT is the primary command used to query and retrieve data from database tables.",
+      "difficulty": "EASY",
+      "order": 2
+    },
+    {
+      "question": "Which clause is used to filter results in a SQL query?",
+      "options": [
+        "FILTER",
+        "HAVING",
+        "WHERE",
+        "WHEN"
+      ],
+      "correctOptionIndex": 2,
+      "module_id": "sql_module_1",
+      "explanation": "The WHERE clause is used to filter records that meet specific conditions in a SQL query.",
+      "difficulty": "EASY",
+      "order": 3
+    },
+    {
+      "question": "Which SQL keyword is used to sort the result set?",
+      "options": [
+        "SORT BY",
+        "ARRANGE",
+        "ORDER BY",
+        "GROUP BY"
+      ],
+      "correctOptionIndex": 2,
+      "module_id": "sql_module_1",
+      "explanation": "ORDER BY is used to sort the result set in ascending (ASC) or descending (DESC) order.",
+      "difficulty": "EASY",
+      "order": 4
+    },
+    {
+      "question": "What is the correct syntax to select all columns from a table named 'users'?",
+      "options": [
+        "SELECT all FROM users;",
+        "SELECT * FROM users;",
+        "GET * FROM users;",
+        "SELECT columns FROM users;"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_1",
+      "explanation": "The asterisk (*) is a wildcard that selects all columns. The correct syntax is SELECT * FROM table_name;",
+      "difficulty": "EASY",
+      "order": 5
+    },
+    {
+      "question": "Which SQL command is used to add new data to a table?",
+      "options": [
+        "ADD",
+        "INSERT INTO",
+        "CREATE",
+        "UPDATE"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_1",
+      "explanation": "INSERT INTO is used to add new rows of data into a table. Syntax: INSERT INTO table_name (columns) VALUES (values);",
+      "difficulty": "EASY",
+      "order": 6
+    },
+    {
+      "question": "What does the DISTINCT keyword do in SQL?",
+      "options": [
+        "Deletes duplicate rows",
+        "Returns only unique values",
+        "Sorts the data",
+        "Counts the rows"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_1",
+      "explanation": "DISTINCT removes duplicate values from the result set, returning only unique records.",
+      "difficulty": "NORMAL",
+      "order": 7
+    },
+    {
+      "question": "Which SQL JOIN returns all records from both tables, even if there is no match?",
+      "options": [
+        "INNER JOIN",
+        "LEFT JOIN",
+        "RIGHT JOIN",
+        "FULL OUTER JOIN"
+      ],
+      "correctOptionIndex": 3,
+      "module_id": "sql_module_1",
+      "explanation": "FULL OUTER JOIN returns all records from both tables, including unmatched rows from both sides (filled with NULL where no match exists).",
+      "difficulty": "NORMAL",
+      "order": 8
+    },
+    {
+      "question": "What is the purpose of the PRIMARY KEY constraint?",
+      "options": [
+        "To allow duplicate values",
+        "To uniquely identify each record in a table",
+        "To sort the table",
+        "To allow NULL values"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_2",
+      "explanation": "A PRIMARY KEY uniquely identifies each record in a table. It cannot contain NULL values and must be unique.",
+      "difficulty": "EASY",
+      "order": 9
+    },
+    {
+      "question": "Which aggregate function returns the number of rows?",
+      "options": [
+        "SUM()",
+        "COUNT()",
+        "TOTAL()",
+        "NUM()"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_2",
+      "explanation": "COUNT() is an aggregate function that returns the number of rows that match a specified criterion.",
+      "difficulty": "EASY",
+      "order": 10
+    },
+    {
+      "question": "What does the UPDATE command do in SQL?",
+      "options": [
+        "Creates a new table",
+        "Deletes existing records",
+        "Modifies existing records",
+        "Adds new records"
+      ],
+      "correctOptionIndex": 2,
+      "module_id": "sql_module_2",
+      "explanation": "UPDATE is used to modify existing records in a table. Always use with WHERE clause to avoid updating all rows.",
+      "difficulty": "EASY",
+      "order": 11
+    },
+    {
+      "question": "Which SQL clause is used with aggregate functions to filter groups?",
+      "options": [
+        "WHERE",
+        "FILTER",
+        "HAVING",
+        "GROUP"
+      ],
+      "correctOptionIndex": 2,
+      "module_id": "sql_module_2",
+      "explanation": "HAVING is used with GROUP BY to filter groups after aggregation, while WHERE filters rows before aggregation.",
+      "difficulty": "NORMAL",
+      "order": 12
+    },
+    {
+      "question": "What is the correct way to delete all records from a table named 'temp'?",
+      "options": [
+        "DELETE * FROM temp;",
+        "DELETE FROM temp;",
+        "REMOVE FROM temp;",
+        "DROP temp;"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_2",
+      "explanation": "DELETE FROM table_name; removes all rows from the table. DROP would delete the entire table structure.",
+      "difficulty": "NORMAL",
+      "order": 13
+    },
+    {
+      "question": "Which operator is used to search for a specified pattern in a column?",
+      "options": [
+        "SEARCH",
+        "MATCH",
+        "LIKE",
+        "FIND"
+      ],
+      "correctOptionIndex": 2,
+      "module_id": "sql_module_2",
+      "explanation": "LIKE is used with wildcard characters (% and _) to search for patterns. Example: WHERE name LIKE 'A%'",
+      "difficulty": "NORMAL",
+      "order": 14
+    },
+    {
+      "question": "What does the FOREIGN KEY constraint do?",
+      "options": [
+        "Makes a column required",
+        "Links two tables together",
+        "Sorts the data",
+        "Makes values unique"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_2",
+      "explanation": "A FOREIGN KEY creates a relationship between tables by referencing the PRIMARY KEY of another table.",
+      "difficulty": "NORMAL",
+      "order": 15
+    },
+    {
+      "question": "Which SQL statement is used to create a new table?",
+      "options": [
+        "NEW TABLE",
+        "CREATE TABLE",
+        "MAKE TABLE",
+        "BUILD TABLE"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_3",
+      "explanation": "CREATE TABLE is used to create a new table with specified columns and data types.",
+      "difficulty": "EASY",
+      "order": 16
+    },
+    {
+      "question": "What is the result of 'SELECT 5 + 3 * 2;' in SQL?",
+      "options": [
+        "16",
+        "11",
+        "13",
+        "10"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_3",
+      "explanation": "SQL follows standard mathematical order of operations. 3 * 2 = 6, then 5 + 6 = 11.",
+      "difficulty": "NORMAL",
+      "order": 17
+    },
+    {
+      "question": "Which SQL command is used to change the structure of an existing table?",
+      "options": [
+        "MODIFY TABLE",
+        "ALTER TABLE",
+        "CHANGE TABLE",
+        "UPDATE TABLE"
+      ],
+      "correctOptionIndex": 1,
+      "module_id": "sql_module_3",
+      "explanation": "ALTER TABLE is used to add, delete, or modify columns in an existing table.",
+      "difficulty": "NORMAL",
+      "order": 18
+    },
+    {
+      "question": "What does NULL represent in SQL?",
+      "options": [
+        "Zero value",
+        "Empty string",
+        "Missing or unknown value",
+        "False value"
+      ],
+      "correctOptionIndex": 2,
+      "module_id": "sql_module_3",
+      "explanation": "NULL represents missing, unknown, or not applicable data. It's different from zero or empty string.",
+      "difficulty": "EASY",
+      "order": 19
+    },
+    {
+      "question": "Which statement is used to remove a table and its data permanently?",
+      "options": [
+        "DELETE TABLE",
+        "REMOVE TABLE",
+        "DROP TABLE",
+        "CLEAR TABLE"
+      ],
+      "correctOptionIndex": 2,
+      "module_id": "sql_module_3",
+      "explanation": "DROP TABLE permanently removes the table and all its data from the database.",
+      "difficulty": "EASY",
+      "order": 20
+    }
+  ]
+}

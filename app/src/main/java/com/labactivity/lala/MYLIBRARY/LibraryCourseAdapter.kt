@@ -6,12 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.progressindicator.LinearProgressIndicator
-import com.labactivity.lala.PYTHONCOMPILER.CompilerActivity
 import com.labactivity.lala.R
+import com.labactivity.lala.UNIFIEDCOMPILER.ui.UnifiedCompilerActivity
 
 class LibraryCourseAdapter(
     private val courses: List<UserCourseProgress>,
@@ -23,7 +23,7 @@ class LibraryCourseAdapter(
         val courseTitle: TextView = view.findViewById(R.id.courseTitle)
         val progressText: TextView = view.findViewById(R.id.progressText)
         val progressIndicator: LinearProgressIndicator = view.findViewById(R.id.progressIndicator)
-        val practiceButton: MaterialButton = view.findViewById(R.id.practiceButton)
+        val practiceButton: LinearLayout = view.findViewById(R.id.practiceButton)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
@@ -38,30 +38,27 @@ class LibraryCourseAdapter(
         // Set course data
         holder.courseIcon.setImageResource(course.iconResId)
         holder.courseTitle.text = course.title
-        holder.progressText.text = "${course.progress}%"
+        holder.progressText.text = "${course.progress}% Complete"
         holder.progressIndicator.progress = course.progress
 
         // Change progress color based on completion
         when {
             course.progress >= 100 -> {
                 holder.progressIndicator.setIndicatorColor(context.getColor(R.color.success_green))
-                holder.progressText.setTextColor(context.getColor(R.color.success_green))
             }
             course.progress >= 50 -> {
                 holder.progressIndicator.setIndicatorColor(context.getColor(R.color.primary))
-                holder.progressText.setTextColor(context.getColor(R.color.primary))
             }
             else -> {
                 holder.progressIndicator.setIndicatorColor(context.getColor(R.color.accent))
-                holder.progressText.setTextColor(context.getColor(R.color.accent))
             }
         }
 
-        // Practice button click
+        // Practice button click - Launch unified compiler
         holder.practiceButton.setOnClickListener {
-            val intent = Intent(context, CompilerActivity::class.java).apply {
-                putExtra("courseId", course.courseId)
-                putExtra("courseTitle", course.title)
+            val intent = Intent(context, UnifiedCompilerActivity::class.java).apply {
+                // Use course ID to automatically detect the right compiler
+                putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, course.courseId)
             }
             context.startActivity(intent)
         }
