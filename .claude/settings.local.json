@@ -13,7 +13,9 @@
       "Bash(cat:*)",
       "Bash(git checkout:*)",
       "Bash(rm:*)",
-      "Bash(adb shell:*)"
+      "Bash(adb shell:*)",
+      "Bash(adb logcat:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
