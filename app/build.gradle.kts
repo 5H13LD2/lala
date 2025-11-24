@@ -14,7 +14,7 @@ android {
     }
 
     namespace = "com.labactivity.lala"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.labactivity.lala"

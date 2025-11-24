@@ -1,6 +1,8 @@
 package com.labactivity.lala.quiz
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
@@ -12,6 +14,8 @@ import com.google.firebase.firestore.Query
 import com.labactivity.lala.R
 import com.labactivity.lala.REVIEWER.ResultActivity
 import com.labactivity.lala.UTILS.DialogUtils
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class DynamicQuizActivity : AppCompatActivity() {
 
@@ -19,6 +23,18 @@ class DynamicQuizActivity : AppCompatActivity() {
         private const val TAG = "DynamicQuizActivity"
         private const val QUIZ_TIME_MINUTES = 15L
         private const val MILLIS_IN_SECOND = 1000L
+
+        // SharedPreferences keys
+        private const val PREFS_NAME = "QuizPreferences"
+        private const val KEY_QUIZ_IN_PROGRESS = "quiz_in_progress"
+        private const val KEY_TIME_LEFT = "time_left"
+        private const val KEY_CURRENT_QUESTION = "current_question"
+        private const val KEY_USER_ANSWERS = "user_answers"
+        private const val KEY_QUIZ_QUESTIONS = "quiz_questions"
+        private const val KEY_MODULE_ID = "module_id"
+        private const val KEY_MODULE_TITLE = "module_title"
+        private const val KEY_QUIZ_ID = "quiz_id"
+        private const val KEY_QUIZ_START_TIME = "quiz_start_time"
     }
 
     // UI Components
@@ -52,6 +68,10 @@ class DynamicQuizActivity : AppCompatActivity() {
     // Firestore
     private val firestore = FirebaseFirestore.getInstance()
 
+    // SharedPreferences for quiz state persistence
+    private lateinit var quizPrefs: SharedPreferences
+    private val gson = Gson()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz)
@@ -60,9 +80,19 @@ class DynamicQuizActivity : AppCompatActivity() {
         Log.d(TAG, "onCreate: DynamicQuizActivity started")
         Log.d(TAG, "═══════════════════════════════════════")
 
+        // Initialize SharedPreferences
+        quizPrefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
         initializeViews()
         extractIntentData()
-        loadQuizQuestions()
+
+        // Check if there's a saved quiz state to resume
+        if (hasSavedQuizState()) {
+            Log.d(TAG, "onCreate: Found saved quiz state - offering to resume")
+            showResumeQuizDialog()
+        } else {
+            loadQuizQuestions()
+        }
     }
 
     private fun initializeViews() {
@@ -82,8 +112,7 @@ class DynamicQuizActivity : AppCompatActivity() {
 
         nextButton.setOnClickListener { handleNextButton() }
         backButton.setOnClickListener {
-            countDownTimer?.cancel()
-            finish()
+            showExitConfirmationDialog()
         }
 
         Log.d(TAG, "initializeViews: All views initialized successfully")
@@ -265,6 +294,9 @@ class DynamicQuizActivity : AppCompatActivity() {
 
         currentQuestionIndex++
 
+        // Save quiz state after each question
+        saveQuizState()
+
         if (currentQuestionIndex < quizList.size) {
             Log.d(TAG, "  → Moving to next question")
             displayQuestion()
@@ -282,10 +314,17 @@ class DynamicQuizActivity : AppCompatActivity() {
         // Record quiz start time
         quizStartTime = System.currentTimeMillis()
 
+        // Save initial quiz state
+        saveQuizState()
+
         countDownTimer = object : CountDownTimer(timeLeftInMillis, MILLIS_IN_SECOND) {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis = millisUntilFinished
                 updateTimerUI()
+                // Save state every 10 seconds
+                if ((millisUntilFinished / MILLIS_IN_SECOND) % 10 == 0L) {
+                    saveQuizState()
+                }
             }
 
             override fun onFinish() {
@@ -343,6 +382,9 @@ class DynamicQuizActivity : AppCompatActivity() {
 
         countDownTimer?.cancel()
 
+        // Clear saved quiz state since quiz is completed
+        clearQuizState()
+
         // Calculate time taken (in milliseconds)
         val timeTaken = if (quizStartTime > 0) {
             System.currentTimeMillis() - quizStartTime
@@ -363,6 +405,130 @@ class DynamicQuizActivity : AppCompatActivity() {
         Log.d(TAG, "showResults: Navigating to ResultActivity with ${quizList.size} questions")
         startActivity(intent)
         finish()
+    }
+
+    // ═══════════════════════════════════════
+    // QUIZ STATE PERSISTENCE METHODS
+    // ═══════════════════════════════════════
+
+    private fun hasSavedQuizState(): Boolean {
+        return quizPrefs.getBoolean(KEY_QUIZ_IN_PROGRESS, false)
+    }
+
+    private fun saveQuizState() {
+        try {
+            val editor = quizPrefs.edit()
+            editor.putBoolean(KEY_QUIZ_IN_PROGRESS, true)
+            editor.putLong(KEY_TIME_LEFT, timeLeftInMillis)
+            editor.putInt(KEY_CURRENT_QUESTION, currentQuestionIndex)
+            editor.putString(KEY_MODULE_ID, moduleId)
+            editor.putString(KEY_MODULE_TITLE, moduleTitle)
+            editor.putString(KEY_QUIZ_ID, quizId)
+            editor.putLong(KEY_QUIZ_START_TIME, quizStartTime)
+
+            // Save user answers as JSON
+            val answersJson = gson.toJson(userAnswers)
+            editor.putString(KEY_USER_ANSWERS, answersJson)
+
+            // Save quiz questions as JSON
+            val questionsJson = gson.toJson(quizList)
+            editor.putString(KEY_QUIZ_QUESTIONS, questionsJson)
+
+            editor.apply()
+            Log.d(TAG, "saveQuizState: Quiz state saved successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "saveQuizState: Error saving quiz state", e)
+        }
+    }
+
+    private fun restoreQuizState() {
+        try {
+            Log.d(TAG, "restoreQuizState: Restoring saved quiz state")
+
+            // Restore basic data
+            moduleId = quizPrefs.getString(KEY_MODULE_ID, "") ?: ""
+            moduleTitle = quizPrefs.getString(KEY_MODULE_TITLE, "Quiz") ?: "Quiz"
+            quizId = quizPrefs.getString(KEY_QUIZ_ID, "") ?: ""
+            timeLeftInMillis = quizPrefs.getLong(KEY_TIME_LEFT, QUIZ_TIME_MINUTES * 60 * MILLIS_IN_SECOND)
+            currentQuestionIndex = quizPrefs.getInt(KEY_CURRENT_QUESTION, 0)
+            quizStartTime = quizPrefs.getLong(KEY_QUIZ_START_TIME, 0L)
+
+            // Restore user answers
+            val answersJson = quizPrefs.getString(KEY_USER_ANSWERS, null)
+            if (answersJson != null) {
+                val type = object : TypeToken<MutableMap<Int, Int>>() {}.type
+                val restoredAnswers: MutableMap<Int, Int> = gson.fromJson(answersJson, type)
+                userAnswers.clear()
+                userAnswers.putAll(restoredAnswers)
+            }
+
+            // Restore quiz questions
+            val questionsJson = quizPrefs.getString(KEY_QUIZ_QUESTIONS, null)
+            if (questionsJson != null) {
+                val type = object : TypeToken<MutableList<Quiz>>() {}.type
+                val restoredQuestions: MutableList<Quiz> = gson.fromJson(questionsJson, type)
+                quizList.clear()
+                quizList.addAll(restoredQuestions)
+            }
+
+            Log.d(TAG, "restoreQuizState: Restored question ${currentQuestionIndex + 1}/${quizList.size}")
+            Log.d(TAG, "restoreQuizState: Time left: ${timeLeftInMillis / 1000}s")
+            Log.d(TAG, "restoreQuizState: Answers restored: ${userAnswers.size}")
+
+            // Update UI and restart timer
+            runOnUiThread {
+                displayQuestion()
+                startTimer()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "restoreQuizState: Error restoring quiz state", e)
+            DialogUtils.showErrorDialog(this, "Error", "Failed to restore quiz. Starting fresh.")
+            loadQuizQuestions()
+        }
+    }
+
+    private fun clearQuizState() {
+        try {
+            quizPrefs.edit().clear().apply()
+            Log.d(TAG, "clearQuizState: Quiz state cleared")
+        } catch (e: Exception) {
+            Log.e(TAG, "clearQuizState: Error clearing quiz state", e)
+        }
+    }
+
+    private fun showResumeQuizDialog() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("Resume Quiz?")
+            .setMessage("You have an unfinished quiz. Would you like to resume from where you left off?")
+            .setPositiveButton("Resume") { _, _ ->
+                restoreQuizState()
+            }
+            .setNegativeButton("Start Fresh") { _, _ ->
+                clearQuizState()
+                loadQuizQuestions()
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    private fun showExitConfirmationDialog() {
+        android.app.AlertDialog.Builder(this)
+            .setTitle("⚠️ Exit Quiz?")
+            .setMessage("Your progress will be saved and you can resume later. Are you sure you want to exit?")
+            .setPositiveButton("Exit & Save") { _, _ ->
+                saveQuizState()
+                countDownTimer?.cancel()
+                finish()
+            }
+            .setNegativeButton("Cancel", null)
+            .setCancelable(true)
+            .show()
+    }
+
+    // Override back button to show confirmation
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        showExitConfirmationDialog()
     }
 
     override fun onDestroy() {
