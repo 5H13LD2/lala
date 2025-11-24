@@ -1,3 +1,5 @@
+import java.io.ByteArrayOutputStream
+
 plugins {
     id("com.chaquo.python")
     alias(libs.plugins.android.application)
@@ -175,7 +177,7 @@ dependencies {
  */
 fun getVersionCode(): Int {
     return try {
-        val stdout = java.io.ByteArrayOutputStream()
+        val stdout = ByteArrayOutputStream()
         exec {
             commandLine("git", "rev-list", "--count", "HEAD")
             standardOutput = stdout
@@ -212,7 +214,7 @@ fun getVersionName(): String {
  */
 fun getLatestGitTag(): String {
     return try {
-        val stdout = java.io.ByteArrayOutputStream()
+        val stdout = ByteArrayOutputStream()
         exec {
             commandLine("git", "describe", "--tags", "--abbrev=0")
             standardOutput = stdout
@@ -229,7 +231,7 @@ fun getLatestGitTag(): String {
  */
 fun getGitCommitHash(): String {
     return try {
-        val stdout = java.io.ByteArrayOutputStream()
+        val stdout = ByteArrayOutputStream()
         exec {
             commandLine("git", "rev-parse", "--short", "HEAD")
             standardOutput = stdout
