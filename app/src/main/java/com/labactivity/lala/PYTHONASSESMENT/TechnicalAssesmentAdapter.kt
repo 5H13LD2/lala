@@ -3,6 +3,7 @@ package com.labactivity.lala.PYTHONASSESMENT
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -203,9 +204,16 @@ class TechnicalAssessmentAdapter(
     }
 
     private fun openCompiler(challenge: Challenge) {
+        // Ensure compiler type is not empty, default to "python"
+        val compilerType = challenge.compilerType.takeIf { it.isNotEmpty() } ?: "python"
+
+        Log.d("TechnicalAssessmentAdapter", "Opening compiler for challenge: ${challenge.title}")
+        Log.d("TechnicalAssessmentAdapter", "Compiler type from challenge: '${challenge.compilerType}'")
+        Log.d("TechnicalAssessmentAdapter", "Final compiler type: '$compilerType'")
+
         val intent = Intent(context, UnifiedCompilerActivity::class.java).apply {
             // UnifiedCompilerActivity expected extras
-            putExtra(UnifiedCompilerActivity.EXTRA_LANGUAGE, challenge.compilerType)
+            putExtra(UnifiedCompilerActivity.EXTRA_LANGUAGE, compilerType)
             putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, challenge.courseId)
             putExtra(UnifiedCompilerActivity.EXTRA_INITIAL_CODE, challenge.brokenCode)
 

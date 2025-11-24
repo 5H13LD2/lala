@@ -93,12 +93,16 @@ class TechnicalAssessmentService {
                     Log.d(TAG, "📝 Title field: '$title'")
                     Log.d(TAG, "📝 All fields: ${doc.data}")
 
+                    // Get compilerType and default to "python" if empty or null
+                    val compilerType = doc.getString("compilerType")?.takeIf { it.isNotEmpty() } ?: "python"
+                    Log.d(TAG, "🔧 Compiler type: '$compilerType'")
+
                     val challenge = Challenge(
                         id = doc.id,
                         title = title ?: "Untitled Challenge",
                         difficulty = doc.getString("difficulty") ?: "Unknown",
                         courseId = doc.getString("courseId") ?: "",
-                        compilerType = doc.getString("compilerType") ?: "python", // Default to python if not specified
+                        compilerType = compilerType,
                         brokenCode = doc.getString("brokenCode") ?: "",
                         correctOutput = doc.getString("correctOutput") ?: "",
                         hint = doc.getString("hint") ?: "",
@@ -106,7 +110,7 @@ class TechnicalAssessmentService {
                         status = doc.getString("status") ?: "available",
                         createdAt = doc.getTimestamp("createdAt")?.toDate()?.toString() ?: ""
                     )
-                    Log.d(TAG, "✅ Created challenge: ${challenge.title}")
+                    Log.d(TAG, "✅ Created challenge: ${challenge.title} with compiler: ${challenge.compilerType}")
                     allChallenges.add(challenge)
                 }
             }
