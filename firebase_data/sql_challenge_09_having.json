@@ -1,0 +1,36 @@
+{
+  "title": "Filter Groups with HAVING",
+  "description": "Write an SQL query to show course IDs that have more than 1 enrolled student.",
+  "difficulty": "Medium",
+  "topic": "GROUP BY",
+  "courseId": "sql_fundamentals",
+  "expected_query": "SELECT course_id, COUNT(*) AS student_count FROM enrollments GROUP BY course_id HAVING COUNT(*) > 1;",
+  "expected_result": {
+    "columns": ["course_id", "student_count"],
+    "rows": [
+      [1, 2]
+    ]
+  },
+  "sample_table": {
+    "name": "enrollments",
+    "columns": ["id", "student_id", "course_id"],
+    "rows": [
+      [1, 1, 1],
+      [2, 2, 2],
+      [3, 3, 1]
+    ]
+  },
+  "hints": [
+    "Use GROUP BY course_id to group enrollments",
+    "Use HAVING to filter groups after grouping",
+    "HAVING is like WHERE but for aggregated data",
+    "Count must be greater than 1"
+  ],
+  "createdAt": "2025-10-28T08:40:00Z",
+  "updatedAt": "2025-10-28T08:40:00Z",
+  "author": "Jerico Jimenez",
+  "status": "active",
+  "order": 9,
+  "tags": ["HAVING", "GROUP BY", "filtering groups"],
+  "category": "SQL"
+}

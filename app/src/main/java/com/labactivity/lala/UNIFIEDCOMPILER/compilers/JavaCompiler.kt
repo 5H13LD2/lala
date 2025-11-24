@@ -7,45 +7,132 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import org.codehaus.commons.compiler.CompileException
+import org.codehaus.janino.ScriptEvaluator
 import org.codehaus.janino.SimpleCompiler
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 
 /**
  * Java compiler implementation using Janino
- * Wraps the existing JavaRunner functionality
+ * Supports both main() methods and regular methods
  */
 class JavaCompiler : CourseCompiler {
 
     override suspend fun compile(code: String, config: CompilerConfig): CompilerResult = withContext(Dispatchers.IO) {
         val startTime = System.currentTimeMillis()
+        val outputStream = ByteArrayOutputStream()
+        val errorStream = ByteArrayOutputStream()
+        val originalOut = System.out
+        val originalErr = System.err
 
         try {
             withTimeout(config.timeout) {
-                val outputStream = ByteArrayOutputStream()
-                val errorStream = ByteArrayOutputStream()
-                val originalOut = System.out
-                val originalErr = System.err
-
                 try {
                     // Redirect System.out and System.err
-                    System.setOut(PrintStream(outputStream))
-                    System.setErr(PrintStream(errorStream))
+                    System.setOut(PrintStream(outputStream, true))
+                    System.setErr(PrintStream(errorStream, true))
+
+                    // Extract class name from code first
+                    val className = extractClassName(code)
+                    if (className == null) {
+                        System.setOut(originalOut)
+                        System.setErr(originalErr)
+                        return@withTimeout CompilerResult(
+                            success = false,
+                            output = "",
+                            error = "Error: No class definition found. Please define a class.",
+                            executionTime = System.currentTimeMillis() - startTime,
+                            compiledSuccessfully = false
+                        )
+                    }
+
+                    val methodName = extractMethodName(code) ?: "main"
 
                     // Create Janino SimpleCompiler
                     val compiler = SimpleCompiler()
-                    compiler.cook(code)
 
-                    // Extract class name from code
-                    val className = extractClassName(code) ?: "Test"
-                    val methodName = extractMethodName(code) ?: "run"
+                    // Set parent class loader - use Thread's context class loader
+                    compiler.setParentClassLoader(Thread.currentThread().contextClassLoader)
 
-                    // Load and execute
+                    try {
+                        compiler.cook(code)
+                    } catch (e: CompileException) {
+                        System.setOut(originalOut)
+                        System.setErr(originalErr)
+                        return@withTimeout CompilerResult(
+                            success = false,
+                            output = "",
+                            error = "Compilation Error:\n${e.message}",
+                            executionTime = System.currentTimeMillis() - startTime,
+                            compiledSuccessfully = false
+                        )
+                    }
+
+                    // Load the compiled class
                     val classLoader = compiler.classLoader
-                    val compiledClass = classLoader.loadClass(className)
-                    val instance = compiledClass.getDeclaredConstructor().newInstance()
-                    val method = compiledClass.getMethod(methodName)
-                    val result = method.invoke(instance)
+                    val compiledClass = try {
+                        classLoader.loadClass(className)
+                    } catch (e: ClassNotFoundException) {
+                        System.setOut(originalOut)
+                        System.setErr(originalErr)
+                        return@withTimeout CompilerResult(
+                            success = false,
+                            output = "",
+                            error = "Error: Class '$className' not found after compilation",
+                            executionTime = System.currentTimeMillis() - startTime,
+                            compiledSuccessfully = false
+                        )
+                    } catch (e: Exception) {
+                        System.setOut(originalOut)
+                        System.setErr(originalErr)
+                        return@withTimeout CompilerResult(
+                            success = false,
+                            output = "",
+                            error = "Error loading class: ${e.javaClass.simpleName}: ${e.message}",
+                            executionTime = System.currentTimeMillis() - startTime,
+                            compiledSuccessfully = false
+                        )
+                    }
+
+                    // Execute the method
+                    val result = try {
+                        if (methodName == "main") {
+                            // For main method: public static void main(String[] args)
+                            val method = compiledClass.getDeclaredMethod("main", Array<String>::class.java)
+                            method.isAccessible = true
+                            method.invoke(null, arrayOf<String>())
+                        } else {
+                            // For regular methods: create instance and invoke
+                            val instance = compiledClass.getDeclaredConstructor().newInstance()
+                            val method = compiledClass.getDeclaredMethod(methodName)
+                            method.isAccessible = true
+                            method.invoke(instance)
+                        }
+                    } catch (e: java.lang.reflect.InvocationTargetException) {
+                        // Exception thrown by the user's code
+                        val cause = e.targetException ?: e
+                        System.setOut(originalOut)
+                        System.setErr(originalErr)
+
+                        val stackTrace = cause.stackTraceToString().lines().take(5).joinToString("\n")
+                        return@withTimeout CompilerResult(
+                            success = false,
+                            output = outputStream.toString(),
+                            error = "Runtime Error: ${cause.javaClass.simpleName}: ${cause.message}\n$stackTrace",
+                            executionTime = System.currentTimeMillis() - startTime,
+                            compiledSuccessfully = true
+                        )
+                    } catch (e: NoSuchMethodException) {
+                        System.setOut(originalOut)
+                        System.setErr(originalErr)
+                        return@withTimeout CompilerResult(
+                            success = false,
+                            output = outputStream.toString(),
+                            error = "Error: Method '$methodName' not found in class '$className'",
+                            executionTime = System.currentTimeMillis() - startTime,
+                            compiledSuccessfully = true
+                        )
+                    }
 
                     // Restore streams
                     System.setOut(originalOut)
@@ -56,18 +143,12 @@ class JavaCompiler : CourseCompiler {
                     val executionTime = System.currentTimeMillis() - startTime
 
                     // Build final output
-                    val finalOutput = buildString {
-                        if (output.isNotEmpty()) append(output)
-                        if (result != null) {
-                            if (output.isNotEmpty()) append("\n")
-                            append("Return value: $result")
-                        }
-                    }.ifEmpty { "Execution completed successfully" }
-
-                    // Test case validation
-                    var testCasesPassed = 0
-                    if (config.testCases.isNotEmpty()) {
-                        testCasesPassed = validateTestCases(code, config.testCases)
+                    val finalOutput = if (output.isNotEmpty()) {
+                        output
+                    } else if (result != null && result.toString() != "null") {
+                        "Return value: $result"
+                    } else {
+                        "Code executed successfully (no output)"
                     }
 
                     CompilerResult(
@@ -76,21 +157,10 @@ class JavaCompiler : CourseCompiler {
                         error = errors.ifEmpty { null },
                         executionTime = executionTime,
                         compiledSuccessfully = true,
-                        testCasesPassed = testCasesPassed,
-                        totalTestCases = config.testCases.size
+                        testCasesPassed = 0,
+                        totalTestCases = 0
                     )
 
-                } catch (e: CompileException) {
-                    System.setOut(originalOut)
-                    System.setErr(originalErr)
-
-                    CompilerResult(
-                        success = false,
-                        output = "",
-                        error = "Compilation Error: ${e.message}",
-                        executionTime = System.currentTimeMillis() - startTime,
-                        compiledSuccessfully = false
-                    )
                 } catch (e: Exception) {
                     System.setOut(originalOut)
                     System.setErr(originalErr)
@@ -98,51 +168,24 @@ class JavaCompiler : CourseCompiler {
                     CompilerResult(
                         success = false,
                         output = outputStream.toString(),
-                        error = "Runtime Error: ${e.message ?: e.javaClass.simpleName}",
+                        error = "Unexpected Error: ${e.javaClass.simpleName}: ${e.message}",
                         executionTime = System.currentTimeMillis() - startTime,
-                        compiledSuccessfully = true
+                        compiledSuccessfully = false
                     )
                 }
             }
         } catch (e: Exception) {
+            System.setOut(originalOut)
+            System.setErr(originalErr)
+
             CompilerResult(
                 success = false,
                 output = "",
-                error = "Timeout or execution error: ${e.message}",
+                error = "Execution timeout (${config.timeout}ms exceeded)",
                 executionTime = System.currentTimeMillis() - startTime,
                 compiledSuccessfully = false
             )
         }
-    }
-
-    private fun validateTestCases(code: String, testCases: List<com.labactivity.lala.UNIFIEDCOMPILER.models.TestCase>): Int {
-        var passed = 0
-        testCases.forEach { testCase ->
-            try {
-                val output = ByteArrayOutputStream()
-                System.setOut(PrintStream(output))
-
-                val compiler = SimpleCompiler()
-                compiler.cook(code)
-
-                val className = extractClassName(code) ?: "Test"
-                val methodName = extractMethodName(code) ?: "run"
-
-                val classLoader = compiler.classLoader
-                val compiledClass = classLoader.loadClass(className)
-                val instance = compiledClass.getDeclaredConstructor().newInstance()
-                val method = compiledClass.getMethod(methodName)
-                method.invoke(instance)
-
-                val actualOutput = output.toString().trim()
-                if (actualOutput == testCase.expectedOutput.trim()) {
-                    passed++
-                }
-            } catch (e: Exception) {
-                // Test case failed
-            }
-        }
-        return passed
     }
 
     override fun getLanguageId(): String = "java"
@@ -154,6 +197,7 @@ class JavaCompiler : CourseCompiler {
     override fun validateSyntax(code: String): String? {
         return try {
             val compiler = SimpleCompiler()
+            compiler.setParentClassLoader(this::class.java.classLoader)
             compiler.cook(code)
             null
         } catch (e: CompileException) {
@@ -172,10 +216,15 @@ class JavaCompiler : CourseCompiler {
     }
 
     /**
-     * Extract main method name from Java code (defaults to "run" if not found)
+     * Extract method name from Java code
      */
     private fun extractMethodName(code: String): String? {
-        val mainPattern = Regex("""public\s+static\s+void\s+main\s*\(""")
-        return if (mainPattern.containsMatchIn(code)) "main" else "run"
+        return if (code.contains("public static void main")) {
+            "main"
+        } else if (code.contains("public void run")) {
+            "run"
+        } else {
+            null
+        }
     }
 }

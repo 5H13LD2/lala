@@ -9,11 +9,10 @@ import com.labactivity.lala.UNIFIEDCOMPILER.models.CompilerResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
 
 /**
  * Python compiler implementation using Chaquopy
+ * Uses Python's native sys module for proper stdout/stderr capture
  */
 class PythonCompiler(private val context: Context) : CourseCompiler {
 
@@ -30,117 +29,100 @@ class PythonCompiler(private val context: Context) : CourseCompiler {
         try {
             withTimeout(config.timeout) {
                 val python = Python.getInstance()
-                val output = ByteArrayOutputStream()
-                val errorOutput = ByteArrayOutputStream()
-
-                // Redirect stdout and stderr
-                val originalOut = System.out
-                val originalErr = System.err
-                System.setOut(PrintStream(output))
-                System.setErr(PrintStream(errorOutput))
 
                 try {
-                    // Execute code directly using Python's built-in exec function
-                    val builtins = python.getBuiltins()
-
-                    // If stdin input is provided, make it available
-                    if (config.enableStdin && config.stdinInput.isNotEmpty()) {
-                        // Execute with stdin support
-                        val wrappedCode = """
+                    // Use Python to capture output within Python itself
+                    val captureScript = """
 import sys
 from io import StringIO
-sys.stdin = StringIO('''${config.stdinInput}''')
 
-$code
-                        """.trimIndent()
-                        builtins.callAttr("exec", wrappedCode)
-                    } else {
-                        // Execute code directly
-                        builtins.callAttr("exec", code)
-                    }
+# Create StringIO objects to capture stdout and stderr
+_stdout_capture = StringIO()
+_stderr_capture = StringIO()
+
+# Save originals
+_original_stdout = sys.stdout
+_original_stderr = sys.stderr
+
+# Redirect to capture
+sys.stdout = _stdout_capture
+sys.stderr = _stderr_capture
+
+_exec_error = None
+
+try:
+    # Execute user code
+    exec('''$code''')
+except Exception as e:
+    import traceback
+    _exec_error = str(e)
+    traceback.print_exc()
+finally:
+    # Restore originals
+    sys.stdout = _original_stdout
+    sys.stderr = _original_stderr
+
+# Get captured output
+_output = _stdout_capture.getvalue()
+_errors = _stderr_capture.getvalue()
+                    """.trimIndent()
+
+                    // Execute the capture script
+                    val builtins = python.getBuiltins()
+                    val mainModule = python.getModule("__main__")
+                    val globalsDict = mainModule.get("__dict__")
+
+                    builtins.callAttr("exec", captureScript, globalsDict)
+
+                    // Get the results from globals
+                    val output = globalsDict?.callAttr("get", "_output")?.toString() ?: ""
+                    val errors = globalsDict?.callAttr("get", "_errors")?.toString() ?: ""
+                    val execError = globalsDict?.callAttr("get", "_exec_error")
 
                     val executionTime = System.currentTimeMillis() - startTime
-                    val outputStr = output.toString().trim()
 
-                    // Test case validation if provided
-                    var testCasesPassed = 0
-                    if (config.testCases.isNotEmpty()) {
-                        testCasesPassed = validateTestCases(code, config.testCases)
+                    val finalOutput = output.ifEmpty {
+                        if (execError == null || execError.toString() == "None") {
+                            "Code executed successfully (no output)"
+                        } else {
+                            ""
+                        }
                     }
+
+                    val hasError = errors.isNotEmpty() || (execError != null && execError.toString() != "None")
 
                     CompilerResult(
-                        success = true,
-                        output = outputStr.take(config.maxOutputLength),
+                        success = !hasError,
+                        output = finalOutput.take(config.maxOutputLength),
+                        error = if (hasError) errors.ifEmpty { execError?.toString() } else null,
                         executionTime = executionTime,
                         compiledSuccessfully = true,
-                        testCasesPassed = testCasesPassed,
-                        totalTestCases = config.testCases.size
+                        testCasesPassed = 0,
+                        totalTestCases = 0
                     )
+
                 } catch (e: Exception) {
                     val executionTime = System.currentTimeMillis() - startTime
-                    val errorStr = errorOutput.toString().ifEmpty { e.message ?: "Unknown error" }
+                    val errorMsg = e.message ?: e.toString()
 
                     CompilerResult(
                         success = false,
-                        output = output.toString(),
-                        error = errorStr,
+                        output = "",
+                        error = "Python Error: $errorMsg",
                         executionTime = executionTime,
                         compiledSuccessfully = false
                     )
-                } finally {
-                    // Restore original streams
-                    System.setOut(originalOut)
-                    System.setErr(originalErr)
                 }
             }
         } catch (e: Exception) {
             CompilerResult(
                 success = false,
                 output = "",
-                error = "Execution timeout or error: ${e.message}",
+                error = "Execution timeout (${config.timeout}ms exceeded)",
                 executionTime = System.currentTimeMillis() - startTime,
                 compiledSuccessfully = false
             )
         }
-    }
-
-    private fun validateTestCases(code: String, testCases: List<com.labactivity.lala.UNIFIEDCOMPILER.models.TestCase>): Int {
-        var passed = 0
-        val python = Python.getInstance()
-        val builtins = python.getBuiltins()
-
-        testCases.forEach { testCase ->
-            try {
-                val output = ByteArrayOutputStream()
-                val originalOut = System.out
-                System.setOut(PrintStream(output))
-
-                try {
-                    if (testCase.input.isNotEmpty()) {
-                        val wrappedCode = """
-import sys
-from io import StringIO
-sys.stdin = StringIO('''${testCase.input}''')
-
-$code
-                        """.trimIndent()
-                        builtins.callAttr("exec", wrappedCode)
-                    } else {
-                        builtins.callAttr("exec", code)
-                    }
-
-                    val actualOutput = output.toString().trim()
-                    if (actualOutput == testCase.expectedOutput.trim()) {
-                        passed++
-                    }
-                } finally {
-                    System.setOut(originalOut)
-                }
-            } catch (e: Exception) {
-                // Test case failed
-            }
-        }
-        return passed
     }
 
     override fun getLanguageId(): String = "python"

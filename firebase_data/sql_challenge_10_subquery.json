@@ -1,0 +1,37 @@
+{
+  "title": "Find Students Older Than Average",
+  "description": "Write an SQL query to find students whose age is greater than the average age of all students (using a subquery).",
+  "difficulty": "Hard",
+  "topic": "Subqueries",
+  "courseId": "sql_fundamentals",
+  "expected_query": "SELECT name, age FROM students WHERE age > (SELECT AVG(age) FROM students);",
+  "expected_result": {
+    "columns": ["name", "age"],
+    "rows": [
+      ["Maria", 21],
+      ["John", 22]
+    ]
+  },
+  "sample_table": {
+    "name": "students",
+    "columns": ["id", "name", "age"],
+    "rows": [
+      [1, "Jerico", 20],
+      [2, "Maria", 21],
+      [3, "John", 22]
+    ]
+  },
+  "hints": [
+    "Use a subquery to calculate AVG(age)",
+    "The subquery goes inside parentheses",
+    "Compare age in the outer query with the subquery result",
+    "Average age is 21, so students older than 21 should appear"
+  ],
+  "createdAt": "2025-10-28T08:45:00Z",
+  "updatedAt": "2025-10-28T08:45:00Z",
+  "author": "Jerico Jimenez",
+  "status": "active",
+  "order": 10,
+  "tags": ["subquery", "AVG", "advanced"],
+  "category": "SQL"
+}

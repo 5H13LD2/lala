@@ -1,0 +1,57 @@
+{
+  "title": "Join Students and Courses",
+  "description": "Write an SQL query to display student names along with their enrolled course names using INNER JOIN.",
+  "difficulty": "Medium",
+  "topic": "JOINS",
+  "courseId": "sql_fundamentals",
+  "expected_query": "SELECT s.name, c.course_name FROM students s INNER JOIN enrollments e ON s.id = e.student_id INNER JOIN courses c ON e.course_id = c.id;",
+  "expected_result": {
+    "columns": ["name", "course_name"],
+    "rows": [
+      ["Jerico", "SQL Fundamentals"],
+      ["Maria", "Python Basics"],
+      ["John", "SQL Fundamentals"]
+    ]
+  },
+  "sample_table": {
+    "name": "students",
+    "columns": ["id", "name", "age"],
+    "rows": [
+      [1, "Jerico", 20],
+      [2, "Maria", 21],
+      [3, "John", 22]
+    ]
+  },
+  "additionalTables": [
+    {
+      "name": "enrollments",
+      "columns": ["id", "student_id", "course_id"],
+      "rows": [
+        [1, 1, 1],
+        [2, 2, 2],
+        [3, 3, 1]
+      ]
+    },
+    {
+      "name": "courses",
+      "columns": ["id", "course_name"],
+      "rows": [
+        [1, "SQL Fundamentals"],
+        [2, "Python Basics"]
+      ]
+    }
+  ],
+  "hints": [
+    "You need to join three tables: students, enrollments, and courses",
+    "Use INNER JOIN to connect related tables",
+    "Use table aliases (s, e, c) for cleaner code",
+    "Match student_id in enrollments with id in students"
+  ],
+  "createdAt": "2025-10-28T08:30:00Z",
+  "updatedAt": "2025-10-28T08:30:00Z",
+  "author": "Jerico Jimenez",
+  "status": "active",
+  "order": 7,
+  "tags": ["JOIN", "INNER JOIN", "multiple tables"],
+  "category": "SQL"
+}

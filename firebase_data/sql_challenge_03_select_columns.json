@@ -1,0 +1,37 @@
+{
+  "title": "Select Specific Columns",
+  "description": "Write an SQL query to display only the names of all students.",
+  "difficulty": "Easy",
+  "topic": "SELECT Basics",
+  "courseId": "sql_fundamentals",
+  "expected_query": "SELECT name FROM students;",
+  "expected_result": {
+    "columns": ["name"],
+    "rows": [
+      ["Jerico"],
+      ["Maria"],
+      ["John"]
+    ]
+  },
+  "sample_table": {
+    "name": "students",
+    "columns": ["id", "name", "age"],
+    "rows": [
+      [1, "Jerico", 20],
+      [2, "Maria", 21],
+      [3, "John", 22]
+    ]
+  },
+  "hints": [
+    "Specify the column name instead of using *",
+    "You only need to return the name column",
+    "Column names are case-sensitive in some databases"
+  ],
+  "createdAt": "2025-10-28T08:10:00Z",
+  "updatedAt": "2025-10-28T08:10:00Z",
+  "author": "Jerico Jimenez",
+  "status": "active",
+  "order": 3,
+  "tags": ["SELECT", "columns", "projection"],
+  "category": "SQL"
+}

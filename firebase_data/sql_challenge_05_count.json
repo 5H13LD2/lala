@@ -1,0 +1,35 @@
+{
+  "title": "Count Total Students",
+  "description": "Write an SQL query to count the total number of students in the students table.",
+  "difficulty": "Easy",
+  "topic": "Aggregate Functions",
+  "courseId": "sql_fundamentals",
+  "expected_query": "SELECT COUNT(*) AS count FROM students;",
+  "expected_result": {
+    "columns": ["count"],
+    "rows": [
+      [3]
+    ]
+  },
+  "sample_table": {
+    "name": "students",
+    "columns": ["id", "name", "age"],
+    "rows": [
+      [1, "Jerico", 20],
+      [2, "Maria", 21],
+      [3, "John", 22]
+    ]
+  },
+  "hints": [
+    "Use the COUNT() aggregate function",
+    "COUNT(*) counts all rows",
+    "Use AS to name the result column 'count'"
+  ],
+  "createdAt": "2025-10-28T08:20:00Z",
+  "updatedAt": "2025-10-28T08:20:00Z",
+  "author": "Jerico Jimenez",
+  "status": "active",
+  "order": 5,
+  "tags": ["COUNT", "aggregates", "functions"],
+  "category": "SQL"
+}

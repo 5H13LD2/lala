@@ -1,11 +1,24 @@
 plugins {
-    id("com.chaquo.python") // Ensure this is at the top
+    id("com.chaquo.python")
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id("com.google.gms.google-services")
     id("kotlin-parcelize")
-    alias(libs.plugins.kotlin.compose) // Add kotlin-parcelize plugin
+    alias(libs.plugins.kotlin.compose)
+}
 
+// Chaquopy configuration - MUST be after plugins and before android {}
+chaquopy {
+    defaultConfig {
+        pip {
+            install("numpy")
+        }
+    }
+    sourceSets {
+        getByName("main") {
+            setSrcDirs(listOf("src/main/python"))
+        }
+    }
 }
 
 android {
@@ -27,12 +40,10 @@ android {
         // Enable MultiDex for Janino
         multiDexEnabled = true
 
-        // Chaquopy config
+        // Chaquopy NDK config
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
-
-
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -64,47 +75,17 @@ android {
         }
     }
 
-    // Python configuration
-    chaquopy {
-        defaultConfig {
-            ("C:/Users/jerico/AppData/Local/Programs/Python/Python312/python.exe")
+    buildFeatures {
+        viewBinding = true
+    }
 
-            pip {
-               install("numpy")
-            }
-
-            sourceSets {
-                getByName("main") {
-                    srcDir("src/main/python")
-                }
-            }
-            sourceSets.getByName("main") {
-                setSrcDirs(listOf("src/main/python"))
-            }
-        }
-
-        // Rest of your configuration...
-        buildFeatures {
-            viewBinding = true
-        }
-
-        buildTypes {
-            release {
-                isMinifyEnabled = false
-                proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    "proguard-rules.pro"
-                )
-            }
-        }
-
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_11
-            targetCompatibility = JavaVersion.VERSION_11
-        }
-
-        kotlinOptions {
-            jvmTarget = "11"
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 

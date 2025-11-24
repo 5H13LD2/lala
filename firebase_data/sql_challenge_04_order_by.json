@@ -1,0 +1,37 @@
+{
+  "title": "Sort Students by Age",
+  "description": "Write an SQL query to display all students sorted by age in descending order (oldest first).",
+  "difficulty": "Easy",
+  "topic": "ORDER BY",
+  "courseId": "sql_fundamentals",
+  "expected_query": "SELECT * FROM students ORDER BY age DESC;",
+  "expected_result": {
+    "columns": ["id", "name", "age"],
+    "rows": [
+      [3, "John", 22],
+      [2, "Maria", 21],
+      [1, "Jerico", 20]
+    ]
+  },
+  "sample_table": {
+    "name": "students",
+    "columns": ["id", "name", "age"],
+    "rows": [
+      [1, "Jerico", 20],
+      [2, "Maria", 21],
+      [3, "John", 22]
+    ]
+  },
+  "hints": [
+    "Use ORDER BY clause to sort results",
+    "Use DESC for descending order",
+    "Place ORDER BY at the end of your query"
+  ],
+  "createdAt": "2025-10-28T08:15:00Z",
+  "updatedAt": "2025-10-28T08:15:00Z",
+  "author": "Jerico Jimenez",
+  "status": "active",
+  "order": 4,
+  "tags": ["ORDER BY", "sorting", "DESC"],
+  "category": "SQL"
+}

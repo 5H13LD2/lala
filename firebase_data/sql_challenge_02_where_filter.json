@@ -1,0 +1,36 @@
+{
+  "title": "Filter Students by Age",
+  "description": "Write an SQL query to display students who are 21 years old or older.",
+  "difficulty": "Easy",
+  "topic": "WHERE Clause",
+  "courseId": "sql_fundamentals",
+  "expected_query": "SELECT * FROM students WHERE age >= 21;",
+  "expected_result": {
+    "columns": ["id", "name", "age"],
+    "rows": [
+      [2, "Maria", 21],
+      [3, "John", 22]
+    ]
+  },
+  "sample_table": {
+    "name": "students",
+    "columns": ["id", "name", "age"],
+    "rows": [
+      [1, "Jerico", 20],
+      [2, "Maria", 21],
+      [3, "John", 22]
+    ]
+  },
+  "hints": [
+    "Use the WHERE clause to filter results",
+    "Use >= operator for greater than or equal to",
+    "Make sure to compare with the age column"
+  ],
+  "createdAt": "2025-10-28T08:05:00Z",
+  "updatedAt": "2025-10-28T08:05:00Z",
+  "author": "Jerico Jimenez",
+  "status": "active",
+  "order": 2,
+  "tags": ["WHERE", "filtering", "operators"],
+  "category": "SQL"
+}

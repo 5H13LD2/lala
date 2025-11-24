@@ -1,0 +1,35 @@
+{
+  "title": "Calculate Average Age",
+  "description": "Write an SQL query to calculate the average age of all students.",
+  "difficulty": "Easy",
+  "topic": "Aggregate Functions",
+  "courseId": "sql_fundamentals",
+  "expected_query": "SELECT AVG(age) AS average_age FROM students;",
+  "expected_result": {
+    "columns": ["average_age"],
+    "rows": [
+      [21.0]
+    ]
+  },
+  "sample_table": {
+    "name": "students",
+    "columns": ["id", "name", "age"],
+    "rows": [
+      [1, "Jerico", 20],
+      [2, "Maria", 21],
+      [3, "John", 22]
+    ]
+  },
+  "hints": [
+    "Use the AVG() aggregate function",
+    "Pass the age column to AVG()",
+    "Use AS to name the result 'average_age'"
+  ],
+  "createdAt": "2025-10-28T08:25:00Z",
+  "updatedAt": "2025-10-28T08:25:00Z",
+  "author": "Jerico Jimenez",
+  "status": "active",
+  "order": 6,
+  "tags": ["AVG", "aggregates", "average"],
+  "category": "SQL"
+}
