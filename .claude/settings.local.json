@@ -16,7 +16,11 @@
       "Bash(adb shell:*)",
       "Bash(adb logcat:*)",
       "Bash(find:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git rev-list:*)",
+      "Bash(git tag:*)",
+      "Bash(git describe:*)",
+      "Bash(git rev-parse:*)"
     ],
     "deny": [],
     "ask": []

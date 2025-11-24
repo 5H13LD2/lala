@@ -14,7 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.labactivity.lala.R
 import com.labactivity.lala.databinding.ActivityCoreModuleBinding
 import com.labactivity.lala.homepage.MainActivity4
-
+//ihjklj
 class CoreModule : AppCompatActivity() {
     private var _binding: ActivityCoreModuleBinding? = null
     private val binding get() = _binding!!
