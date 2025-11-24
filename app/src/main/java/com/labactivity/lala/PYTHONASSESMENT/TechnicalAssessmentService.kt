@@ -94,7 +94,12 @@ class TechnicalAssessmentService {
                     Log.d(TAG, "📝 All fields: ${doc.data}")
 
                     // Get compilerType and default to "python" if empty or null
-                    val compilerType = doc.getString("compilerType")?.takeIf { it.isNotEmpty() } ?: "python"
+                    // IMPORTANT: Trim and normalize to lowercase to match CompilerFactory registry
+                    val compilerType = doc.getString("compilerType")
+                        ?.trim()
+                        ?.lowercase()
+                        ?.takeIf { it.isNotEmpty() }
+                        ?: "python"
                     Log.d(TAG, "🔧 Compiler type: '$compilerType'")
 
                     val challenge = Challenge(

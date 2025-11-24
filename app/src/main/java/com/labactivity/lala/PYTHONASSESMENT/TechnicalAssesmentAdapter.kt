@@ -205,7 +205,11 @@ class TechnicalAssessmentAdapter(
 
     private fun openCompiler(challenge: Challenge) {
         // Ensure compiler type is not empty, default to "python"
-        val compilerType = challenge.compilerType.takeIf { it.isNotEmpty() } ?: "python"
+        // Normalize: trim and lowercase to match CompilerFactory registry
+        val compilerType = challenge.compilerType
+            .trim()
+            .lowercase()
+            .takeIf { it.isNotEmpty() } ?: "python"
 
         Log.d("TechnicalAssessmentAdapter", "Opening compiler for challenge: ${challenge.title}")
         Log.d("TechnicalAssessmentAdapter", "Compiler type from challenge: '${challenge.compilerType}'")

@@ -56,6 +56,11 @@ class UnifiedCompilerActivity : AppCompatActivity() {
     private lateinit var testResultsCard: MaterialCardView
     private lateinit var loadingOverlay: View
 
+    // Quick input buttons
+    private lateinit var btnTab: MaterialButton
+    private lateinit var btnSpaces: MaterialButton
+    private val numberButtons = mutableListOf<MaterialButton>()
+
     // Services
     private val compilerService = CompilerService()
 
@@ -82,6 +87,7 @@ class UnifiedCompilerActivity : AppCompatActivity() {
         setupToolbar()
         setupLanguageSelector()
         setupButtons()
+        setupQuickInputButtons()
         loadInitialData()
     }
 
@@ -98,6 +104,20 @@ class UnifiedCompilerActivity : AppCompatActivity() {
         errorCard = findViewById(R.id.errorCard)
         testResultsCard = findViewById(R.id.testResultsCard)
         loadingOverlay = findViewById(R.id.loadingOverlay)
+
+        // Initialize quick input buttons
+        btnTab = findViewById(R.id.btnTab)
+        btnSpaces = findViewById(R.id.btnSpaces)
+        numberButtons.add(findViewById(R.id.btn0))
+        numberButtons.add(findViewById(R.id.btn1))
+        numberButtons.add(findViewById(R.id.btn2))
+        numberButtons.add(findViewById(R.id.btn3))
+        numberButtons.add(findViewById(R.id.btn4))
+        numberButtons.add(findViewById(R.id.btn5))
+        numberButtons.add(findViewById(R.id.btn6))
+        numberButtons.add(findViewById(R.id.btn7))
+        numberButtons.add(findViewById(R.id.btn8))
+        numberButtons.add(findViewById(R.id.btn9))
     }
 
     private fun setupToolbar() {
@@ -149,6 +169,40 @@ class UnifiedCompilerActivity : AppCompatActivity() {
             testResultsCard.visibility = View.GONE
             tvExecutionTime.text = "0ms"
         }
+    }
+
+    /**
+     * Setup quick input buttons for easier code editing
+     */
+    private fun setupQuickInputButtons() {
+        // Tab button - inserts 4 spaces for Python indentation
+        btnTab.setOnClickListener {
+            insertTextAtCursor("    ") // 4 spaces
+        }
+
+        // Space button - inserts 4 spaces
+        btnSpaces.setOnClickListener {
+            insertTextAtCursor("    ") // 4 spaces
+        }
+
+        // Number buttons (0-9)
+        numberButtons.forEachIndexed { index, button ->
+            button.setOnClickListener {
+                insertTextAtCursor(index.toString())
+            }
+        }
+    }
+
+    /**
+     * Insert text at current cursor position in code editor
+     */
+    private fun insertTextAtCursor(text: String) {
+        val cursorPosition = codeEditor.selectionStart
+        val currentText = codeEditor.text.toString()
+        val newText = currentText.substring(0, cursorPosition) + text + currentText.substring(cursorPosition)
+        codeEditor.setText(newText)
+        // Move cursor after inserted text
+        codeEditor.setSelection(cursorPosition + text.length)
     }
 
     private fun loadInitialData() {
