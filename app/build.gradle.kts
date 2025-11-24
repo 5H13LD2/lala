@@ -33,8 +33,11 @@ android {
         applicationId = "com.labactivity.lala"
         minSdk = 26  // Increased from 24 to support Kotlin Scripting and JRuby
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+
+        // Auto-increment version based on git commits
+        versionCode = getVersionCode()
+        versionName = getVersionName()
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Enable MultiDex for Janino
@@ -164,4 +167,75 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+/**
+ * Get version code based on git commit count
+ * This ensures consistent versioning across all builds from the same commit
+ */
+fun getVersionCode(): Int {
+    return try {
+        val stdout = java.io.ByteArrayOutputStream()
+        exec {
+            commandLine("git", "rev-list", "--count", "HEAD")
+            standardOutput = stdout
+        }
+        stdout.toString().trim().toIntOrNull() ?: 1
+    } catch (e: Exception) {
+        println("Warning: Could not get git commit count: ${e.message}")
+        1 // Default version code
+    }
+}
+
+/**
+ * Get version name based on git tag and commit
+ * Format: vX.Y.Z or vX.Y.Z-commitHash if no tag
+ */
+fun getVersionName(): String {
+    return try {
+        val tag = getLatestGitTag()
+        if (tag.isNotEmpty()) {
+            tag
+        } else {
+            // No tag, use commit hash
+            val commitHash = getGitCommitHash()
+            "1.0.0-$commitHash"
+        }
+    } catch (e: Exception) {
+        println("Warning: Could not get version name: ${e.message}")
+        "1.0.0" // Default version name
+    }
+}
+
+/**
+ * Get the latest git tag
+ */
+fun getLatestGitTag(): String {
+    return try {
+        val stdout = java.io.ByteArrayOutputStream()
+        exec {
+            commandLine("git", "describe", "--tags", "--abbrev=0")
+            standardOutput = stdout
+            isIgnoreExitValue = true
+        }
+        stdout.toString().trim()
+    } catch (e: Exception) {
+        ""
+    }
+}
+
+/**
+ * Get the current git commit hash (short)
+ */
+fun getGitCommitHash(): String {
+    return try {
+        val stdout = java.io.ByteArrayOutputStream()
+        exec {
+            commandLine("git", "rev-parse", "--short", "HEAD")
+            standardOutput = stdout
+        }
+        stdout.toString().trim()
+    } catch (e: Exception) {
+        "unknown"
+    }
 }
