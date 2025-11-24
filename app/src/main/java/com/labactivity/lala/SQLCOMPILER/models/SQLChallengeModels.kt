@@ -61,10 +61,7 @@ data class SQLChallenge(
     val tags: List<String> = emptyList(),
 
     @PropertyName("testCases")
-    val testCases: List<TestCase> = emptyList(),
-
-    // Whether challenge is unlocked for the current user (computed at runtime, not stored in Firestore)
-    val isUnlocked: Boolean = true
+    val testCases: List<TestCase> = emptyList()
 ) {
     /**
      * Returns a preview of the description (first 100 characters)
@@ -112,6 +109,20 @@ data class ExpectedResult(
     @PropertyName("rows")
     val rows: List<List<Any>> = emptyList()
 ) {
+    /**
+     * Converts this ExpectedResult to QueryResult format
+     * for use with QueryEvaluator
+     */
+    fun toQueryResult(): com.labactivity.lala.SQLCOMPILER.QueryResult {
+        return com.labactivity.lala.SQLCOMPILER.QueryResult(
+            success = true,
+            columns = columns,
+            rows = rows,
+            errorMessage = null,
+            executionTime = 0
+        )
+    }
+
     /**
      * Returns the number of expected rows
      */

@@ -1,514 +1,566 @@
 package com.labactivity.lala.SQLCOMPILER
 
+import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.ProgressBar
-import android.widget.TableLayout
-import android.widget.TableRow
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.labactivity.lala.R
 import com.labactivity.lala.SQLCOMPILER.models.SQLChallenge
+import com.labactivity.lala.SQLCOMPILER.models.TableData
 import com.labactivity.lala.SQLCOMPILER.services.FirestoreSQLHelper
-import com.labactivity.lala.SQLCOMPILER.services.SQLiteHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Activity for displaying and executing SQL challenges
+ * Activity for executing SQL challenges fetched from Firebase Firestore
+ * Integrates with QueryEvaluator to validate user queries
  */
-class SQLChallengeActivity : BaseActivity() {
+class SQLChallengeActivity : AppCompatActivity() {
 
-    private lateinit var backButton: ImageButton
-    private lateinit var progressBar: ProgressBar
+    private lateinit var databaseHelper: DatabaseHelper
+    private lateinit var queryEvaluator: QueryEvaluator
+    private lateinit var queryValidator: QueryValidator
+    private val firestoreHelper = FirestoreSQLHelper.getInstance()
+
+    // UI Components
     private lateinit var challengeTitle: TextView
+    private lateinit var challengeDescription: TextView
     private lateinit var challengeDifficulty: TextView
     private lateinit var challengeTopic: TextView
-    private lateinit var challengeDescription: TextView
-    private lateinit var sampleTablesContainer: LinearLayout
-    private lateinit var expectedTableLayout: TableLayout
     private lateinit var queryEditText: EditText
     private lateinit var lineNumbers: TextView
     private lateinit var runButton: Button
     private lateinit var hintButton: Button
-    private lateinit var resetButton: Button
     private lateinit var viewSolutionButton: Button
-    private lateinit var resultMessage: TextView
+    private lateinit var resetButton: Button
+    private lateinit var backButton: ImageButton
+    private lateinit var expectedTableLayout: TableLayout
     private lateinit var resultTableLayout: TableLayout
+    private lateinit var resultMessage: TextView
+    private lateinit var sampleTablesContainer: LinearLayout
+    private lateinit var progressBar: ProgressBar
 
-    private val sqlHelper = FirestoreSQLHelper.getInstance()
-    private val sqliteHelper = SQLiteHelper(this)
+    // Data
     private var currentChallenge: SQLChallenge? = null
     private var challengeId: String? = null
-
-    companion object {
-        private const val TAG = "SQLChallengeActivity"
-    }
+    private var currentHintIndex = 0
+    private var startTime: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sql_challenge)
 
-        initializeViews()
-        setupListeners()
-
         // Get challenge ID from intent
-        challengeId = intent.getStringExtra("CHALLENGE_ID")
+        challengeId = intent.getStringExtra(EXTRA_CHALLENGE_ID)
 
-        if (challengeId != null) {
-            loadChallengeFromFirebase(challengeId!!)
-        } else {
-            Log.e(TAG, "No challenge ID provided")
+        if (challengeId == null) {
+            Toast.makeText(this, "Error: No challenge ID provided", Toast.LENGTH_LONG).show()
             finish()
+            return
         }
+
+        initializeComponents()
+        setupDatabase()
+        loadChallenge()
+        setupListeners()
     }
 
-    /**
-     * Initialize all views
-     */
-    private fun initializeViews() {
-        backButton = findViewById(R.id.backButton)
-        progressBar = findViewById(R.id.progressBar)
+    private fun initializeComponents() {
         challengeTitle = findViewById(R.id.challengeTitle)
+        challengeDescription = findViewById(R.id.challengeDescription)
         challengeDifficulty = findViewById(R.id.challengeDifficulty)
         challengeTopic = findViewById(R.id.challengeTopic)
-        challengeDescription = findViewById(R.id.challengeDescription)
-        sampleTablesContainer = findViewById(R.id.sampleTablesContainer)
-        expectedTableLayout = findViewById(R.id.expectedTableLayout)
         queryEditText = findViewById(R.id.queryEditText)
         lineNumbers = findViewById(R.id.lineNumbers)
         runButton = findViewById(R.id.runButton)
         hintButton = findViewById(R.id.hintButton)
-        resetButton = findViewById(R.id.resetButton)
         viewSolutionButton = findViewById(R.id.viewSolutionButton)
-        resultMessage = findViewById(R.id.resultMessage)
+        resetButton = findViewById(R.id.resetButton)
+        backButton = findViewById(R.id.backButton)
+        expectedTableLayout = findViewById(R.id.expectedTableLayout)
         resultTableLayout = findViewById(R.id.resultTableLayout)
+        resultMessage = findViewById(R.id.resultMessage)
+        sampleTablesContainer = findViewById(R.id.sampleTablesContainer)
+        progressBar = findViewById(R.id.progressBar)
+
+        queryValidator = QueryValidator()
+
+        // Setup line numbers to update dynamically
+        setupLineNumbers()
     }
 
-    /**
-     * Setup click listeners
-     */
-    private fun setupListeners() {
-        backButton.setOnClickListener { finish() }
-
-        runButton.setOnClickListener {
-            val query = queryEditText.text.toString().trim()
-            if (query.isNotEmpty()) {
-                executeQuery(query)
-            } else {
-                showResultMessage("Please enter a SQL query", isSuccess = false)
+    private fun setupLineNumbers() {
+        queryEditText.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                updateLineNumbers()
             }
-        }
-
-        hintButton.setOnClickListener {
-            currentChallenge?.hints?.let { hints ->
-                if (hints.isNotEmpty()) {
-                    showHintDialog(hints.first())
-                }
-            }
-        }
-
-        resetButton.setOnClickListener {
-            queryEditText.text.clear()
-            resultMessage.visibility = View.GONE
-            resultTableLayout.removeAllViews()
-        }
-
-        viewSolutionButton.setOnClickListener {
-            currentChallenge?.expectedQuery?.let { solution ->
-                showSolutionDialog(solution)
-            }
-        }
-
-        // Update line numbers as user types
-        queryEditText.setOnKeyListener { _, _, _ ->
-            updateLineNumbers()
-            false
-        }
+        })
+        updateLineNumbers()
     }
 
-    /**
-     * Load challenge data from Firebase
-     */
-    private fun loadChallengeFromFirebase(challengeId: String) {
-        progressBar.visibility = View.VISIBLE
+    private fun updateLineNumbers() {
+        val text = queryEditText.text.toString()
+        val lineCount = text.split("\n").size.coerceAtLeast(5)
+        val numbers = (1..lineCount).joinToString("\n")
+        lineNumbers.text = numbers
+    }
+
+    private fun setupDatabase() {
+        databaseHelper = DatabaseHelper(this)
+    }
+
+    private fun loadChallenge() {
+        showLoading(true)
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                Log.d(TAG, "Loading challenge: $challengeId from Firebase...")
-
                 val challenge = withContext(Dispatchers.IO) {
-                    sqlHelper.getChallengeById(challengeId)
+                    firestoreHelper.getChallengeById(challengeId!!)
                 }
 
                 if (challenge != null) {
-                    Log.d(TAG, "✅ Challenge loaded: ${challenge.title}")
                     currentChallenge = challenge
                     displayChallenge(challenge)
+                    setupChallengeDatabase(challenge)
+                    startTime = System.currentTimeMillis()
                 } else {
-                    Log.e(TAG, "❌ Challenge not found")
-                    showResultMessage("Challenge not found", isSuccess = false)
+                    Toast.makeText(
+                        this@SQLChallengeActivity,
+                        "Error: Challenge not found",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    finish()
                 }
 
-                progressBar.visibility = View.GONE
-
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Error loading challenge", e)
-                progressBar.visibility = View.GONE
-                showResultMessage("Error loading challenge: ${e.message}", isSuccess = false)
+                Toast.makeText(
+                    this@SQLChallengeActivity,
+                    "Error loading challenge: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+                finish()
+            } finally {
+                showLoading(false)
             }
         }
     }
 
-    /**
-     * Display challenge data in the UI
-     */
     private fun displayChallenge(challenge: SQLChallenge) {
-        // Set basic info
         challengeTitle.text = challenge.title
-        challengeDifficulty.text = challenge.difficulty
-        challengeTopic.text = challenge.topic
         challengeDescription.text = challenge.description
+        challengeTopic.text = challenge.topic
+
+        // Set difficulty with color
+        challengeDifficulty.apply {
+            text = challenge.difficulty
+            setTextColor(Color.parseColor(challenge.difficultyColor))
+        }
 
         // Display sample tables
-        displaySampleTables(challenge)
+        displaySampleTables(challenge.getAllTables())
 
         // Display expected output
-        displayExpectedOutput(challenge)
+        displayExpectedOutput(challenge.expectedResult.columns, challenge.expectedResult.rows)
 
-        // Initialize database with sample data
-        initializeDatabase(challenge)
+        // Show/hide hint button based on availability
+        hintButton.visibility = if (challenge.hints.isNotEmpty()) View.VISIBLE else View.GONE
     }
 
-    /**
-     * Display sample tables
-     */
-    private fun displaySampleTables(challenge: SQLChallenge) {
+    private fun setupChallengeDatabase(challenge: SQLChallenge) {
+        try {
+            val database = databaseHelper.writableDatabase
+
+            // Clear any existing data
+            databaseHelper.resetDatabase()
+
+            // Create and populate all tables (primary + additional)
+            challenge.getAllTables().forEach { tableData ->
+                createAndPopulateTable(database, tableData)
+            }
+
+            // Initialize query evaluator with the database
+            queryEvaluator = QueryEvaluator(database)
+
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error setting up database: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun createAndPopulateTable(
+        database: android.database.sqlite.SQLiteDatabase,
+        tableData: TableData
+    ) {
+        try {
+            // Drop table if exists
+            database.execSQL("DROP TABLE IF EXISTS ${tableData.name}")
+
+            // Create table
+            val createTableSQL = tableData.generateCreateTableSQL()
+            database.execSQL(createTableSQL)
+
+            // Insert data
+            val insertStatements = tableData.generateInsertSQL()
+            insertStatements.forEach { insertSQL ->
+                database.execSQL(insertSQL)
+            }
+
+        } catch (e: Exception) {
+            throw Exception("Error creating table ${tableData.name}: ${e.message}")
+        }
+    }
+
+    private fun displaySampleTables(tables: List<TableData>) {
         sampleTablesContainer.removeAllViews()
 
-        challenge.getAllTables().forEach { table ->
-            val tableView = createTableView(table.name, table.columns, table.rows)
-            sampleTablesContainer.addView(tableView)
+        tables.forEach { tableData ->
+            // Add table title
+            val titleView = TextView(this).apply {
+                text = "Table: ${tableData.name}"
+                textSize = 16f
+                setTextColor(ContextCompat.getColor(context, R.color.primary_blue))
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                setPadding(0, 16, 0, 8)
+            }
+            sampleTablesContainer.addView(titleView)
+
+            // Add table layout
+            val tableLayout = TableLayout(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            // Create header row
+            val headerRow = TableRow(this)
+            tableData.columns.forEach { column ->
+                val headerCell = TextView(this).apply {
+                    text = column
+                    setBackgroundColor(ContextCompat.getColor(context, R.color.primary_blue))
+                    setTextColor(Color.WHITE)
+                    setPadding(16, 16, 16, 16)
+                    gravity = android.view.Gravity.CENTER
+                    setTypeface(null, android.graphics.Typeface.BOLD)
+                }
+                headerRow.addView(headerCell)
+            }
+            tableLayout.addView(headerRow)
+
+            // Create data rows (show max 5 rows)
+            val maxRows = 5
+            tableData.rows.take(maxRows).forEach { row ->
+                val dataRow = TableRow(this)
+                row.forEach { cell ->
+                    val dataCell = TextView(this).apply {
+                        text = cell.toString()
+                        setBackgroundColor(Color.WHITE)
+                        setTextColor(Color.BLACK)
+                        setPadding(16, 16, 16, 16)
+                        gravity = android.view.Gravity.CENTER
+                    }
+                    dataRow.addView(dataCell)
+                }
+                tableLayout.addView(dataRow)
+            }
+
+            // Add "..." row if there are more rows
+            if (tableData.rows.size > maxRows) {
+                val moreRow = TableRow(this)
+                val moreCell = TextView(this).apply {
+                    text = "... (${tableData.rows.size - maxRows} more rows)"
+                    setTextColor(Color.GRAY)
+                    setPadding(16, 8, 16, 8)
+                    gravity = android.view.Gravity.CENTER
+                }
+                moreRow.addView(moreCell)
+                tableLayout.addView(moreRow)
+            }
+
+            sampleTablesContainer.addView(tableLayout)
+
+            // Add spacing
+            val spacer = View(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    16
+                )
+            }
+            sampleTablesContainer.addView(spacer)
         }
     }
 
-    /**
-     * Display expected output
-     */
-    private fun displayExpectedOutput(challenge: SQLChallenge) {
+    private fun displayExpectedOutput(columns: List<String>, rows: List<List<Any>>) {
         expectedTableLayout.removeAllViews()
 
-        val expectedResult = challenge.expectedResult
-        if (expectedResult.columns.isNotEmpty() && expectedResult.rows.isNotEmpty()) {
-            // Add header row
-            val headerRow = TableRow(this)
-            expectedResult.columns.forEach { header ->
-                val textView = TextView(this).apply {
-                    text = header
-                    setPadding(16, 16, 16, 16)
-                    setBackgroundResource(R.drawable.table_header_background)
-                    setTextColor(resources.getColor(R.color.white, null))
-                }
-                headerRow.addView(textView)
-            }
-            expectedTableLayout.addView(headerRow)
+        if (columns.isEmpty()) return
 
-            // Add data rows
-            expectedResult.rows.forEach { rowData ->
-                val dataRow = TableRow(this)
-                rowData.forEach { cellValue ->
-                    val textView = TextView(this).apply {
-                        text = cellValue?.toString() ?: ""
-                        setPadding(16, 16, 16, 16)
-                        setBackgroundResource(R.drawable.table_cell_background)
-                    }
-                    dataRow.addView(textView)
-                }
-                expectedTableLayout.addView(dataRow)
-            }
-        }
-    }
-
-    /**
-     * Create a visual representation of a table
-     */
-    private fun createTableView(
-        tableName: String,
-        columns: List<String>,
-        rows: List<List<Any>>
-    ): View {
-        val tableContainer = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(0, 0, 32, 16)
-        }
-
-        // Table name
-        val nameTextView = TextView(this).apply {
-            text = tableName
-            textSize = 16f
-            setTypeface(null, android.graphics.Typeface.BOLD)
-            setPadding(0, 0, 0, 8)
-        }
-        tableContainer.addView(nameTextView)
-
-        // Table layout
-        val tableLayout = TableLayout(this)
-
-        // Add header
+        // Create header row
         val headerRow = TableRow(this)
         columns.forEach { column ->
-            val textView = TextView(this).apply {
+            val headerCell = TextView(this).apply {
                 text = column
-                setPadding(12, 12, 12, 12)
-                setBackgroundResource(R.drawable.table_header_background)
-                setTextColor(resources.getColor(R.color.white, null))
-                textSize = 12f
+                setBackgroundColor(ContextCompat.getColor(context, R.color.primary_blue))
+                setTextColor(Color.WHITE)
+                setPadding(16, 16, 16, 16)
+                gravity = android.view.Gravity.CENTER
+                setTypeface(null, android.graphics.Typeface.BOLD)
             }
-            headerRow.addView(textView)
+            headerRow.addView(headerCell)
         }
-        tableLayout.addView(headerRow)
+        expectedTableLayout.addView(headerRow)
 
-        // Add data rows
-        rows.forEach { rowData ->
+        // Create data rows
+        rows.forEach { row ->
             val dataRow = TableRow(this)
-            rowData.forEach { cellValue ->
-                val textView = TextView(this).apply {
-                    text = cellValue?.toString() ?: ""
-                    setPadding(12, 12, 12, 12)
-                    setBackgroundResource(R.drawable.table_cell_background)
-                    textSize = 12f
+            row.forEach { cell ->
+                val dataCell = TextView(this).apply {
+                    text = cell.toString()
+                    setBackgroundColor(Color.WHITE)
+                    setTextColor(Color.BLACK)
+                    setPadding(16, 16, 16, 16)
+                    gravity = android.view.Gravity.CENTER
                 }
-                dataRow.addView(textView)
+                dataRow.addView(dataCell)
             }
-            tableLayout.addView(dataRow)
-        }
-
-        tableContainer.addView(tableLayout)
-        return tableContainer
-    }
-
-    /**
-     * Initialize SQLite database with sample data
-     */
-    private fun initializeDatabase(challenge: SQLChallenge) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                sqliteHelper.createTablesFromChallenge(challenge)
-                Log.d(TAG, "✅ Database initialized with sample data")
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error initializing database", e)
-            }
+            expectedTableLayout.addView(dataRow)
         }
     }
 
-    /**
-     * Execute user's SQL query
-     */
-    private fun executeQuery(query: String) {
-        CoroutineScope(Dispatchers.Main).launch {
+    private fun setupListeners() {
+        runButton.setOnClickListener {
+            executeQuery()
+        }
+
+        hintButton.setOnClickListener {
+            showHint()
+        }
+
+        viewSolutionButton.setOnClickListener {
+            showSolution()
+        }
+
+        resetButton.setOnClickListener {
+            resetQuery()
+        }
+
+        backButton.setOnClickListener {
+            finish()
+        }
+    }
+
+    private fun executeQuery() {
+        val query = queryEditText.text.toString().trim()
+
+        if (query.isEmpty()) {
+            Toast.makeText(this, "Please enter a query", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Check if queryEvaluator is initialized
+        if (!::queryEvaluator.isInitialized) {
+            Toast.makeText(this, "Database not ready. Please wait...", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Validate query
+        val validationResult = queryValidator.validateQuery(query)
+        if (!validationResult.isValid) {
+            showError(validationResult.errorMessage ?: "Invalid query")
+            return
+        }
+
+        // Execute and evaluate query
+        currentChallenge?.let { challenge ->
             try {
-                val result = withContext(Dispatchers.IO) {
-                    sqliteHelper.executeQuery(query)
+                val expectedResult = challenge.expectedResult.toQueryResult()
+                val evaluation = queryEvaluator.evaluateQuery(query, expectedResult)
+
+                displayResults(evaluation)
+
+                // Save progress to Firestore
+                if (evaluation.isCorrect) {
+                    saveProgress(true, evaluation.score, query)
+                    showSuccessDialog()
+                } else {
+                    saveProgress(false, evaluation.score, query)
                 }
 
-                displayQueryResult(result)
-                validateQuery(result)
-
             } catch (e: Exception) {
-                Log.e(TAG, "❌ Query execution error", e)
-                showResultMessage("Error: ${e.message}", isSuccess = false)
+                showError("Error executing query: ${e.message}")
             }
         }
     }
 
-    /**
-     * Display query results
-     */
-    private fun displayQueryResult(result: List<Map<String, Any?>>) {
+    private fun displayResults(evaluation: EvaluationResult) {
+        // Clear previous results
         resultTableLayout.removeAllViews()
 
-        if (result.isEmpty()) {
-            showResultMessage("Query executed successfully (0 rows returned)", isSuccess = true)
-            return
-        }
+        val result = evaluation.actualResult
 
-        val headers = result[0].keys.toList()
-
-        // Add header row
-        val headerRow = TableRow(this)
-        headers.forEach { header ->
-            val textView = TextView(this).apply {
-                text = header
-                setPadding(16, 16, 16, 16)
-                setBackgroundResource(R.drawable.table_header_background)
-                setTextColor(resources.getColor(R.color.white, null))
-            }
-            headerRow.addView(textView)
-        }
-        resultTableLayout.addView(headerRow)
-
-        // Add data rows
-        result.forEach { row ->
-            val dataRow = TableRow(this)
-            headers.forEach { header ->
-                val textView = TextView(this).apply {
-                    text = row[header]?.toString() ?: ""
+        if (result.success && result.columns.isNotEmpty()) {
+            // Create header row
+            val headerRow = TableRow(this)
+            result.columns.forEach { column ->
+                val headerCell = TextView(this).apply {
+                    text = column
+                    setBackgroundColor(ContextCompat.getColor(context, R.color.primary_blue))
+                    setTextColor(Color.WHITE)
                     setPadding(16, 16, 16, 16)
-                    setBackgroundResource(R.drawable.table_cell_background)
+                    gravity = android.view.Gravity.CENTER
+                    setTypeface(null, android.graphics.Typeface.BOLD)
                 }
-                dataRow.addView(textView)
+                headerRow.addView(headerCell)
             }
-            resultTableLayout.addView(dataRow)
-        }
-    }
+            resultTableLayout.addView(headerRow)
 
-    /**
-     * Validate query result against expected output
-     */
-    private fun validateQuery(result: List<Map<String, Any?>>) {
-        val expectedResult = currentChallenge?.expectedResult ?: return
-
-        // Check row count
-        if (result.size != expectedResult.rowCount) {
-            showResultMessage(
-                "❌ Incorrect: Expected ${expectedResult.rowCount} rows, got ${result.size} rows",
-                isSuccess = false
-            )
-            return
-        }
-
-        // Check column count
-        if (result.isNotEmpty() && result[0].size != expectedResult.columnCount) {
-            showResultMessage(
-                "❌ Incorrect: Expected ${expectedResult.columnCount} columns, got ${result[0].size} columns",
-                isSuccess = false
-            )
-            return
-        }
-
-        // Compare results row by row
-        val isCorrect = result.indices.all { i ->
-            val resultRow = result[i]
-            val expectedRow = expectedResult.rows[i]
-
-            // Compare each column value
-            expectedResult.columns.indices.all { colIndex ->
-                val colName = expectedResult.columns[colIndex]
-                val resultValue = resultRow[colName]
-                val expectedValue = expectedRow[colIndex]
-
-                // Normalize values for comparison
-                normalizeValue(resultValue) == normalizeValue(expectedValue)
-            }
-        }
-
-        if (isCorrect) {
-            showResultMessage("✅ Correct! Well done!", isSuccess = true)
-            saveProgress()
-        } else {
-            showResultMessage("❌ Incorrect result. Try again!", isSuccess = false)
-        }
-    }
-
-    /**
-     * Save user progress to Firebase
-     */
-    private fun saveProgress() {
-        challengeId?.let { id ->
-            CoroutineScope(Dispatchers.IO).launch {
-                try {
-                    val userQuery = queryEditText.text.toString()
-                    sqlHelper.updateProgressAfterAttempt(
-                        challengeId = id,
-                        passed = true,
-                        score = 100,
-                        userQuery = userQuery,
-                        timeTaken = 0L
-                    )
-                    Log.d(TAG, "✅ Progress saved")
-                } catch (e: Exception) {
-                    Log.e(TAG, "❌ Error saving progress", e)
+            // Create data rows
+            result.rows.forEach { row ->
+                val dataRow = TableRow(this)
+                row.forEach { cell ->
+                    val dataCell = TextView(this).apply {
+                        text = cell.toString()
+                        setBackgroundColor(Color.WHITE)
+                        setTextColor(Color.BLACK)
+                        setPadding(16, 16, 16, 16)
+                        gravity = android.view.Gravity.CENTER
+                    }
+                    dataRow.addView(dataCell)
                 }
+                resultTableLayout.addView(dataRow)
             }
+        }
+
+        // Show result message
+        resultMessage.apply {
+            text = evaluation.feedback
+            setTextColor(
+                if (evaluation.isCorrect)
+                    ContextCompat.getColor(context, R.color.success_green)
+                else
+                    ContextCompat.getColor(context, R.color.error_red)
+            )
+            visibility = View.VISIBLE
         }
     }
 
-    /**
-     * Show result message
-     */
-    private fun showResultMessage(message: String, isSuccess: Boolean) {
-        resultMessage.text = message
-        resultMessage.setBackgroundColor(
-            if (isSuccess) {
-                resources.getColor(R.color.success_green, null)
-            } else {
-                resources.getColor(R.color.error_red, null)
-            }
-        )
-        resultMessage.setTextColor(resources.getColor(R.color.white, null))
-        resultMessage.visibility = View.VISIBLE
+    private fun showError(message: String) {
+        resultMessage.apply {
+            text = "❌ Error: $message"
+            setTextColor(ContextCompat.getColor(context, R.color.error_red))
+            visibility = View.VISIBLE
+        }
+
+        // Clear result table
+        resultTableLayout.removeAllViews()
     }
 
-    /**
-     * Show hint dialog
-     */
-    private fun showHintDialog(hint: String) {
+    private fun showHint() {
+        currentChallenge?.let { challenge ->
+            if (challenge.hints.isEmpty()) {
+                Toast.makeText(this, "No hints available", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val hint = challenge.hints[currentHintIndex % challenge.hints.size]
+            currentHintIndex++
+
+            AlertDialog.Builder(this)
+                .setTitle("Hint ${currentHintIndex}/${challenge.hints.size}")
+                .setMessage(hint)
+                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                .show()
+        }
+    }
+
+    private fun showSolution() {
         AlertDialog.Builder(this)
-            .setTitle("💡 Hint")
-            .setMessage(hint)
-            .setPositiveButton("OK", null)
+            .setTitle("View Solution")
+            .setMessage("Are you sure you want to view the solution? This will reveal the answer.")
+            .setPositiveButton("Yes") { dialog, _ ->
+                currentChallenge?.let { challenge ->
+                    queryEditText.setText(challenge.expectedQuery)
+
+                    AlertDialog.Builder(this)
+                        .setTitle("Solution")
+                        .setMessage(
+                            "Query:\n${challenge.expectedQuery}\n\n" +
+                                    "Explanation:\n${challenge.description}"
+                        )
+                        .setPositiveButton("OK") { d, _ -> d.dismiss() }
+                        .show()
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
             .show()
     }
 
-    /**
-     * Show solution dialog
-     */
-    private fun showSolutionDialog(solution: String) {
+    private fun resetQuery() {
+        queryEditText.setText("")
+        resultTableLayout.removeAllViews()
+        resultMessage.visibility = View.GONE
+        currentHintIndex = 0
+    }
+
+    private fun showSuccessDialog() {
+        val timeTaken = (System.currentTimeMillis() - startTime) / 1000 // in seconds
+
         AlertDialog.Builder(this)
-            .setTitle("Solution")
-            .setMessage(solution)
-            .setPositiveButton("OK", null)
+            .setTitle("🎉 Congratulations!")
+            .setMessage(
+                "You've successfully completed this challenge!\n\n" +
+                        "Time taken: ${timeTaken}s\n" +
+                        "Difficulty: ${currentChallenge?.difficulty ?: "Unknown"}"
+            )
+            .setPositiveButton("Continue") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setNegativeButton("Back to Challenges") { dialog, _ ->
+                dialog.dismiss()
+                finish()
+            }
             .show()
     }
 
-    /**
-     * Normalize value for comparison (handles different numeric types)
-     */
-    private fun normalizeValue(value: Any?): String {
-        return when (value) {
-            is Number -> {
-                // Convert all numbers to Long if they're integers, otherwise Double
-                val numValue = value.toDouble()
-                if (numValue == numValue.toLong().toDouble()) {
-                    numValue.toLong().toString()
-                } else {
-                    numValue.toString()
-                }
+    private fun saveProgress(passed: Boolean, score: Int, userQuery: String) {
+        val timeTaken = (System.currentTimeMillis() - startTime) / 1000
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                firestoreHelper.updateProgressAfterAttempt(
+                    challengeId = challengeId!!,
+                    passed = passed,
+                    score = score,
+                    userQuery = userQuery,
+                    timeTaken = timeTaken
+                )
+            } catch (e: Exception) {
+                // Log error but don't show to user
+                android.util.Log.e(TAG, "Error saving progress: ${e.message}")
             }
-            null -> ""
-            else -> value.toString()
         }
     }
 
-    /**
-     * Update line numbers based on query text
-     */
-    private fun updateLineNumbers() {
-        val lines = queryEditText.text.toString().split("\n")
-        val lineNumberText = (1..maxOf(lines.size, 5)).joinToString("\n")
-        lineNumbers.text = lineNumberText
+    private fun showLoading(show: Boolean) {
+        progressBar.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        sqliteHelper.close()
+        if (::databaseHelper.isInitialized) {
+            databaseHelper.close()
+        }
+    }
+
+    companion object {
+        private const val TAG = "SQLChallengeActivity"
+        const val EXTRA_CHALLENGE_ID = "challenge_id"
     }
 }

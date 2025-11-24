@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.cardview.widget.CardView
@@ -16,7 +15,6 @@ import com.labactivity.lala.R
 import com.labactivity.lala.SQLCOMPILER.SQLChallengeActivity
 import com.labactivity.lala.SQLCOMPILER.models.SQLChallenge
 import com.labactivity.lala.SQLCOMPILER.models.SQLChallengeProgress
-import com.labactivity.lala.UTILS.DialogUtils
 
 /**
  * RecyclerView Adapter for displaying SQL Challenges
@@ -95,16 +93,6 @@ class SQLChallengeAdapter(
             val isCompleted = progress?.status == "completed"
             holder.cardView.alpha = if (isCompleted) 0.85f else 1f
 
-            // Show/hide lock overlay for locked challenges
-            if (!challenge.isUnlocked) {
-                holder.lockOverlay?.visibility = View.VISIBLE
-                holder.lockIcon?.visibility = View.VISIBLE
-                holder.cardView.alpha = 0.6f
-            } else {
-                holder.lockOverlay?.visibility = View.GONE
-                holder.lockIcon?.visibility = View.GONE
-            }
-
             // Animate card entrance
             if (holder.itemView.animation == null) {
                 val animation = android.view.animation.AnimationUtils.loadAnimation(
@@ -116,21 +104,6 @@ class SQLChallengeAdapter(
 
             // Set click listener
             holder.itemView.setOnClickListener {
-                // Check if challenge is locked
-                if (!challenge.isUnlocked) {
-                    val message = when (challenge.difficulty.lowercase()) {
-                        "medium" -> "Complete all Easy SQL challenges to unlock Medium difficulty."
-                        "hard" -> "Complete all Easy and Medium SQL challenges to unlock Hard difficulty."
-                        else -> "This SQL challenge is currently locked."
-                    }
-                    DialogUtils.showLockedDialog(
-                        context = context,
-                        title = "🔒 SQL Challenge Locked",
-                        message = message
-                    )
-                    return@setOnClickListener
-                }
-
                 if (isCompleted && progress?.passed == true) {
                     showRetryDialog(challenge)
                 } else {
@@ -210,7 +183,7 @@ class SQLChallengeAdapter(
      */
     private fun openChallenge(challenge: SQLChallenge) {
         val intent = Intent(context, SQLChallengeActivity::class.java).apply {
-            putExtra("CHALLENGE_ID", challenge.id)
+            putExtra(SQLChallengeActivity.EXTRA_CHALLENGE_ID, challenge.id)
         }
         context.startActivity(intent)
     }
@@ -239,8 +212,6 @@ class SQLChallengeAdapter(
         val topicTextView: TextView = itemView.findViewById(R.id.textTopic)
         val statusTextView: TextView = itemView.findViewById(R.id.textStatus)
         val scoreTextView: TextView = itemView.findViewById(R.id.textScore)
-        val lockOverlay: View? = itemView.findViewById(R.id.lockOverlay)
-        val lockIcon: ImageView? = itemView.findViewById(R.id.lockIcon)
     }
 
     /**
