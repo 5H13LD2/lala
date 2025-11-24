@@ -398,9 +398,16 @@ class SQLChallengeActivity : BaseActivity() {
         val isCorrect = result.indices.all { i ->
             val resultRow = result[i]
             val expectedRow = expectedResult.rows[i]
-            val resultValues = expectedResult.columns.map { col -> resultRow[col]?.toString() ?: "" }
-            val expectedValues = expectedRow.map { it?.toString() ?: "" }
-            resultValues == expectedValues
+
+            // Compare each column value
+            expectedResult.columns.indices.all { colIndex ->
+                val colName = expectedResult.columns[colIndex]
+                val resultValue = resultRow[colName]
+                val expectedValue = expectedRow[colIndex]
+
+                // Normalize values for comparison
+                normalizeValue(resultValue) == normalizeValue(expectedValue)
+            }
         }
 
         if (isCorrect) {
@@ -470,6 +477,25 @@ class SQLChallengeActivity : BaseActivity() {
             .setMessage(solution)
             .setPositiveButton("OK", null)
             .show()
+    }
+
+    /**
+     * Normalize value for comparison (handles different numeric types)
+     */
+    private fun normalizeValue(value: Any?): String {
+        return when (value) {
+            is Number -> {
+                // Convert all numbers to Long if they're integers, otherwise Double
+                val numValue = value.toDouble()
+                if (numValue == numValue.toLong().toDouble()) {
+                    numValue.toLong().toString()
+                } else {
+                    numValue.toString()
+                }
+            }
+            null -> ""
+            else -> value.toString()
+        }
     }
 
     /**

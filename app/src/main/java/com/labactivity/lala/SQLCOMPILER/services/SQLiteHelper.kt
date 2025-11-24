@@ -48,10 +48,15 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
 
             // Create tables and insert data
             allTables.forEach { table ->
-                // Build CREATE TABLE statement from columns
-                val columns = table.columns.joinToString(", ") { column ->
-                    "$column TEXT" // For simplicity, all columns are TEXT
-                }
+                // Infer column types from first row
+                val columnTypes = inferColumnTypes(table)
+
+                // Build CREATE TABLE statement with proper types
+                val columns = table.columns.mapIndexed { index, columnName ->
+                    val type = columnTypes.getOrElse(index) { "TEXT" }
+                    "$columnName $type"
+                }.joinToString(", ")
+
                 val createTableSQL = "CREATE TABLE IF NOT EXISTS ${table.name} ($columns)"
                 db.execSQL(createTableSQL)
 
@@ -61,7 +66,12 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
                     val placeholders = table.columns.joinToString(", ") { "?" }
                     val insertSQL = "INSERT INTO ${table.name} ($columnNames) VALUES ($placeholders)"
 
-                    val values = rowData.map { it?.toString() ?: "" }.toTypedArray()
+                    val values = rowData.map { value ->
+                        when (value) {
+                            is Number -> value
+                            else -> value?.toString() ?: ""
+                        }
+                    }.toTypedArray()
 
                     db.execSQL(insertSQL, values)
                 }
@@ -73,6 +83,28 @@ class SQLiteHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, 
             Log.e(TAG, "❌ Error creating tables", e)
             throw e
         }
+    }
+
+    /**
+     * Infer column types from table data
+     */
+    private fun inferColumnTypes(table: com.labactivity.lala.SQLCOMPILER.models.TableData): Map<Int, String> {
+        if (table.rows.isEmpty()) return emptyMap()
+
+        val columnTypes = mutableMapOf<Int, String>()
+        val firstRow = table.rows.first()
+
+        firstRow.forEachIndexed { index, value ->
+            val sqlType = when (value) {
+                is Int, is Long -> "INTEGER"
+                is Double, is Float -> "REAL"
+                is Boolean -> "INTEGER"
+                else -> "TEXT"
+            }
+            columnTypes[index] = sqlType
+        }
+
+        return columnTypes
     }
 
     /**

@@ -15,7 +15,8 @@
       "Bash(rm:*)",
       "Bash(adb shell:*)",
       "Bash(adb logcat:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
