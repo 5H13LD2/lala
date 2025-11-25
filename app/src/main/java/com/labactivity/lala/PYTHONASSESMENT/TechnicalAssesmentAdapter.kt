@@ -3,7 +3,6 @@ package com.labactivity.lala.PYTHONASSESMENT
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -204,28 +203,14 @@ class TechnicalAssessmentAdapter(
     }
 
     private fun openCompiler(challenge: Challenge) {
-        // Ensure compiler type is not empty, default to "python"
-        // Normalize: trim and lowercase to match CompilerFactory registry
-        val compilerType = challenge.compilerType
-            .trim()
-            .lowercase()
-            .takeIf { it.isNotEmpty() } ?: "python"
-
-        Log.d("TechnicalAssessmentAdapter", "Opening compiler for challenge: ${challenge.title}")
-        Log.d("TechnicalAssessmentAdapter", "Compiler type from challenge: '${challenge.compilerType}'")
-        Log.d("TechnicalAssessmentAdapter", "Final compiler type: '$compilerType'")
-
         val intent = Intent(context, UnifiedCompilerActivity::class.java).apply {
-            // UnifiedCompilerActivity expected extras
-            putExtra(UnifiedCompilerActivity.EXTRA_LANGUAGE, compilerType)
-            putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, challenge.courseId)
-            putExtra(UnifiedCompilerActivity.EXTRA_INITIAL_CODE, challenge.brokenCode)
-
-            // Additional challenge data for validation
             putExtra("CHALLENGE_ID", challenge.id)
             putExtra("CHALLENGE_TITLE", challenge.title)
+            putExtra("CHALLENGE_CODE", challenge.brokenCode)
             putExtra("CORRECT_OUTPUT", challenge.correctOutput)
             putExtra("HINT", challenge.hint)
+            putExtra("COURSE_ID", challenge.courseId)
+            putExtra("COMPILER_TYPE", challenge.compilerType) // Pass compiler type for unified compiler
         }
         context.startActivity(intent)
     }

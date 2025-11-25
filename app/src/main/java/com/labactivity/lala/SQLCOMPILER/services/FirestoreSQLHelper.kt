@@ -43,33 +43,124 @@ class FirestoreSQLHelper {
     // ==================== Challenge Fetching Methods ====================
 
     /**
-     * Fetches all active SQL challenges from Firestore
+     * Fetches all active SQL challenges from Firestore with unlock status
+     * Only returns challenges for courses the user is enrolled in
      * @return List of SQLChallenge objects sorted by order
      */
     suspend fun getAllChallenges(): List<SQLChallenge> = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Fetching all SQL challenges from Firestore")
+            val userId = auth.currentUser?.uid ?: run {
+                Log.w(TAG, "⚠️ User not authenticated")
+                return@withContext emptyList()
+            }
 
-            val snapshot = firestore.collection(COLLECTION_SQL_CHALLENGES)
+            // Get enrolled course IDs
+            val enrolledCourseIds = getUserEnrolledCourseIds(userId)
+            Log.d(TAG, "✅ User enrolled in courses: $enrolledCourseIds")
+
+            if (enrolledCourseIds.isEmpty()) {
+                Log.d(TAG, "⚠️ No enrolled courses found")
+                return@withContext emptyList()
+            }
+
+            // Check if user is enrolled in any SQL-related course
+            val hasSQLCourse = enrolledCourseIds.any { it.contains("sql", ignoreCase = true) }
+            if (!hasSQLCourse) {
+                Log.d(TAG, "⚠️ User not enrolled in any SQL course. Enrolled courses: $enrolledCourseIds")
+                return@withContext emptyList()
+            }
+
+            Log.d(TAG, "Fetching SQL challenges for enrolled courses from Firestore collection: $COLLECTION_SQL_CHALLENGES")
+
+            // First, try to fetch ALL active SQL challenges to see what's available
+            val allActiveSnapshot = firestore.collection(COLLECTION_SQL_CHALLENGES)
                 .whereEqualTo("status", "active")
                 .orderBy("order", Query.Direction.ASCENDING)
                 .get()
                 .await()
 
-            val challenges = snapshot.documents.mapNotNull { doc ->
-                try {
-                    doc.toObject(SQLChallenge::class.java)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error parsing challenge document ${doc.id}: ${e.message}")
-                    null
-                }
+            Log.d(TAG, "📊 Total active SQL challenges in Firestore: ${allActiveSnapshot.size()}")
+
+            // Log all available challenges and their courseIds for debugging
+            allActiveSnapshot.documents.forEach { doc ->
+                val title = doc.getString("title") ?: "Unknown"
+                val courseId = doc.getString("courseId") ?: "No courseId"
+                val difficulty = doc.getString("difficulty") ?: "No difficulty"
+                Log.d(TAG, "  📝 Challenge: $title | courseId: $courseId | difficulty: $difficulty")
             }
 
-            Log.d(TAG, "Successfully fetched ${challenges.size} SQL challenges")
-            challenges
+            // Fetch challenges in batches (Firestore 'in' query limit is 10)
+            val allChallenges = mutableListOf<SQLChallenge>()
+            val batches = enrolledCourseIds.chunked(10)
+
+            for (batch in batches) {
+                val snapshot = firestore.collection(COLLECTION_SQL_CHALLENGES)
+                    .whereEqualTo("status", "active")
+                    .whereIn("courseId", batch)
+                    .orderBy("order", Query.Direction.ASCENDING)
+                    .get()
+                    .await()
+
+                Log.d(TAG, "  🔍 Batch query for courseIds $batch returned ${snapshot.size()} challenges")
+
+                val batchChallenges = snapshot.documents.mapNotNull { doc ->
+                    try {
+                        doc.toObject(SQLChallenge::class.java)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "❌ Error parsing challenge document ${doc.id}: ${e.message}")
+                        null
+                    }
+                }
+                allChallenges.addAll(batchChallenges)
+            }
+
+            // If no challenges found with exact courseId match, fall back to showing all SQL challenges
+            if (allChallenges.isEmpty()) {
+                Log.w(TAG, "⚠️ No SQL challenges found matching enrolled courseIds. Loading ALL active SQL challenges as fallback.")
+                val fallbackChallenges = allActiveSnapshot.documents.mapNotNull { doc ->
+                    try {
+                        doc.toObject(SQLChallenge::class.java)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "❌ Error parsing challenge document ${doc.id}: ${e.message}")
+                        null
+                    }
+                }
+                allChallenges.addAll(fallbackChallenges)
+            }
+
+            Log.d(TAG, "✅ Successfully fetched ${allChallenges.size} SQL challenges")
+
+            // Apply unlock logic
+            val challengesWithUnlockStatus = applyUnlockLogic(allChallenges)
+            Log.d(TAG, "✅ Applied unlock logic to ${challengesWithUnlockStatus.size} SQL challenges")
+
+            challengesWithUnlockStatus
 
         } catch (e: Exception) {
-            Log.e(TAG, "Error fetching SQL challenges: ${e.message}", e)
+            Log.e(TAG, "❌ Error fetching SQL challenges: ${e.message}", e)
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    /**
+     * Fetch user's enrolled course IDs
+     * @param userId The user ID
+     * @return List of enrolled course IDs
+     */
+    private suspend fun getUserEnrolledCourseIds(userId: String): List<String> {
+        return try {
+            val document = firestore.collection("users")
+                .document(userId)
+                .get()
+                .await()
+
+            val courseTaken = document.get("courseTaken") as? List<Map<String, Any>> ?: emptyList()
+            val ids = courseTaken.mapNotNull { it["courseId"] as? String }
+            Log.d(TAG, "📘 Found ${ids.size} enrolled courses")
+            ids
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error getting enrolled course IDs", e)
             emptyList()
         }
     }
@@ -154,6 +245,68 @@ class FirestoreSQLHelper {
                 emptyList()
             }
         }
+
+    /**
+     * Apply unlock logic to SQL challenges based on difficulty progression
+     * Rule: A challenge is unlocked if all easier challenges are completed
+     * Difficulty order: Easy -> Medium -> Hard
+     * @param challenges List of challenges to process
+     * @return List of challenges with isUnlocked field set correctly
+     */
+    private suspend fun applyUnlockLogic(challenges: List<SQLChallenge>): List<SQLChallenge> {
+        return try {
+            // Get all user progress
+            val allProgress = getAllUserProgress()
+            val completedChallengeIds = allProgress.filter { it.passed }.map { it.challengeId }.toSet()
+
+            Log.d(TAG, "🔓 User has completed ${completedChallengeIds.size} SQL challenges")
+
+            // Group challenges by difficulty
+            val easyChallenges = challenges.filter { it.difficulty.equals("Easy", ignoreCase = true) }
+            val mediumChallenges = challenges.filter { it.difficulty.equals("Medium", ignoreCase = true) }
+            val hardChallenges = challenges.filter { it.difficulty.equals("Hard", ignoreCase = true) }
+
+            // Check if all challenges of a difficulty are completed
+            val allEasyCompleted = easyChallenges.all { it.id in completedChallengeIds }
+            val allMediumCompleted = mediumChallenges.all { it.id in completedChallengeIds }
+
+            Log.d(TAG, "🔓 SQL Easy: ${easyChallenges.size} total, all completed: $allEasyCompleted")
+            Log.d(TAG, "🔓 SQL Medium: ${mediumChallenges.size} total, all completed: $allMediumCompleted")
+            Log.d(TAG, "🔓 SQL Hard: ${hardChallenges.size} total")
+
+            // Apply unlock logic
+            challenges.map { challenge ->
+                val isUnlocked = when (challenge.difficulty.lowercase()) {
+                    "easy" -> {
+                        // All Easy challenges are always unlocked
+                        true
+                    }
+                    "medium" -> {
+                        // Medium challenges unlock when all Easy are completed
+                        allEasyCompleted
+                    }
+                    "hard" -> {
+                        // Hard challenges unlock when all Easy AND Medium are completed
+                        allEasyCompleted && allMediumCompleted
+                    }
+                    else -> {
+                        // Unknown difficulty - unlock by default
+                        true
+                    }
+                }
+
+                if (!isUnlocked) {
+                    Log.d(TAG, "🔒 SQL Challenge locked: ${challenge.title} (${challenge.difficulty})")
+                }
+
+                challenge.copy(isUnlocked = isUnlocked)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ Error applying unlock logic to SQL challenges", e)
+            // On error, return all challenges as unlocked (fail-safe)
+            challenges.map { it.copy(isUnlocked = true) }
+        }
+    }
 
     /**
      * Fetches a single challenge by its document ID

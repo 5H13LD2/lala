@@ -5,7 +5,7 @@ data class Challenge(
     val title: String = "",
     val difficulty: String = "",
     val courseId: String = "",
-    val compilerType: String = "python", // Language compiler: "python", "java", "kotlin", "ruby", "javascript", "php" (default: python)
+    val compilerType: String = "",      // Language compiler: "python", "java", "kotlin", "ruby", "javascript", "php"
     val brokenCode: String = "",
     val correctOutput: String = "",
     val hint: String = "",
