@@ -51,7 +51,7 @@ class MainActivity3 : AppCompatActivity() {
     private fun setupRecyclerView() {
         adapter = CourseAdapter(mutableListOf()) { selectedCourse ->
             Log.d(TAG, "Selected course: id=${selectedCourse.courseId}, name=${selectedCourse.name}")
-            
+
             // Start CoreModule with course data
             startCoreModule(selectedCourse)
         }
@@ -64,19 +64,19 @@ class MainActivity3 : AppCompatActivity() {
 
     private fun startCoreModule(course: Course) {
         Log.d(TAG, "Starting CoreModule for course: ${course.courseId}")
-        
+
         val intent = Intent(this, CoreModule::class.java).apply {
             putExtra("COURSE_ID", course.courseId)
             putExtra("COURSE_NAME", course.name)
             putExtra("COURSE_DESC", course.description)
         }
-        
+
         // Log all extras for debugging
         Log.d(TAG, "Intent extras:")
         intent.extras?.keySet()?.forEach { key ->
             Log.d(TAG, "$key: ${intent.extras?.get(key)}")
         }
-        
+
         startActivity(intent)
     }
 
@@ -101,17 +101,26 @@ class MainActivity3 : AppCompatActivity() {
                 val courseList = snapshot.documents.mapNotNull { doc ->
                     try {
                         val courseId = doc.id
-                        Log.d(TAG, "Processing course document: $courseId")
-                        
+                        val status = doc.getString("status") ?: "published"
+
+                        Log.d(TAG, "Processing course document: $courseId, status: $status")
+
+                        // Filter out draft and inactive courses
+                        if (status == "draft" || status == "inactive") {
+                            Log.d(TAG, "Filtering out course $courseId with status: $status")
+                            return@mapNotNull null
+                        }
+
                         Course(
                             courseId = courseId,
                             name = doc.getString("title") ?: throw Exception("No title found"),
                             description = doc.getString("description") ?: "No description",
                             imageResId = getDynamicImage(courseId, doc.getString("title") ?: ""),
                             category = doc.getString("category") ?: "General",
-                            difficulty = doc.getString("difficulty") ?: "Beginner"
+                            difficulty = doc.getString("difficulty") ?: "Beginner",
+                            status = status
                         ).also {
-                            Log.d(TAG, "Created Course object: id=${it.courseId}, name=${it.name}")
+                            Log.d(TAG, "Created Course object: id=${it.courseId}, name=${it.name}, status=${it.status}")
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "Error parsing course ${doc.id}: ${e.message}")

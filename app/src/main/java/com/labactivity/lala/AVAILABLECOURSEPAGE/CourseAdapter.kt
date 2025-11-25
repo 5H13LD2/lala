@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.labactivity.lala.UTILS.DialogUtils
 import com.google.android.material.card.MaterialCardView
@@ -41,11 +42,11 @@ class CourseAdapter(
                 .addOnSuccessListener { document ->
                     val enrolledCourses = document.get(COURSE_TAKEN_FIELD) as? List<Map<String, Any>> ?: listOf()
                     val enrolledCourseIds = enrolledCourses.map { it["courseId"] as String }.toSet()
-                    
-                    val availableCourses = newCourses.filterNot { 
-                        enrolledCourseIds.contains(it.courseId) 
+
+                    val availableCourses = newCourses.filterNot {
+                        enrolledCourseIds.contains(it.courseId)
                     }
-                    
+
                     courses.clear()
                     courses.addAll(availableCourses)
                     notifyDataSetChanged()
@@ -106,7 +107,7 @@ class CourseAdapter(
                 )
 
                 val userRef = firestore.collection(USERS_COLLECTION).document(user.uid)
-                
+
                 if (document.exists()) {
                     userRef.update(COURSE_TAKEN_FIELD, FieldValue.arrayUnion(enrollmentData))
                         .addOnSuccessListener {
@@ -158,6 +159,17 @@ class CourseAdapter(
             imageView.setImageResource(course.imageResId)
             descriptionTextView.text = course.description
 
+            // Disable enroll button for archived courses
+            if (course.status == "archived") {
+                enrollButton.isEnabled = false
+                enrollButton.alpha = 0.5f
+                enrollButton.text = "Archived"
+            } else {
+                enrollButton.isEnabled = true
+                enrollButton.alpha = 1.0f
+                enrollButton.text = "Enroll"
+            }
+
             cardView.setOnClickListener {
                 Log.d(TAG, "Card clicked for course: ${course.courseId}")
                 navigateToCourse(course)
@@ -184,6 +196,17 @@ class CourseAdapter(
 
         private fun showEnrollmentDialog(course: Course) {
             val context = itemView.context
+
+            // Prevent enrollment in archived courses
+            if (course.status == "archived") {
+                Toast.makeText(
+                    context,
+                    "Cannot enroll in archived courses. This course is no longer accepting new enrollments.",
+                    Toast.LENGTH_LONG
+                ).show()
+                return
+            }
+
             val dialog = Dialog(context)
             dialog.setContentView(R.layout.custom_dialog)
             dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)

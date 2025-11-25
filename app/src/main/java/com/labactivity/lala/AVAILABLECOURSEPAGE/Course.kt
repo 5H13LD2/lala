@@ -7,6 +7,6 @@ data class Course(
     val imageResId: Int,
     val description: String = "",
     val category: String = "General",
-    val difficulty: String = "Beginner"
-
+    val difficulty: String = "Beginner",
+    val status: String = "published" // draft, published, inactive, archived
 )
