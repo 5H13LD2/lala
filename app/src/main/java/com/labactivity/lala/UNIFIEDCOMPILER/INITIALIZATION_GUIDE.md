@@ -47,9 +47,9 @@ lifecycleScope.launch {
         // Test Java
         val javaCompiler = CompilerFactory.getCompiler("java")
         val javaResult = javaCompiler.compile("""
-            public class Test {
-                public void run() {
-                    System.out.println("Hello from Java!");
+            public class Main {
+                public void static void main(String[]args) {
+                    System.out.println("hello Ma'am tere!");
                 }
             }
         """.trimIndent())
