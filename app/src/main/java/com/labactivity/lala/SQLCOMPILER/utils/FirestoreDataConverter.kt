@@ -66,6 +66,10 @@ object FirestoreDataConverter {
             // Parse tags
             val tags = (document.get("tags") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
 
+            Log.d(TAG, "Successfully parsed challenge: $title")
+            Log.d(TAG, "  - Sample table '${sampleTable.name}' has ${sampleTable.rows.size} rows")
+            Log.d(TAG, "  - Expected result has ${expectedResult.rows.size} rows")
+
             return SQLChallenge(
                 id = id,
                 title = title,
@@ -101,10 +105,17 @@ object FirestoreDataConverter {
         val rowsData = map["rows"]
 
         val rows = when (rowsData) {
+            // Case 1: rows is stored as a JSON string like "[[1,"Jerico",20],[2,"Maria",21]]"
+            is String -> parseRowsFromJsonString(rowsData)
+            // Case 2: rows is stored as an actual array
             is List<*> -> parseRowsList(rowsData, columns)
-            else -> emptyList()
+            else -> {
+                Log.w(TAG, "Unknown rows format in expected_result: ${rowsData?.javaClass?.simpleName}")
+                emptyList()
+            }
         }
 
+        Log.d(TAG, "Parsed ExpectedResult: ${columns.size} columns, ${rows.size} rows")
         return ExpectedResult(columns = columns, rows = rows)
     }
 
@@ -118,11 +129,67 @@ object FirestoreDataConverter {
         val rowsData = map["rows"]
 
         val rows = when (rowsData) {
+            // Case 1: rows is stored as a JSON string like "[[1,"Jerico",20],[2,"Maria",21]]"
+            is String -> parseRowsFromJsonString(rowsData)
+            // Case 2: rows is stored as an actual array
             is List<*> -> parseRowsList(rowsData, columns)
-            else -> emptyList()
+            else -> {
+                Log.w(TAG, "Unknown rows format in table $name: ${rowsData?.javaClass?.simpleName}")
+                emptyList()
+            }
         }
 
+        Log.d(TAG, "Parsed TableData '$name': ${columns.size} columns, ${rows.size} rows")
         return TableData(name = name, columns = columns, rows = rows)
+    }
+
+    /**
+     * Parses rows from a JSON string containing array of arrays
+     * Example: "[[1,"Jerico",20],[2,"Maria",21],[3,"John",22]]"
+     */
+    private fun parseRowsFromJsonString(jsonString: String): List<List<Any>> {
+        return try {
+            val cleanedString = jsonString.trim()
+
+            if (!cleanedString.startsWith("[") || !cleanedString.endsWith("]")) {
+                Log.w(TAG, "Invalid rows JSON string format: $jsonString")
+                return emptyList()
+            }
+
+            val jsonArray = JSONArray(cleanedString)
+            val rows = mutableListOf<List<Any>>()
+
+            for (i in 0 until jsonArray.length()) {
+                val rowArray = jsonArray.optJSONArray(i)
+                if (rowArray != null) {
+                    val row = mutableListOf<Any>()
+                    for (j in 0 until rowArray.length()) {
+                        val value = when {
+                            rowArray.isNull(j) -> ""
+                            else -> {
+                                val obj = rowArray.get(j)
+                                when (obj) {
+                                    is Int -> obj.toLong()
+                                    is Long -> obj
+                                    is Double -> if (obj % 1.0 == 0.0) obj.toLong() else obj
+                                    is String -> obj
+                                    is Boolean -> obj
+                                    else -> obj.toString()
+                                }
+                            }
+                        }
+                        row.add(value)
+                    }
+                    rows.add(row)
+                }
+            }
+
+            Log.d(TAG, "Successfully parsed ${rows.size} rows from JSON string")
+            rows
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing rows from JSON string: $jsonString", e)
+            emptyList()
+        }
     }
 
     /**
@@ -253,10 +320,23 @@ object FirestoreDataConverter {
      * Validates a SQLChallenge object
      */
     fun isValid(challenge: SQLChallenge): Boolean {
-        return challenge.title.isNotBlank() &&
+        val isValid = challenge.title.isNotBlank() &&
                 challenge.description.isNotBlank() &&
                 challenge.expectedResult.columns.isNotEmpty() &&
                 challenge.sampleTable.name.isNotBlank() &&
-                challenge.sampleTable.columns.isNotEmpty()
+                challenge.sampleTable.columns.isNotEmpty() &&
+                challenge.sampleTable.rows.isNotEmpty()  // Also check that rows were parsed
+
+        if (!isValid) {
+            Log.w(TAG, "Challenge validation failed for '${challenge.title}':")
+            Log.w(TAG, "  - title blank: ${challenge.title.isBlank()}")
+            Log.w(TAG, "  - description blank: ${challenge.description.isBlank()}")
+            Log.w(TAG, "  - expectedResult columns empty: ${challenge.expectedResult.columns.isEmpty()}")
+            Log.w(TAG, "  - sampleTable name blank: ${challenge.sampleTable.name.isBlank()}")
+            Log.w(TAG, "  - sampleTable columns empty: ${challenge.sampleTable.columns.isEmpty()}")
+            Log.w(TAG, "  - sampleTable rows empty: ${challenge.sampleTable.rows.isEmpty()}")
+        }
+
+        return isValid
     }
 }
