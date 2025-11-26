@@ -106,7 +106,7 @@
         android:layout_height="0dp"
         android:layout_weight="0.8">
 
-        <!-- Code Editor Container -->
+        <!-- Code Editor Container with Line Numbers -->
         <androidx.cardview.widget.CardView
             android:id="@+id/editorCard"
             android:layout_width="match_parent"
@@ -116,32 +116,85 @@
             app:cardElevation="4dp"
             app:cardCornerRadius="12dp">
 
-            <!-- Code Editor -->
-            <ScrollView
+            <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#1E1E1E"
                 android:fillViewport="true">
 
-                <EditText
-                    android:id="@+id/etCodeEditor"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#1E1E1E"
-                    android:padding="16dp"
-                    android:textColor="#D4D4D4"
-                    android:textColorHint="#6A9955"
-                    android:hint="// Write your code here..."
-                    android:fontFamily="monospace"
-                    android:textSize="15sp"
-                    android:lineSpacingExtra="4dp"
-                    android:gravity="start|top"
-                    android:inputType="textMultiLine|textNoSuggestions"
-                    android:scrollbars="vertical"
-                    android:minHeight="200dp"
-                    android:textCursorDrawable="@null"
-                    android:importantForAutofill="no" />
-            </ScrollView>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:background="#1E1E1E">
+
+                    <!-- Line Numbers Column -->
+                    <ScrollView
+                        android:id="@+id/svLineNumbers"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:background="#252526"
+                        android:scrollbars="none"
+                        android:fillViewport="true">
+
+                        <TextView
+                            android:id="@+id/tvLineNumbers"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="#252526"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="16dp"
+                            android:textColor="#858585"
+                            android:fontFamily="monospace"
+                            android:textSize="15sp"
+                            android:lineSpacingExtra="4dp"
+                            android:gravity="end"
+                            android:minWidth="40dp"
+                            android:text="1" />
+                    </ScrollView>
+
+                    <!-- Divider Line -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="#3C3C3C" />
+
+                    <!-- Code Editor -->
+                    <ScrollView
+                        android:id="@+id/svCodeEditor"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#1E1E1E"
+                        android:fillViewport="true">
+
+                        <EditText
+                            android:id="@+id/etCodeEditor"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="#1E1E1E"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="16dp"
+                            android:paddingTop="16dp"
+                            android:paddingBottom="16dp"
+                            android:textColor="#D4D4D4"
+                            android:textColorHint="#6A9955"
+                            android:hint="// Write your code here..."
+                            android:fontFamily="monospace"
+                            android:textSize="15sp"
+                            android:lineSpacingExtra="4dp"
+                            android:gravity="start|top"
+                            android:inputType="textMultiLine|textNoSuggestions"
+                            android:scrollbars="none"
+                            android:minWidth="300dp"
+                            android:minHeight="200dp"
+                            android:textCursorDrawable="@null"
+                            android:importantForAutofill="no" />
+                    </ScrollView>
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
         </androidx.cardview.widget.CardView>
 
         <!-- Output Display (Initially Hidden) -->

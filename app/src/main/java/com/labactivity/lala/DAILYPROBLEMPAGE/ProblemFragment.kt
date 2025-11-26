@@ -24,6 +24,9 @@ class ProblemFragment : Fragment() {
     private var courseId: String = ""
     private var compilerType: String = ""
 
+    private var currentHintIndex = 0
+    private var hints: List<String> = emptyList()
+
     companion object {
         private const val ARG_PROBLEM_ID = "problem_id"
         private const val ARG_COURSE_ID = "course_id"
@@ -99,6 +102,11 @@ class ProblemFragment : Fragment() {
                     }
                     binding.tvExamples.text = examplesText
 
+                    // Store hints for progressive reveal
+                    hints = problem.hints
+                    currentHintIndex = 0
+                    updateHintButton()
+
                     // Show/hide solved/revision badges based on user progress
                     lifecycleScope.launch {
                         viewModel.userProgress.collect { progress ->
@@ -112,14 +120,50 @@ class ProblemFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        // Report bug button
-        binding.btnReportBug.setOnClickListener {
-            // TODO: Implement bug reporting
-        }
+        // Hint button - reveals hints one at a time
+        binding.btnHint.setOnClickListener {
+            if (hints.isNotEmpty() && currentHintIndex < hints.size) {
+                // Show hints container
+                binding.hintsContainer.isVisible = true
 
-        // Share button
-        binding.btnShare.setOnClickListener {
-            // TODO: Implement sharing
+                // Build hints text up to current index
+                val hintsToShow = hints.take(currentHintIndex + 1)
+                val hintsText = hintsToShow.mapIndexed { index, hint ->
+                    "${index + 1}. $hint"
+                }.joinToString("\n\n")
+
+                binding.tvHints.text = hintsText
+
+                // Move to next hint
+                currentHintIndex++
+
+                // Update button text
+                updateHintButton()
+            }
+        }
+    }
+
+    private fun updateHintButton() {
+        when {
+            hints.isEmpty() -> {
+                binding.btnHint.isVisible = false
+            }
+            currentHintIndex >= hints.size -> {
+                binding.btnHint.text = "No more hints"
+                binding.btnHint.isEnabled = false
+                binding.btnHint.alpha = 0.5f
+            }
+            currentHintIndex == 0 -> {
+                binding.btnHint.text = "💡 Show Hint (${hints.size} available)"
+                binding.btnHint.isEnabled = true
+                binding.btnHint.alpha = 1f
+            }
+            else -> {
+                val remaining = hints.size - currentHintIndex
+                binding.btnHint.text = "💡 Next Hint ($remaining remaining)"
+                binding.btnHint.isEnabled = true
+                binding.btnHint.alpha = 1f
+            }
         }
     }
 

@@ -79,7 +79,7 @@ class SolutionFragment : Fragment() {
                             displaySolution(problem)
                         } else {
                             // Hide solution until attempt is made
-                            binding.tvSolutionCode.text = "Complete the problem first to see the solution!"
+                            setCodeWithLineNumbers("// Complete the problem first to see the solution!")
                             binding.tvExplanation.text = ""
                         }
                     }
@@ -89,8 +89,23 @@ class SolutionFragment : Fragment() {
     }
 
     private fun displaySolution(problem: DailyProblem) {
-        // Display solution code (this should be added to DailyProblem model)
-        binding.tvSolutionCode.text = "// Solution will be available here\n// Check back after attempting the problem"
+        // Display solution code with line numbers
+        val solutionCode = """
+            |// Solution for: ${problem.title}
+            |// Language: $compilerType
+            |
+            |fun solve(input: String): String {
+            |    // TODO: Implementation
+            |    return input
+            |}
+            |
+            |fun main() {
+            |    val result = solve("example")
+            |    println(result)
+            |}
+        """.trimMargin()
+
+        setCodeWithLineNumbers(solutionCode)
 
         // Display explanation
         binding.tvExplanation.text = buildString {
@@ -109,6 +124,18 @@ class SolutionFragment : Fragment() {
             append("\nSpace Complexity: O(1)")
             append("\n\nTags: ${problem.tags.joinToString(", ")}")
         }
+    }
+
+    /**
+     * Sets the code text and generates corresponding line numbers
+     */
+    private fun setCodeWithLineNumbers(code: String) {
+        binding.tvSolutionCode.text = code
+
+        // Generate line numbers
+        val lineCount = code.lines().size.coerceAtLeast(1)
+        val lineNumbers = (1..lineCount).joinToString("\n")
+        binding.tvLineNumbers.text = lineNumbers
     }
 
     override fun onDestroyView() {

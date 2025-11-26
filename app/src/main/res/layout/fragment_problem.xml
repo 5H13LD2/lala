@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Title and Tags -->
+        <!-- Title and Difficulty -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -22,7 +22,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Reduce Polyfill"
+                android:text="Problem Title"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -50,49 +50,32 @@
                 android:id="@+id/tvSolved"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Solved"
-                android:textColor="#FFFFFF"
-                android:background="@drawable/modern_button_primary"
+                android:text="✓ Solved"
+                android:textColor="#4CAF50"
+                android:background="@drawable/check_mark_badge"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="4dp"
-                android:layout_marginEnd="8dp" />
+                android:textSize="12sp"
+                android:layout_marginEnd="8dp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/tvRevision"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Revision"
-                android:textColor="#FFFFFF"
-                android:background="@drawable/modern_button_secondary"
+                android:text="⟳ Revision"
+                android:textColor="#FF9800"
+                android:background="@drawable/xp_progress_bar_fill"
                 android:paddingHorizontal="12dp"
                 android:paddingVertical="4dp"
-                android:layout_marginEnd="8dp" />
+                android:textSize="12sp"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1" />
 
-            <TextView
-                android:id="@+id/btnReportBug"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Report Bug 🐛"
-                android:textColor="#FF6B6B"
-                android:background="@drawable/modern_card_background"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:id="@+id/btnShare"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Share 🔗"
-                android:textColor="#FFFFFF"
-                android:background="@drawable/modern_button_primary"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp" />
         </LinearLayout>
 
         <!-- Problem Description -->
@@ -113,6 +96,48 @@
             android:layout_marginTop="16dp"
             android:textColor="#CCCCCC"
             android:textSize="16sp" />
+
+        <!-- Hint Button -->
+        <Button
+            android:id="@+id/btnHint"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="24dp"
+            android:text="💡 Show Hint"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:background="@drawable/modern_button_secondary"
+            android:paddingHorizontal="24dp" />
+
+        <!-- Hints Container (Initially Hidden) -->
+        <LinearLayout
+            android:id="@+id/hintsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/modern_card_background"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💡 Hints"
+                android:textColor="#FFD700"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvHints"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#CCCCCC"
+                android:textSize="14sp"
+                android:lineSpacingExtra="6dp" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>
