@@ -53,11 +53,12 @@ class JavaCompiler : CourseCompiler {
         val processedCode = ensureProperStructure(code, className)
 
         try {
+            Log.d(TAG, "Executing Java code (class: $className)...")
             withTimeout(config.timeout) {
                 executeWithPiston(processedCode, className, startTime, config)
             }
         } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-            Log.w(TAG, "Execution timeout")
+            Log.w(TAG, "❌ Execution timeout")
             CompilerResult(
                 success = false,
                 output = "",
@@ -237,14 +238,30 @@ class JavaCompiler : CourseCompiler {
                     "Code executed successfully (no output)"
                 }
 
-                Log.d(TAG, "Execution completed successfully in ${executionTime}ms")
+                // Validate test cases if provided
+                var testCasesPassed = 0
+                var totalTestCases = config.testCases.size
+
+                if (totalTestCases > 0) {
+                    Log.d(TAG, "Validating ${totalTestCases} test cases...")
+                    testCasesPassed = validateTestCases(stdout, config.testCases)
+                    Log.d(TAG, "Test cases passed: $testCasesPassed/$totalTestCases")
+                }
+
+                if (totalTestCases > 0) {
+                    Log.d(TAG, "✅ Code executed successfully in ${executionTime}ms (Test cases: $testCasesPassed/$totalTestCases)")
+                } else {
+                    Log.d(TAG, "✅ Code executed successfully in ${executionTime}ms")
+                }
 
                 return CompilerResult(
                     success = true,
                     output = finalOutput.take(config.maxOutputLength),
                     error = null,
                     executionTime = executionTime,
-                    compiledSuccessfully = true
+                    compiledSuccessfully = true,
+                    testCasesPassed = testCasesPassed,
+                    totalTestCases = totalTestCases
                 )
             }
 
@@ -350,4 +367,30 @@ public class Main {
     }
 
     override fun supportsTestCases(): Boolean = true
+
+    /**
+     * Validate test cases by comparing actual output with expected output
+     */
+    private fun validateTestCases(
+        actualOutput: String,
+        testCases: List<com.labactivity.lala.UNIFIEDCOMPILER.models.TestCase>
+    ): Int {
+        var passed = 0
+
+        testCases.forEach { testCase ->
+            val expected = testCase.expectedOutput.trim()
+            val actual = actualOutput.trim()
+
+            if (actual == expected) {
+                passed++
+                Log.d(TAG, "  ✓ Test case passed: ${testCase.description}")
+            } else {
+                Log.d(TAG, "  ✗ Test case failed: ${testCase.description}")
+                Log.d(TAG, "    Expected: $expected")
+                Log.d(TAG, "    Got: $actual")
+            }
+        }
+
+        return passed
+    }
 }

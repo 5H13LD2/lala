@@ -5,6 +5,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.labactivity.lala.GAMIFICATION.XPManager
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -18,6 +19,8 @@ class DailyProblemRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
+
+    private val xpManager = XPManager()
 
     companion object {
         private const val TAG = "DailyProblemRepo"
@@ -121,6 +124,13 @@ class DailyProblemRepository(
             IllegalStateException("User not authenticated")
         )
 
+        Log.d(TAG, "═══════════════════════════════════════")
+        Log.d(TAG, "Submitting solution for problem: $problemId")
+        Log.d(TAG, "User: $userId")
+        Log.d(TAG, "Status: $status")
+        Log.d(TAG, "Score: $score")
+        Log.d(TAG, "Test cases: $testCasesPassed/$totalTestCases")
+
         val progress = DailyProblemProgress(
             problemId = problemId,
             courseId = courseId,
@@ -134,6 +144,8 @@ class DailyProblemRepository(
         )
 
         return try {
+            Log.d(TAG, "Fetching progress for problem $problemId and user $userId")
+
             firestore.collection(COLLECTION_USERS)
                 .document(userId)
                 .collection(SUBCOLLECTION_PROGRESS)
@@ -141,10 +153,27 @@ class DailyProblemRepository(
                 .set(progress)
                 .await()
 
-            Log.d(TAG, "Successfully submitted solution for problem: $problemId")
+            Log.d(TAG, "Progress saved successfully")
+
+            // Award XP if solution passed
+            val passed = status == "completed" && score >= 70
+            if (passed) {
+                Log.d(TAG, "XPManager               com.labactivity.lala                 D  ═══════════════════════════════════════")
+                Log.d(TAG, "XPManager               com.labactivity.lala                 D  Awarding Technical Assessment XP")
+                Log.d(TAG, "XPManager               com.labactivity.lala                 D    Challenge: Daily Problem $problemId")
+                Log.d(TAG, "XPManager               com.labactivity.lala                 D    Score: $score")
+
+                xpManager.awardTechnicalAssessmentXP(userId, passed)
+
+                Log.d(TAG, "✅ Awarded XP for completing daily problem: $problemId")
+            }
+
+            Log.d(TAG, "✅ Progress saved")
+            Log.d(TAG, "═══════════════════════════════════════")
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e(TAG, "Error submitting solution for problem: $problemId", e)
+            Log.e(TAG, "❌ Error submitting solution for problem: $problemId", e)
+            Log.d(TAG, "═══════════════════════════════════════")
             Result.failure(e)
         }
     }

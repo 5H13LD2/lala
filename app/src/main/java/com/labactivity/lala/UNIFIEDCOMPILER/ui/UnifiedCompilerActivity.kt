@@ -18,13 +18,18 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.labactivity.lala.R
+import android.util.Log
 import com.labactivity.lala.UNIFIEDCOMPILER.CompilerFactory
 import com.labactivity.lala.UNIFIEDCOMPILER.models.CompilerConfig
 import com.labactivity.lala.UNIFIEDCOMPILER.services.CompilerService
+import com.labactivity.lala.UNIFIEDCOMPILER.services.UnifiedAssessmentService
+import com.labactivity.lala.UNIFIEDCOMPILER.models.UnifiedChallenge
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import com.google.firebase.firestore.FirebaseFirestore
 
 /**
  * UNIVERSAL COMPILER ACTIVITY
@@ -98,10 +103,13 @@ class UnifiedCompilerActivity : AppCompatActivity() {
 
     // Services
     private val compilerService = CompilerService()
+    private val assessmentService = UnifiedAssessmentService()
 
     // State
     private var currentLanguage = "python"
     private var courseId: String? = null
+    private var challengeId: String? = null
+    private var currentChallenge: UnifiedChallenge? = null
     private var challengeHints: List<String> = emptyList()
     private var challengeHint: String = ""
     private var challengeDescription: String = ""
@@ -113,8 +121,11 @@ class UnifiedCompilerActivity : AppCompatActivity() {
     private var isUndoRedoOperation = false
 
     companion object {
+        private const val TAG = "UnifiedCompilerActivity"
         const val EXTRA_LANGUAGE = "extra_language"
         const val EXTRA_COURSE_ID = "extra_course_id"
+        const val EXTRA_CHALLENGE_ID = "extra_challenge_id"
+        const val EXTRA_CHALLENGE = "extra_challenge"
         const val EXTRA_INITIAL_CODE = "extra_initial_code"
         const val EXTRA_CHALLENGE_DESCRIPTION = "extra_challenge_description"
         const val EXTRA_CHALLENGE_HINT = "extra_challenge_hint"
@@ -515,6 +526,19 @@ class UnifiedCompilerActivity : AppCompatActivity() {
         // Load course ID if provided
         courseId = intent.getStringExtra(EXTRA_COURSE_ID)
 
+        // Load challenge ID if provided
+        challengeId = intent.getStringExtra(EXTRA_CHALLENGE_ID)
+
+        Log.d(TAG, "Loading initial data:")
+        Log.d(TAG, "  courseId: $courseId")
+        Log.d(TAG, "  challengeId: $challengeId")
+
+        // If challengeId is provided, fetch the challenge from Firebase
+        if (challengeId != null) {
+            Log.d(TAG, "Challenge ID provided - fetching from Firebase...")
+            fetchChallengeFromFirebase(challengeId!!)
+        }
+
         // Load language - with fallback logic
         val intentLanguage = intent.getStringExtra(EXTRA_LANGUAGE)
 
@@ -553,6 +577,84 @@ class UnifiedCompilerActivity : AppCompatActivity() {
 
         // Update UI for initial language
         updateEditorForLanguage()
+    }
+
+    /**
+     * Fetch challenge from Firebase technical_assessment collection
+     */
+    private fun fetchChallengeFromFirebase(challengeId: String) {
+        lifecycleScope.launch {
+            try {
+                Log.d(TAG, "Fetching challenge: $challengeId from technical_assesment")
+                showLoading(true, "Loading challenge...")
+
+                val document = FirebaseFirestore.getInstance()
+                    .collection("technical_assesment")
+                    .document(challengeId)
+                    .get()
+                    .await()
+
+                if (document.exists()) {
+                    currentChallenge = document.toObject(UnifiedChallenge::class.java)?.copy(
+                        id = document.id
+                    )
+
+                    if (currentChallenge != null) {
+                        Log.d(TAG, "✅ Challenge loaded: ${currentChallenge!!.title}")
+                        Log.d(TAG, "  Compiler type: ${currentChallenge!!.compilerType}")
+                        Log.d(TAG, "  Difficulty: ${currentChallenge!!.difficulty}")
+                        Log.d(TAG, "  Test cases: ${currentChallenge!!.correctOutput}")
+
+                        // Update language from challenge
+                        currentLanguage = currentChallenge!!.compilerType
+                        selectLanguageChip(currentLanguage)
+
+                        // Load challenge description and hints
+                        challengeDescription = currentChallenge!!.description
+                        challengeHints = currentChallenge!!.hints
+                        btnHint.visibility = if (challengeDescription.isNotEmpty() || challengeHints.isNotEmpty()) {
+                            View.VISIBLE
+                        } else {
+                            View.GONE
+                        }
+
+                        // Set toolbar title to challenge title
+                        supportActionBar?.title = currentChallenge!!.title
+
+                        Toast.makeText(
+                            this@UnifiedCompilerActivity,
+                            "Challenge loaded: ${currentChallenge!!.title}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        Log.e(TAG, "❌ Failed to parse challenge")
+                        Toast.makeText(
+                            this@UnifiedCompilerActivity,
+                            "Failed to load challenge data",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                } else {
+                    Log.e(TAG, "❌ Challenge not found: $challengeId")
+                    Toast.makeText(
+                        this@UnifiedCompilerActivity,
+                        "Challenge not found",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+
+                showLoading(false)
+
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ Error fetching challenge", e)
+                showLoading(false)
+                Toast.makeText(
+                    this@UnifiedCompilerActivity,
+                    "Error loading challenge: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     /**
@@ -648,12 +750,42 @@ for (i in 0..4) {
                 testResultsCard.visibility = View.GONE
 
                 // Debug logging
-                android.util.Log.d("UnifiedCompiler", "courseId: $courseId")
-                android.util.Log.d("UnifiedCompiler", "currentLanguage: $currentLanguage")
+                Log.d(TAG, "═══════════════════════════════════════")
+                Log.d(TAG, "Execute Code Called")
+                Log.d(TAG, "courseId: $courseId")
+                Log.d(TAG, "challengeId: $challengeId")
+                Log.d(TAG, "currentLanguage: $currentLanguage")
+                Log.d(TAG, "hasChallenge: ${currentChallenge != null}")
+                Log.d(TAG, "═══════════════════════════════════════")
 
-                // FIXED: Always use currentLanguage (which has fallback logic)
-                val compiler = CompilerFactory.getCompiler(currentLanguage)
-                val result = compiler.compile(code, CompilerConfig())
+                // Check if this is a challenge from technical_assessment
+                val challenge = currentChallenge
+                val result = if (challenge != null && challengeId != null) {
+                    // Execute using UnifiedAssessmentService for full logging
+                    Log.d(TAG, "Using UnifiedAssessmentService for challenge execution")
+                    val executionResult = assessmentService.executeChallenge(
+                        challengeId = challengeId!!,
+                        userCode = code,
+                        challenge = challenge
+                    )
+
+                    // Save progress if passed
+                    if (executionResult.passed) {
+                        assessmentService.saveProgress(
+                            challengeId = challengeId!!,
+                            challenge = challenge,
+                            userCode = code,
+                            executionResult = executionResult
+                        )
+                    }
+
+                    executionResult.compilerResult
+                } else {
+                    // Regular code execution without challenge validation
+                    Log.d(TAG, "Using direct compiler execution (no challenge)")
+                    val compiler = CompilerFactory.getCompiler(currentLanguage)
+                    compiler.compile(code, CompilerConfig())
+                }
 
                 showLoading(false)
 

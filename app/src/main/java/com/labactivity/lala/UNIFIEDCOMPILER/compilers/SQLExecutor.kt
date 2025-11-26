@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import com.labactivity.lala.UNIFIEDCOMPILER.CourseCompiler
 import com.labactivity.lala.UNIFIEDCOMPILER.models.CompilerConfig
 import com.labactivity.lala.UNIFIEDCOMPILER.models.CompilerResult
@@ -19,6 +20,10 @@ class SQLExecutor(context: Context) : CourseCompiler {
 
     private val dbHelper = SQLDatabaseHelper(context)
     private val database: SQLiteDatabase = dbHelper.writableDatabase
+
+    companion object {
+        private const val TAG = "UnifiedSQLExecutor"
+    }
 
     // Security: Blocked keywords to prevent destructive operations
     private val blockedKeywords = setOf(
@@ -44,6 +49,7 @@ class SQLExecutor(context: Context) : CourseCompiler {
 
             withTimeout(config.timeout) {
                 try {
+                    Log.d(TAG, "Executing SQL query: $code")
                     val cursor: Cursor = database.rawQuery(code, null)
                     val executionTime = System.currentTimeMillis() - startTime
 
@@ -65,6 +71,8 @@ class SQLExecutor(context: Context) : CourseCompiler {
                         rows.add(row)
                     }
                     cursor.close()
+
+                    Log.d(TAG, "✅ Query executed successfully: ${rows.size} rows returned")
 
                     // Format output as table
                     val output = formatQueryResult(columns, rows)
@@ -237,6 +245,8 @@ class SQLExecutor(context: Context) : CourseCompiler {
      */
     fun addCustomTable(tableName: String, columns: List<String>, rows: List<List<Any>>) {
         try {
+            Log.d(TAG, "Creating table: $tableName with ${columns.size} columns and ${rows.size} rows")
+
             // Create table
             val columnDefs = columns.joinToString(", ") { "$it TEXT" }
             database.execSQL("DROP TABLE IF EXISTS $tableName")
@@ -247,8 +257,11 @@ class SQLExecutor(context: Context) : CourseCompiler {
                 val values = row.joinToString(", ") { "'$it'" }
                 database.execSQL("INSERT INTO $tableName VALUES ($values)")
             }
+
+            Log.d(TAG, "✅ Created table $tableName with ${rows.size} rows")
         } catch (e: Exception) {
-            // Handle table creation error
+            Log.e(TAG, "❌ Error creating table $tableName", e)
+            throw e
         }
     }
 }

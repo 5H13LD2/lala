@@ -3,6 +3,7 @@ package com.labactivity.lala.SQLCOMPILER.models
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.PropertyName
+import com.google.firebase.firestore.Exclude
 
 /**
  * Main data class representing a SQL challenge from Firestore
@@ -281,6 +282,7 @@ data class SQLChallengeProgress(
     /**
      * Returns a user-friendly status text
      */
+    @get:Exclude
     val statusText: String
         get() = when (status) {
             "not_started" -> "Not Started"
@@ -292,6 +294,7 @@ data class SQLChallengeProgress(
     /**
      * Returns a formatted time taken string
      */
+    @get:Exclude
     val formattedTimeTaken: String
         get() {
             if (timeTaken == 0L) return "N/A"

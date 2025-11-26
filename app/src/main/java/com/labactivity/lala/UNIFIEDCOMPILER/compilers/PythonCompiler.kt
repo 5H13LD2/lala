@@ -1,6 +1,7 @@
 package com.labactivity.lala.UNIFIEDCOMPILER.compilers
 
 import android.content.Context
+import android.util.Log
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
 import com.labactivity.lala.UNIFIEDCOMPILER.CourseCompiler
@@ -16,6 +17,10 @@ import kotlinx.coroutines.withTimeout
  */
 class PythonCompiler(private val context: Context) : CourseCompiler {
 
+    companion object {
+        private const val TAG = "UnifiedPythonCompiler"
+    }
+
     init {
         // Initialize Python if not already started
         if (!Python.isStarted()) {
@@ -25,6 +30,8 @@ class PythonCompiler(private val context: Context) : CourseCompiler {
 
     override suspend fun compile(code: String, config: CompilerConfig): CompilerResult = withContext(Dispatchers.IO) {
         val startTime = System.currentTimeMillis()
+
+        Log.d(TAG, "Executing Python code...")
 
         try {
             withTimeout(config.timeout) {
@@ -91,19 +98,41 @@ _errors = _stderr_capture.getvalue()
 
                     val hasError = errors.isNotEmpty() || (execError != null && execError.toString() != "None")
 
+                    // Validate test cases if provided
+                    var testCasesPassed = 0
+                    var totalTestCases = config.testCases.size
+
+                    if (!hasError && totalTestCases > 0) {
+                        Log.d(TAG, "Validating ${totalTestCases} test cases...")
+                        testCasesPassed = validateTestCases(output, config.testCases)
+                        Log.d(TAG, "Test cases passed: $testCasesPassed/$totalTestCases")
+                    }
+
+                    if (!hasError) {
+                        if (totalTestCases > 0) {
+                            Log.d(TAG, "✅ Code executed successfully in ${executionTime}ms (Test cases: $testCasesPassed/$totalTestCases)")
+                        } else {
+                            Log.d(TAG, "✅ Code executed successfully in ${executionTime}ms")
+                        }
+                    } else {
+                        Log.e(TAG, "❌ Execution error: ${errors.ifEmpty { execError?.toString() }}")
+                    }
+
                     CompilerResult(
                         success = !hasError,
                         output = finalOutput.take(config.maxOutputLength),
                         error = if (hasError) errors.ifEmpty { execError?.toString() } else null,
                         executionTime = executionTime,
                         compiledSuccessfully = true,
-                        testCasesPassed = 0,
-                        totalTestCases = 0
+                        testCasesPassed = testCasesPassed,
+                        totalTestCases = totalTestCases
                     )
 
                 } catch (e: Exception) {
                     val executionTime = System.currentTimeMillis() - startTime
                     val errorMsg = e.message ?: e.toString()
+
+                    Log.e(TAG, "❌ Python execution failed: $errorMsg", e)
 
                     CompilerResult(
                         success = false,
@@ -139,5 +168,31 @@ _errors = _stderr_capture.getvalue()
         } catch (e: Exception) {
             e.message // Return error message
         }
+    }
+
+    /**
+     * Validate test cases by comparing actual output with expected output
+     */
+    private fun validateTestCases(
+        actualOutput: String,
+        testCases: List<com.labactivity.lala.UNIFIEDCOMPILER.models.TestCase>
+    ): Int {
+        var passed = 0
+
+        testCases.forEach { testCase ->
+            val expected = testCase.expectedOutput.trim()
+            val actual = actualOutput.trim()
+
+            if (actual == expected) {
+                passed++
+                Log.d(TAG, "  ✓ Test case passed: ${testCase.description}")
+            } else {
+                Log.d(TAG, "  ✗ Test case failed: ${testCase.description}")
+                Log.d(TAG, "    Expected: $expected")
+                Log.d(TAG, "    Got: $actual")
+            }
+        }
+
+        return passed
     }
 }

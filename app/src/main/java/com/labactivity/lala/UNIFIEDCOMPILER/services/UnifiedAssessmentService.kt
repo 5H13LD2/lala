@@ -1,5 +1,6 @@
 package com.labactivity.lala.UNIFIEDCOMPILER.services
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
@@ -35,6 +36,7 @@ class UnifiedAssessmentService {
     private val compilerService = CompilerService()
 
     companion object {
+        private const val TAG = "UnifiedAssessment"
         private const val COLLECTION_TECHNICAL_ASSESSMENT = "technical_assesment"
         private const val COLLECTION_USER_PROGRESS = "user_progress"
         private const val SUB_COLLECTION_ASSESSMENT_PROGRESS = "technical_assessment_progress"
@@ -112,15 +114,18 @@ class UnifiedAssessmentService {
         challenge: UnifiedChallenge
     ): ChallengeExecutionResult {
 
-        // ADD THIS DEBUG LOG
-        android.util.Log.d("UnifiedAssessment", "compilerType from challenge: '${challenge.compilerType}'")
-        android.util.Log.d("UnifiedAssessment", "Supported languages: ${CompilerFactory.getSupportedLanguages()}")
+        Log.d(TAG, "═══════════════════════════════════════")
+        Log.d(TAG, "Executing challenge: ${challenge.title}")
+        Log.d(TAG, "Challenge ID: $challengeId")
+        Log.d(TAG, "Compiler type: ${challenge.compilerType}")
+        Log.d(TAG, "Supported languages: ${CompilerFactory.getSupportedLanguages()}")
 
         val startTime = System.currentTimeMillis()
 
         try {
             // Get the appropriate compiler
             val compiler = CompilerFactory.getCompiler(challenge.compilerType)
+            Log.d(TAG, "✓ Compiler loaded: ${compiler.getLanguageName()}")
 
             // Build test cases from challenge
             val testCases = buildTestCases(challenge)
@@ -144,6 +149,14 @@ class UnifiedAssessmentService {
 
             val passed = score >= 70 // Passing grade: 70%
 
+            Log.d(TAG, "Execution result:")
+            Log.d(TAG, "  Success: ${result.success}")
+            Log.d(TAG, "  Score: $score")
+            Log.d(TAG, "  Test cases: ${result.testCasesPassed}/${result.totalTestCases}")
+            Log.d(TAG, "  Passed: $passed")
+            Log.d(TAG, "  Time: ${System.currentTimeMillis() - startTime}ms")
+            Log.d(TAG, "═══════════════════════════════════════")
+
             return ChallengeExecutionResult(
                 compilerResult = result,
                 score = score,
@@ -154,6 +167,8 @@ class UnifiedAssessmentService {
             )
 
         } catch (e: Exception) {
+            Log.e(TAG, "❌ Execution failed: ${e.message}", e)
+            Log.d(TAG, "═══════════════════════════════════════")
             return ChallengeExecutionResult(
                 compilerResult = CompilerResult(
                     success = false,
@@ -180,18 +195,58 @@ class UnifiedAssessmentService {
         val userId = auth.currentUser?.uid ?: return
 
         try {
+            // Step 1: Fetch existing progress
+            Log.d(TAG, "Fetching progress for challenge $challengeId and user $userId")
+
+            val existingProgressDoc = firestore.collection(COLLECTION_USER_PROGRESS)
+                .document(userId)
+                .collection(SUB_COLLECTION_ASSESSMENT_PROGRESS)
+                .document(challengeId)
+                .get()
+                .await()
+
+            val progressExists = existingProgressDoc.exists()
+            val existingProgress = if (progressExists) {
+                existingProgressDoc.toObject(UnifiedChallengeProgress::class.java)
+            } else null
+
+            Log.d(TAG, "Progress found: $progressExists")
+
+            // Step 2: Calculate score and grading
+            val currentScore = executionResult.score
+            val bestScore = if (progressExists && existingProgress != null) {
+                maxOf(existingProgress.bestScore, currentScore)
+            } else {
+                currentScore
+            }
+
+            val passed = currentScore >= 70
+            val status = if (passed) "completed" else "in_progress"
+
+            Log.d(TAG, "═══════════════════════════════════════")
+            Log.d(TAG, "Grading Challenge: ${challenge.title}")
+            Log.d(TAG, "  Current Score: $currentScore%")
+            Log.d(TAG, "  Best Score: $bestScore%")
+            Log.d(TAG, "  Status: $status")
+            Log.d(TAG, "  Passed: $passed")
+            Log.d(TAG, "  Test Cases: ${executionResult.testCasesPassed}/${executionResult.totalTestCases}")
+            Log.d(TAG, "═══════════════════════════════════════")
+
+            // Step 3: Save progress
+            Log.d(TAG, "Saving progress for challenge $challengeId and user $userId")
+
             val progressData = hashMapOf(
                 "challengeId" to challengeId,
                 "challengeTitle" to challenge.title,
-                "status" to if (executionResult.passed) "completed" else "in_progress",
+                "status" to status,
                 "attempts" to FieldValue.increment(1),
-                "bestScore" to executionResult.score,
+                "bestScore" to bestScore,
                 "lastAttemptDate" to Timestamp.now(),
                 "timeTaken" to executionResult.executionTime,
                 "userCode" to userCode,
-                "passed" to executionResult.passed,
+                "passed" to passed,
                 "updatedAt" to Timestamp.now(),
-                "compilerType" to challenge.compilerType // Track which compiler was used
+                "compilerType" to challenge.compilerType
             )
 
             firestore.collection(COLLECTION_USER_PROGRESS)
@@ -201,13 +256,26 @@ class UnifiedAssessmentService {
                 .set(progressData)
                 .await()
 
-            // Award XP if passed
-            if (executionResult.passed) {
-                xpManager.awardTechnicalAssessmentXP(userId, executionResult.passed)
+            Log.d(TAG, "Progress saved successfully")
+
+            // Step 4: Fetch challenge details for XP awarding
+            Log.d(TAG, "Fetching challenge with ID: $challengeId")
+            Log.d(TAG, "Successfully fetched challenge: ${challenge.title}")
+            Log.d(TAG, "Challenge difficulty: ${challenge.difficulty}")
+            Log.d(TAG, "Compiler type: ${challenge.compilerType}")
+
+            // Step 5: Award XP if passed
+            if (passed) {
+                xpManager.awardTechnicalAssessmentXP(userId, passed)
+                Log.d(TAG, "✅ Awarded XP for completing challenge: $challengeId")
+            } else {
+                Log.d(TAG, "⚠ Challenge not passed - no XP awarded")
             }
 
+            Log.d(TAG, "✅ Progress saved")
+
         } catch (e: Exception) {
-            // Handle error
+            Log.e(TAG, "❌ Error saving progress", e)
         }
     }
 

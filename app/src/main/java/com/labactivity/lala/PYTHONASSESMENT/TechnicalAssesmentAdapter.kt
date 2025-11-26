@@ -73,7 +73,7 @@ class TechnicalAssessmentAdapter(
                         ContextCompat.getColor(context, R.color.success_green)
                     )
                     holder.statusTextView?.visibility = View.VISIBLE
-                    holder.scoreTextView?.text = "Score: ${progress.bestScore}%"
+                    holder.scoreTextView?.text = "Best: ${progress.bestScore}%"
                     holder.scoreTextView?.visibility = View.VISIBLE
                 }
                 "in_progress" -> {
@@ -82,7 +82,7 @@ class TechnicalAssessmentAdapter(
                         ContextCompat.getColor(context, R.color.primary_blue)
                     )
                     holder.statusTextView?.visibility = View.VISIBLE
-                    holder.scoreTextView?.text = "Attempts: ${progress.attempts}"
+                    holder.scoreTextView?.text = "Best: ${progress.bestScore}% • ${progress.attempts} attempt${if (progress.attempts != 1) "s" else ""}"
                     holder.scoreTextView?.visibility = View.VISIBLE
                 }
                 else -> {
@@ -215,7 +215,7 @@ class TechnicalAssessmentAdapter(
             putStringArrayListExtra(UnifiedCompilerActivity.EXTRA_CHALLENGE_HINTS, ArrayList(challenge.hints))
 
             // Additional challenge data for validation
-            putExtra("CHALLENGE_ID", challenge.id)
+            putExtra(UnifiedCompilerActivity.EXTRA_CHALLENGE_ID, challenge.id)
             putExtra("CHALLENGE_TITLE", challenge.title)
             putExtra("CORRECT_OUTPUT", challenge.correctOutput)
         }
