@@ -204,13 +204,20 @@ class TechnicalAssessmentAdapter(
 
     private fun openCompiler(challenge: Challenge) {
         val intent = Intent(context, UnifiedCompilerActivity::class.java).apply {
+            // UnifiedCompilerActivity expected extras
+            putExtra(UnifiedCompilerActivity.EXTRA_LANGUAGE, challenge.compilerType)
+            putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, challenge.courseId)
+            putExtra(UnifiedCompilerActivity.EXTRA_INITIAL_CODE, challenge.brokenCode)
+
+            // Challenge hint data
+            putExtra(UnifiedCompilerActivity.EXTRA_CHALLENGE_DESCRIPTION, challenge.description)
+            putExtra(UnifiedCompilerActivity.EXTRA_CHALLENGE_HINT, challenge.hint)
+            putStringArrayListExtra(UnifiedCompilerActivity.EXTRA_CHALLENGE_HINTS, ArrayList(challenge.hints))
+
+            // Additional challenge data for validation
             putExtra("CHALLENGE_ID", challenge.id)
             putExtra("CHALLENGE_TITLE", challenge.title)
-            putExtra("CHALLENGE_CODE", challenge.brokenCode)
             putExtra("CORRECT_OUTPUT", challenge.correctOutput)
-            putExtra("HINT", challenge.hint)
-            putExtra("COURSE_ID", challenge.courseId)
-            putExtra("COMPILER_TYPE", challenge.compilerType) // Pass compiler type for unified compiler
         }
         context.startActivity(intent)
     }

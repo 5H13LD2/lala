@@ -58,7 +58,7 @@ class UnifiedCompilerActivity : AppCompatActivity() {
     private lateinit var codeEditor: EditText
     private lateinit var btnRun: MaterialButton
     private lateinit var btnClear: MaterialButton
-    private lateinit var btnFormat: MaterialButton
+    private lateinit var btnHint: MaterialButton
     private lateinit var tvOutput: TextView
     private lateinit var tvError: TextView
     private lateinit var tvExecutionTime: TextView
@@ -102,6 +102,10 @@ class UnifiedCompilerActivity : AppCompatActivity() {
     // State
     private var currentLanguage = "python"
     private var courseId: String? = null
+    private var challengeHints: List<String> = emptyList()
+    private var challengeHint: String = ""
+    private var challengeDescription: String = ""
+    private var currentHintIndex = 0
 
     // Undo/Redo stacks
     private val undoStack = mutableListOf<String>()
@@ -112,6 +116,9 @@ class UnifiedCompilerActivity : AppCompatActivity() {
         const val EXTRA_LANGUAGE = "extra_language"
         const val EXTRA_COURSE_ID = "extra_course_id"
         const val EXTRA_INITIAL_CODE = "extra_initial_code"
+        const val EXTRA_CHALLENGE_DESCRIPTION = "extra_challenge_description"
+        const val EXTRA_CHALLENGE_HINT = "extra_challenge_hint"
+        const val EXTRA_CHALLENGE_HINTS = "extra_challenge_hints"
         private const val MAX_UNDO_HISTORY = 50
     }
 
@@ -140,7 +147,7 @@ class UnifiedCompilerActivity : AppCompatActivity() {
         codeEditor = findViewById(R.id.codeEditor)
         btnRun = findViewById(R.id.btnRun)
         btnClear = findViewById(R.id.btnClear)
-        btnFormat = findViewById(R.id.btnFormat)
+        btnHint = findViewById(R.id.btnHint)
         tvOutput = findViewById(R.id.tvOutput)
         tvError = findViewById(R.id.tvError)
         tvExecutionTime = findViewById(R.id.tvExecutionTime)
@@ -233,8 +240,8 @@ class UnifiedCompilerActivity : AppCompatActivity() {
             updateEditorStats()
         }
 
-        btnFormat.setOnClickListener {
-            formatCode()
+        btnHint.setOnClickListener {
+            showHint()
         }
 
         btnCopyOutput.setOnClickListener {
@@ -452,65 +459,89 @@ class UnifiedCompilerActivity : AppCompatActivity() {
         clipboard.setPrimaryClip(clip)
     }
 
-    private fun formatCode() {
-        val code = codeEditor.text.toString()
-        if (code.isBlank()) {
-            Toast.makeText(this, "No code to format", Toast.LENGTH_SHORT).show()
-            return
-        }
+    /**
+     * Show hint dialog with description and hints
+     */
+    private fun showHint() {
+        val dialogBuilder = android.app.AlertDialog.Builder(this)
+        dialogBuilder.setTitle("💡 Challenge Hint")
 
-        // Basic formatting - indent correction
-        val formattedCode = when (currentLanguage) {
-            "python" -> formatPythonCode(code)
-            "java", "kotlin" -> formatBracketCode(code)
-            else -> code
-        }
-
-        codeEditor.setText(formattedCode)
-        Toast.makeText(this, "Code formatted", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun formatPythonCode(code: String): String {
-        // Basic Python formatting - normalize indentation
-        val lines = code.lines()
-        return lines.joinToString("\n") { line ->
-            // Trim trailing whitespace, preserve leading
-            line.trimEnd()
-        }
-    }
-
-    private fun formatBracketCode(code: String): String {
-        // Basic bracket-based language formatting
-        val lines = code.lines()
-        var indentLevel = 0
-        val indentStr = "    " // 4 spaces
-
-        return lines.joinToString("\n") { line ->
-            val trimmedLine = line.trim()
-
-            // Decrease indent before closing braces
-            if (trimmedLine.startsWith("}") || trimmedLine.startsWith(")")) {
-                indentLevel = maxOf(0, indentLevel - 1)
+        // Build hint message
+        val hintMessage = buildString {
+            if (challengeDescription.isNotEmpty()) {
+                append("📝 Description:\n")
+                append(challengeDescription)
+                append("\n\n")
             }
 
-            val formattedLine = if (trimmedLine.isNotEmpty()) {
-                indentStr.repeat(indentLevel) + trimmedLine
-            } else {
-                ""
+            if (challengeHint.isNotEmpty()) {
+                append("💡 Hint:\n")
+                append(challengeHint)
+                append("\n\n")
             }
 
-            // Increase indent after opening braces
-            if (trimmedLine.endsWith("{") || trimmedLine.endsWith("(")) {
-                indentLevel++
-            }
+            if (challengeHints.isNotEmpty()) {
+                if (currentHintIndex < challengeHints.size) {
+                    append("💡 Hint ${currentHintIndex + 1}/${challengeHints.size}:\n")
+                    append(challengeHints[currentHintIndex])
 
-            formattedLine
+                    if (currentHintIndex < challengeHints.size - 1) {
+                        append("\n\n(Tap 'Next Hint' for more)")
+                    }
+                } else {
+                    append("✓ All hints revealed!")
+                }
+            }
         }
+
+        dialogBuilder.setMessage(hintMessage)
+
+        // Add buttons based on available hints
+        if (challengeHints.isNotEmpty() && currentHintIndex < challengeHints.size - 1) {
+            dialogBuilder.setPositiveButton("Next Hint") { dialog, _ ->
+                currentHintIndex++
+                dialog.dismiss()
+                showHint() // Show next hint
+            }
+            dialogBuilder.setNegativeButton("Close", null)
+        } else {
+            dialogBuilder.setPositiveButton("Got it!", null)
+        }
+
+        dialogBuilder.create().show()
     }
 
     private fun loadInitialData() {
         // Load course ID if provided
         courseId = intent.getStringExtra(EXTRA_COURSE_ID)
+
+        // Load language - with fallback logic
+        val intentLanguage = intent.getStringExtra(EXTRA_LANGUAGE)
+
+        // Determine language from multiple sources
+        currentLanguage = when {
+            // 1. Use intent language if valid
+            !intentLanguage.isNullOrBlank() && isValidLanguage(intentLanguage) -> intentLanguage.lowercase()
+
+            // 2. Try to derive from courseId
+            courseId != null -> deriveLanguageFromCourseId(courseId!!)
+
+            // 3. Default to python
+            else -> "python"
+        }
+
+        // Select the chip for the determined language
+        selectLanguageChip(currentLanguage)
+
+        // Load challenge hints and description
+        challengeDescription = intent.getStringExtra(EXTRA_CHALLENGE_DESCRIPTION) ?: ""
+        challengeHint = intent.getStringExtra(EXTRA_CHALLENGE_HINT) ?: ""
+        challengeHints = intent.getStringArrayListExtra(EXTRA_CHALLENGE_HINTS) ?: emptyList()
+
+        val hasHintData = challengeDescription.isNotEmpty() ||
+                challengeHint.isNotEmpty() ||
+                challengeHints.isNotEmpty()
+        btnHint.visibility = if (hasHintData) View.VISIBLE else View.GONE
 
         // Load initial code if provided
         val initialCode = intent.getStringExtra(EXTRA_INITIAL_CODE)
@@ -522,6 +553,28 @@ class UnifiedCompilerActivity : AppCompatActivity() {
 
         // Update UI for initial language
         updateEditorForLanguage()
+    }
+
+    /**
+     * Check if a language string is valid
+     */
+    private fun isValidLanguage(language: String): Boolean {
+        val validLanguages = listOf("python", "python3", "py", "java", "kotlin", "kt")
+        return language.lowercase().trim() in validLanguages
+    }
+
+    /**
+     * Derive language from courseId naming convention
+     */
+    private fun deriveLanguageFromCourseId(courseId: String): String {
+        return when {
+            courseId.contains("python", ignoreCase = true) -> "python"
+            courseId.contains("java", ignoreCase = true) -> "java"
+            courseId.contains("kotlin", ignoreCase = true) -> "kotlin"
+            courseId.contains("py", ignoreCase = true) -> "python"
+            courseId.contains("kt", ignoreCase = true) -> "kotlin"
+            else -> "python" // Safe default
+        }
     }
 
     private fun selectLanguageChip(language: String) {
@@ -594,13 +647,13 @@ for (i in 0..4) {
                 errorCard.visibility = View.GONE
                 testResultsCard.visibility = View.GONE
 
-                // Execute using either course ID or direct language
-                val result = if (courseId != null) {
-                    compilerService.executeCodeForCourse(courseId!!, code)
-                } else {
-                    val compiler = CompilerFactory.getCompiler(currentLanguage)
-                    compiler.compile(code, CompilerConfig())
-                }
+                // Debug logging
+                android.util.Log.d("UnifiedCompiler", "courseId: $courseId")
+                android.util.Log.d("UnifiedCompiler", "currentLanguage: $currentLanguage")
+
+                // FIXED: Always use currentLanguage (which has fallback logic)
+                val compiler = CompilerFactory.getCompiler(currentLanguage)
+                val result = compiler.compile(code, CompilerConfig())
 
                 showLoading(false)
 
@@ -710,7 +763,9 @@ for (i in 0..4) {
         loadingOverlay.visibility = if (show) View.VISIBLE else View.GONE
         tvLoadingText.text = message
         btnRun.isEnabled = !show
-        btnFormat.isEnabled = !show
+        if (btnHint.visibility == View.VISIBLE) {
+            btnHint.isEnabled = !show
+        }
         btnClear.isEnabled = !show
     }
 

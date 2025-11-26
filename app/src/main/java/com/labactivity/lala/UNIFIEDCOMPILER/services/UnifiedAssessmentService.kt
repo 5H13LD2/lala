@@ -111,6 +111,11 @@ class UnifiedAssessmentService {
         userCode: String,
         challenge: UnifiedChallenge
     ): ChallengeExecutionResult {
+
+        // ADD THIS DEBUG LOG
+        android.util.Log.d("UnifiedAssessment", "compilerType from challenge: '${challenge.compilerType}'")
+        android.util.Log.d("UnifiedAssessment", "Supported languages: ${CompilerFactory.getSupportedLanguages()}")
+
         val startTime = System.currentTimeMillis()
 
         try {

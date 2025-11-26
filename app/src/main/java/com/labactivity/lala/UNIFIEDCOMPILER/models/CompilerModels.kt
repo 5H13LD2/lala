@@ -42,9 +42,20 @@ data class TestCase(
  * Course compiler configuration from Firebase
  */
 data class CourseCompilerInfo(
-    val courseId: String = "",
-    val courseName: String = "",
-    val compilerType: String = "", // "python", "java", "sql", "kotlin", etc.
-    val version: String = "",
-    val supportedFeatures: List<String> = emptyList()
+    // Compiler-related fields
+    var courseId: String = "",
+    var courseName: String = "",
+    var compilerType: String = "",  // "python", "java", "sql", "kotlin", etc.
+    var version: String = "",
+    var supportedFeatures: List<String> = emptyList(),
+
+    // Course metadata fields (these were missing - causing the warnings)
+    var difficulty: String = "",
+    var moduleCount: Int = 0,
+    var name: String = "",
+    var description: String = "",
+    var category: String = "",
+    var title: String = "",
+    var hadCompiler: Boolean = false,
+    var updatedAt: com.google.firebase.Timestamp? = null
 )

@@ -17,91 +17,55 @@ object CompilerFactory {
     private lateinit var applicationContext: Context
     private val registry = mutableMapOf<String, CourseCompiler>()
 
-    /**
-     * Initialize the factory with application context
-     * Call this in Application onCreate() or MainActivity onCreate()
-     */
+    // Alias mapping for language variations
+    private val aliases = mapOf(
+        "python3" to "python",
+        "py" to "python",
+        "kt" to "kotlin"
+    )
+
     fun initialize(context: Context) {
         applicationContext = context.applicationContext
         registerDefaultCompilers()
     }
 
-    /**
-     * Register all built-in compilers
-     * This is called automatically during initialization
-     */
     private fun registerDefaultCompilers() {
-        // Register built-in compilers
         registry["python"] = PythonCompiler(applicationContext)
         registry["java"] = JavaCompiler()
         registry["kotlin"] = KotlinCompiler()
-
-        // Future compilers can be added here
-        // Example:
-        // registry["sql"] = SQLExecutor(applicationContext)
-        // registry["ruby"] = RubyCompiler()
-        // registry["swift"] = SwiftCompiler()
-        // registry["go"] = GoCompiler()
-        // registry["javascript"] = JavaScriptCompiler()
-        // registry["csharp"] = CSharpCompiler()
     }
 
-    /**
-     * Get a compiler for a specific language/course
-     *
-     * @param compilerType The language identifier (e.g., "python", "java", "kotlin")
-     * @return CourseCompiler instance for the language
-     * @throws IllegalArgumentException if compiler not found
-     */
+    private fun resolveAlias(compilerType: String): String {
+        val normalized = compilerType.trim().lowercase()
+        return aliases[normalized] ?: normalized
+    }
+
     fun getCompiler(compilerType: String): CourseCompiler {
-        val normalizedType = compilerType.lowercase().trim()
-        return registry[normalizedType]
+        val normalizedType = compilerType.trim().lowercase()
+
+        // Handle empty or blank input - default to Python
+        if (normalizedType.isBlank()) {
+            android.util.Log.w("CompilerFactory", "Empty compilerType received, defaulting to Python")
+            return registry["python"]
+                ?: throw IllegalArgumentException("Default compiler (python) not initialized")
+        }
+
+        val registryKey = resolveAlias(compilerType)
+
+        return registry[registryKey]
             ?: throw IllegalArgumentException(
-                "Compiler not found for '$compilerType'. " +
-                "Supported languages: ${getSupportedLanguages().joinToString(", ")}"
+                "Compiler not found. Requested: '$compilerType' (resolved: '$registryKey'), " +
+                        "Supported: ${getSupportedLanguages()}"
             )
     }
 
-    /**
-     * Register a custom compiler dynamically
-     * Useful for runtime plugin systems or custom courses
-     */
-    fun registerCompiler(languageId: String, compiler: CourseCompiler) {
-        registry[languageId.lowercase()] = compiler
-    }
-
-    /**
-     * Check if a compiler is registered
-     */
     fun hasCompiler(compilerType: String): Boolean {
-        return registry.containsKey(compilerType.lowercase().trim())
+        return registry.containsKey(resolveAlias(compilerType))
     }
 
-    /**
-     * Get all supported language IDs
-     */
     fun getSupportedLanguages(): List<String> {
         return registry.keys.sorted()
     }
 
-    /**
-     * Get all registered compilers
-     */
-    fun getAllCompilers(): Map<String, CourseCompiler> {
-        return registry.toMap()
-    }
-
-    /**
-     * Unregister a compiler (useful for testing or dynamic unloading)
-     */
-    fun unregisterCompiler(languageId: String) {
-        registry.remove(languageId.lowercase())
-    }
-
-    /**
-     * Clear all compilers (useful for testing)
-     */
-    internal fun clearRegistry() {
-        registry.clear()
-    }
+    // ... rest of your methods
 }

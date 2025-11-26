@@ -35,17 +35,34 @@ data class UnifiedChallenge(
     @PropertyName("hint")
     val hint: String = "",
 
+    @PropertyName("hints")
+    val hints: List<String> = emptyList(), // Array of hints from Firebase
+
     @PropertyName("category")
     val category: String = "",
 
     @PropertyName("status")
-    val status: String = "available",
+    val status: String = "active",
+
+    @PropertyName("author")
+    val author: String = "",
+
+    @PropertyName("tags")
+    val tags: List<String> = emptyList(),
+
+    @PropertyName("order")
+    val order: Int = 0,
 
     @PropertyName("createdAt")
-    val createdAt: String = "",
+    val createdAt: Timestamp? = null,
 
-    // Runtime fields (not in Firebase)
-    var compilerType: String = "", // "python", "java", "kotlin", etc. - auto-filled from course
+    @PropertyName("updatedAt")
+    val updatedAt: String = "",
+
+    @PropertyName("compilerType")
+    var compilerType: String = "", // Now read from Firebase: "python", "java", "kotlin", etc.
+
+    // Runtime field (not in Firebase)
     var isUnlocked: Boolean = true
 )
 

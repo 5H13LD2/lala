@@ -104,14 +104,17 @@ class TechnicalAssessmentService {
                         hint = doc.getString("hint") ?: "",
                         category = doc.getString("category") ?: "",
                         status = doc.getString("status") ?: "available",
-                        createdAt = doc.getTimestamp("createdAt")?.toDate()?.toString() ?: ""
+                        createdAt = doc.getTimestamp("createdAt")
                     )
                     Log.d(TAG, "✅ Created challenge: ${challenge.title}")
                     allChallenges.add(challenge)
                 }
             }
 
-            allChallenges.sortedWith(compareBy<Challenge> { it.createdAt.ifEmpty { "9999" } }.thenBy { it.title })
+            allChallenges.sortedWith(
+                compareBy<Challenge> { it.createdAt?.toDate()?.time ?: Long.MAX_VALUE }
+                    .thenBy { it.title }
+            )
         } catch (e: Exception) {
             Log.e(TAG, "❌ Error fetching challenges by course IDs", e)
             emptyList()

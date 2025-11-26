@@ -466,16 +466,16 @@
                     app:cornerRadius="8dp" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnFormat"
+                    android:id="@+id/btnHint"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="0dp"
                     android:layout_height="48dp"
                     android:layout_marginHorizontal="8dp"
                     android:layout_weight="1"
-                    android:text="Format"
-                    android:textColor="#64B5F6"
+                    android:text="💡 Hint"
+                    android:textColor="#FFC107"
                     android:textSize="14sp"
-                    app:strokeColor="#64B5F6"
+                    app:strokeColor="#FFC107"
                     app:cornerRadius="8dp" />
 
                 <com.google.android.material.button.MaterialButton
