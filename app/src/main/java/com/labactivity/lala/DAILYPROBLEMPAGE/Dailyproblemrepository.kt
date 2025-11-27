@@ -163,7 +163,11 @@ class DailyProblemRepository(
                 Log.d(TAG, "XPManager               com.labactivity.lala                 D    Challenge: Daily Problem $problemId")
                 Log.d(TAG, "XPManager               com.labactivity.lala                 D    Score: $score")
 
-                xpManager.awardTechnicalAssessmentXP(userId, passed)
+                xpManager.awardTechnicalAssessmentXP(
+                    challengeTitle = "Daily Problem $problemId",
+                    passed = true,
+                    score = score
+                )
 
                 Log.d(TAG, "✅ Awarded XP for completing daily problem: $problemId")
             }

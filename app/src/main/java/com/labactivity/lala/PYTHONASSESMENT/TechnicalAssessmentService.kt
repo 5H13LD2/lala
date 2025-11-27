@@ -5,6 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import com.labactivity.lala.GAMIFICATION.XPManager
+import com.labactivity.lala.LEADERBOARDPAGE.Achievement
 
 class TechnicalAssessmentService {
     private val firestore = FirebaseFirestore.getInstance()
@@ -198,6 +199,7 @@ class TechnicalAssessmentService {
     /**
      * Save user progress for a technical assessment challenge
      * Stores in user_progress/{userId}/technical_assessment_progress/{challengeId}
+     * @return Pair of (success: Boolean, unlockedAchievements: List<Achievement>)
      */
     suspend fun saveUserProgress(
         challengeId: String,
@@ -206,11 +208,11 @@ class TechnicalAssessmentService {
         score: Int = 100,
         timeTaken: Long = 0,
         userCode: String = ""
-    ): Boolean {
+    ): Pair<Boolean, List<Achievement>> {
         return try {
             val userId = auth.currentUser?.uid ?: run {
                 Log.w(TAG, "⚠️ User not authenticated")
-                return false
+                return Pair(false, emptyList())
             }
 
             // Get existing progress or create new
@@ -239,19 +241,21 @@ class TechnicalAssessmentService {
             Log.d(TAG, "✅ Saved progress for challenge [$challengeId] - Passed: $passed")
 
             // Award XP if the challenge was passed
+            var unlockedAchievements = emptyList<Achievement>()
             if (passed) {
-                xpManager.awardTechnicalAssessmentXP(
+                val xpResult = xpManager.awardTechnicalAssessmentXP(
                     challengeTitle = challengeTitle,
                     passed = true,
                     score = score
                 )
+                unlockedAchievements = xpResult.unlockedAchievements
             }
 
-            true
+            Pair(true, unlockedAchievements)
 
         } catch (e: Exception) {
             Log.e(TAG, "❌ Error saving user progress", e)
-            false
+            Pair(false, emptyList())
         }
     }
 

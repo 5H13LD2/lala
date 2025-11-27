@@ -38,7 +38,7 @@ object AssessmentStatusManager {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 // Save user progress to user_progress/{userId}/technical_assessment_progress/{challengeId}
-                val success = assessmentService.saveUserProgress(
+                val (success, unlockedAchievements) = assessmentService.saveUserProgress(
                     challengeId = challengeId,
                     challengeTitle = challengeTitle,
                     passed = passed,
@@ -49,6 +49,12 @@ object AssessmentStatusManager {
 
                 if (success) {
                     Log.d(TAG, "✅ Marked assessment '$challengeTitle' as completed - Progress saved")
+
+                    // Show achievement dialog if any achievements were unlocked
+                    if (unlockedAchievements.isNotEmpty()) {
+                        // The dialog will be shown by the caller activity/fragment that has context
+                        Log.d(TAG, "🏆 ${unlockedAchievements.size} achievement(s) unlocked")
+                    }
                 } else {
                     Log.w(TAG, "⚠️ Failed to save progress for assessment '$challengeTitle'")
                 }

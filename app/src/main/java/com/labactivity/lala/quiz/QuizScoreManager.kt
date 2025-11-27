@@ -6,10 +6,12 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.labactivity.lala.GAMIFICATION.AchievementUnlockDialog
 import com.labactivity.lala.GAMIFICATION.XPManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Manages quiz scores both locally (SharedPreferences) and remotely (Firestore)
@@ -21,7 +23,7 @@ import kotlinx.coroutines.launch
  *     - {attemptId1}: Full attempt data
  *     - {attemptId2}: Full attempt data
  */
-class QuizScoreManager(context: Context) {
+class QuizScoreManager(private val context: Context) {
 
     companion object {
         private const val TAG = "QuizScoreManager"
@@ -183,11 +185,21 @@ class QuizScoreManager(context: Context) {
 
                         // Step 5: Award XP for completing the quiz
                         CoroutineScope(Dispatchers.IO).launch {
-                            xpManager.awardQuizXP(
+                            val xpResult = xpManager.awardQuizXP(
                                 score = score,
                                 totalQuestions = total,
                                 difficulty = difficulty
                             )
+
+                            // Show achievement dialog if any achievements were unlocked
+                            if (xpResult.success && xpResult.unlockedAchievements.isNotEmpty()) {
+                                withContext(Dispatchers.Main) {
+                                    AchievementUnlockDialog.showMultipleAchievements(
+                                        context,
+                                        xpResult.unlockedAchievements
+                                    )
+                                }
+                            }
                         }
                     }
                     .addOnFailureListener { e ->

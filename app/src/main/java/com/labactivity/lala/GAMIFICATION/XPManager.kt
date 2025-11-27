@@ -47,12 +47,13 @@ class XPManager {
     /**
      * Awards XP for completing a quiz
      * Automatically calculates XP based on score percentage
+     * Returns list of newly unlocked achievements
      */
     suspend fun awardQuizXP(
         score: Int,
         totalQuestions: Int,
         difficulty: String = "NORMAL"
-    ): Boolean {
+    ): XPAwardResult {
         val percentage = (score * 100.0 / totalQuestions)
         val xpAmount = calculateQuizXP(percentage)
 
@@ -62,29 +63,30 @@ class XPManager {
         Log.d(TAG, "  Difficulty: $difficulty")
         Log.d(TAG, "  XP Awarded: $xpAmount")
 
-        val success = updateUserXP(xpAmount, updateQuizzesTaken = true)
+        val result = updateUserXP(xpAmount, updateQuizzesTaken = true)
 
-        if (success) {
+        if (result.success) {
             Log.d(TAG, "  ✓ Quiz XP awarded successfully")
         } else {
             Log.e(TAG, "  ✗ Failed to award quiz XP")
         }
         Log.d(TAG, "═══════════════════════════════════════")
 
-        return success
+        return result
     }
 
     /**
      * Awards XP for completing a technical assessment
+     * Returns list of newly unlocked achievements
      */
     suspend fun awardTechnicalAssessmentXP(
         challengeTitle: String,
         passed: Boolean,
         score: Int = 100
-    ): Boolean {
+    ): XPAwardResult {
         if (!passed) {
             Log.d(TAG, "Technical assessment not passed - no XP awarded")
-            return true // Not an error, just no XP
+            return XPAwardResult(true, emptyList()) // Not an error, just no XP
         }
 
         Log.d(TAG, "═══════════════════════════════════════")
@@ -93,19 +95,19 @@ class XPManager {
         Log.d(TAG, "  Score: $score")
         Log.d(TAG, "  XP Awarded: $XP_TECHNICAL_ASSESSMENT")
 
-        val success = updateUserXP(
+        val result = updateUserXP(
             XP_TECHNICAL_ASSESSMENT,
             updateTechnicalAssessments = true
         )
 
-        if (success) {
+        if (result.success) {
             Log.d(TAG, "  ✓ Technical assessment XP awarded successfully")
         } else {
             Log.e(TAG, "  ✗ Failed to award technical assessment XP")
         }
         Log.d(TAG, "═══════════════════════════════════════")
 
-        return success
+        return result
     }
 
     /**
@@ -122,16 +124,17 @@ class XPManager {
     /**
      * Updates user's total XP and recalculates level
      * Also increments relevant counters and checks for achievements
+     * Returns XPAwardResult with success status and unlocked achievements
      */
     private suspend fun updateUserXP(
         xpAmount: Int,
         updateQuizzesTaken: Boolean = false,
         updateTechnicalAssessments: Boolean = false
-    ): Boolean {
+    ): XPAwardResult {
         return try {
             val userId = auth.currentUser?.uid ?: run {
                 Log.w(TAG, "⚠ User not authenticated")
-                return false
+                return XPAwardResult(false, emptyList())
             }
 
             val userDocRef = firestore.collection("users").document(userId)
@@ -179,11 +182,11 @@ class XPManager {
                 }
             }
 
-            true
+            XPAwardResult(true, unlockedAchievements.map { it.achievement })
 
         } catch (e: Exception) {
             Log.e(TAG, "  ✗ Error updating user XP", e)
-            false
+            XPAwardResult(false, emptyList())
         }
     }
 
@@ -275,4 +278,12 @@ data class UserXPData(
     val quizzesTaken: Int,
     val coursesCompleted: Int,
     val technicalAssessmentsCompleted: Int
+)
+
+/**
+ * Data class for XP award result
+ */
+data class XPAwardResult(
+    val success: Boolean,
+    val unlockedAchievements: List<com.labactivity.lala.LEADERBOARDPAGE.Achievement>
 )

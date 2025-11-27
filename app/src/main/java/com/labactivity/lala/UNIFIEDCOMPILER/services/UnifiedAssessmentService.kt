@@ -266,7 +266,11 @@ class UnifiedAssessmentService {
 
             // Step 5: Award XP if passed
             if (passed) {
-                xpManager.awardTechnicalAssessmentXP(userId, passed)
+                xpManager.awardTechnicalAssessmentXP(
+                    challengeTitle = challenge.title,
+                    passed = true,
+                    score = currentScore
+                )
                 Log.d(TAG, "✅ Awarded XP for completing challenge: $challengeId")
             } else {
                 Log.d(TAG, "⚠ Challenge not passed - no XP awarded")

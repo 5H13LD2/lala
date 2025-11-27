@@ -13,6 +13,7 @@ import android.widget.TableRow
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.labactivity.lala.FIXBACKBUTTON.BaseActivity
+import com.labactivity.lala.GAMIFICATION.AchievementUnlockDialog
 import com.labactivity.lala.R
 import com.labactivity.lala.SQLCOMPILER.models.SQLChallenge
 import com.labactivity.lala.SQLCOMPILER.services.FirestoreSQLHelper
@@ -426,14 +427,27 @@ class SQLChallengeActivity : BaseActivity() {
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val userQuery = queryEditText.text.toString()
-                    sqlHelper.updateProgressAfterAttempt(
+                    val (success, unlockedAchievements) = sqlHelper.updateProgressAfterAttempt(
                         challengeId = id,
                         passed = true,
                         score = 100,
                         userQuery = userQuery,
                         timeTaken = 0L
                     )
-                    Log.d(TAG, "✅ Progress saved")
+
+                    if (success) {
+                        Log.d(TAG, "✅ Progress saved")
+
+                        // Show achievement dialog if any achievements were unlocked
+                        if (unlockedAchievements.isNotEmpty()) {
+                            withContext(Dispatchers.Main) {
+                                AchievementUnlockDialog.showMultipleAchievements(
+                                    this@SQLChallengeActivity,
+                                    unlockedAchievements
+                                )
+                            }
+                        }
+                    }
                 } catch (e: Exception) {
                     Log.e(TAG, "❌ Error saving progress", e)
                 }

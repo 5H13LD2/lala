@@ -7,6 +7,8 @@ import com.google.firebase.firestore.Query
 import com.labactivity.lala.SQLCOMPILER.models.*
 import com.labactivity.lala.SQLCOMPILER.utils.FirestoreDataConverter
 import com.labactivity.lala.GAMIFICATION.XPManager
+import com.labactivity.lala.GAMIFICATION.XPAwardResult
+import com.labactivity.lala.LEADERBOARDPAGE.Achievement
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -461,6 +463,7 @@ class FirestoreSQLHelper {
      * @param score The score achieved (0-100)
      * @param userQuery The SQL query the user submitted
      * @param timeTaken Time taken in seconds
+     * @return Pair of (success: Boolean, unlockedAchievements: List<Achievement>)
      */
     suspend fun updateProgressAfterAttempt(
         challengeId: String,
@@ -468,9 +471,9 @@ class FirestoreSQLHelper {
         score: Int,
         userQuery: String,
         timeTaken: Long
-    ): Boolean = withContext(Dispatchers.IO) {
+    ): Pair<Boolean, List<Achievement>> = withContext(Dispatchers.IO) {
         try {
-            val userId = auth.currentUser?.uid ?: return@withContext false
+            val userId = auth.currentUser?.uid ?: return@withContext Pair(false, emptyList())
 
             // Get existing progress or create new
             val existingProgress = getUserProgress(challengeId)
@@ -489,22 +492,24 @@ class FirestoreSQLHelper {
             val saveResult = saveUserProgress(challengeId, newProgress)
 
             // Award XP if the challenge was passed
+            var unlockedAchievements = emptyList<Achievement>()
             if (saveResult && passed) {
                 // Get challenge details for title
                 val challenge = getChallengeById(challengeId)
-                xpManager.awardTechnicalAssessmentXP(
+                val xpResult = xpManager.awardTechnicalAssessmentXP(
                     challengeTitle = challenge?.title ?: "SQL Challenge",
                     passed = true,
                     score = score
                 )
+                unlockedAchievements = xpResult.unlockedAchievements
                 Log.d(TAG, "✅ Awarded 50 XP for completing SQL challenge: $challengeId")
             }
 
-            saveResult
+            Pair(saveResult, unlockedAchievements)
 
         } catch (e: Exception) {
             Log.e(TAG, "Error updating progress after attempt: ${e.message}", e)
-            false
+            Pair(false, emptyList())
         }
     }
 
