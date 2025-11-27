@@ -257,4 +257,11 @@ class AllInterviewsActivity : BaseActivity() {
         binding.textTopicCount.slideUpFadeIn(duration = 400, startDelay = 300)
         binding.recyclerViewInterviews.slideUpFadeIn(duration = 400, startDelay = 400)
     }
+
+    /**
+     * Override back button to simply finish activity without exit dialog
+     */
+    override fun onBackPressed() {
+        finish()
+    }
 }

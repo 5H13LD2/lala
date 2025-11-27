@@ -253,4 +253,11 @@ class AllSQLChallengesActivity : BaseActivity() {
             }
         }
     }
+
+    /**
+     * Override back button to simply finish activity without exit dialog
+     */
+    override fun onBackPressed() {
+        finish()
+    }
 }
