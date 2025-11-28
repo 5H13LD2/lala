@@ -8,9 +8,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.labactivity.lala.R
+import com.labactivity.lala.SQLCOMPILER.AllSQLChallengesActivity
 import com.labactivity.lala.UNIFIEDCOMPILER.ui.UnifiedCompilerActivity
 
 class LibraryCourseAdapter(
@@ -54,13 +56,63 @@ class LibraryCourseAdapter(
             }
         }
 
-        // Practice button click - Launch unified compiler
+        // Practice button click - Launch appropriate activity based on course type
         holder.practiceButton.setOnClickListener {
-            val intent = Intent(context, UnifiedCompilerActivity::class.java).apply {
-                // Use course ID to automatically detect the right compiler
-                putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, course.courseId)
+            try {
+                val intent = when {
+                    course.courseId.contains("sql", ignoreCase = true) ->
+                        Intent(context, AllSQLChallengesActivity::class.java)
+                    course.courseId.contains("python", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java).apply {
+                            putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, course.courseId)
+                        }
+                    course.courseId.contains("java", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java).apply {
+                            putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, course.courseId)
+                        }
+                    course.courseId.contains("php", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java).apply {
+                            putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, course.courseId)
+                        }
+                    course.courseId.contains("ruby", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java).apply {
+                            putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, course.courseId)
+                        }
+                    course.courseId.contains("kotlin", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java).apply {
+                            putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, course.courseId)
+                        }
+                    course.courseId.contains("javascript", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java).apply {
+                            putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, course.courseId)
+                        }
+                    course.courseId.contains("c_programming", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java).apply {
+                            putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, course.courseId)
+                        }
+                    course.courseId.contains("cpp", ignoreCase = true) ->
+                        Intent(context, UnifiedCompilerActivity::class.java).apply {
+                            putExtra(UnifiedCompilerActivity.EXTRA_COURSE_ID, course.courseId)
+                        }
+                    else -> null
+                }
+
+                if (intent != null) {
+                    context.startActivity(intent)
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Practice not available for this course yet",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    context,
+                    "Error opening practice: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
-            context.startActivity(intent)
         }
 
         // Card click also navigates to practice
