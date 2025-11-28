@@ -412,25 +412,26 @@ class SQLChallengeActivity : BaseActivity() {
         }
 
         if (isCorrect) {
-            showResultMessage("✅ Correct! Well done!", isSuccess = true)
-            saveProgress()
+            // Save progress and show success dialog
+            saveProgressAndShowDialog(true, 100)
         } else {
-            showResultMessage("❌ Incorrect result. Try again!", isSuccess = false)
+            // Show retry dialog without saving
+            showRetryDialog(0)
         }
     }
 
     /**
-     * Save user progress to Firebase
+     * Save user progress to Firebase and show appropriate dialog
      */
-    private fun saveProgress() {
+    private fun saveProgressAndShowDialog(passed: Boolean, score: Int) {
         challengeId?.let { id ->
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     val userQuery = queryEditText.text.toString()
                     val (success, unlockedAchievements) = sqlHelper.updateProgressAfterAttempt(
                         challengeId = id,
-                        passed = true,
-                        score = 100,
+                        passed = passed,
+                        score = score,
                         userQuery = userQuery,
                         timeTaken = 0L
                     )
@@ -438,21 +439,69 @@ class SQLChallengeActivity : BaseActivity() {
                     if (success) {
                         Log.d(TAG, "✅ Progress saved")
 
-                        // Show achievement dialog if any achievements were unlocked
-                        if (unlockedAchievements.isNotEmpty()) {
-                            withContext(Dispatchers.Main) {
-                                AchievementUnlockDialog.showMultipleAchievements(
-                                    this@SQLChallengeActivity,
-                                    unlockedAchievements
-                                )
-                            }
+                        // Show success dialog on main thread
+                        withContext(Dispatchers.Main) {
+                            showSuccessDialog(score, unlockedAchievements)
                         }
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "❌ Error saving progress", e)
+                    withContext(Dispatchers.Main) {
+                        showResultMessage("❌ Error saving progress", isSuccess = false)
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * Show success dialog when query is correct
+     */
+    private fun showSuccessDialog(score: Int, unlockedAchievements: List<com.labactivity.lala.LEADERBOARDPAGE.Achievement>) {
+        AlertDialog.Builder(this)
+            .setTitle("🎉 Success!")
+            .setMessage("✅ Correct! Well done!\n\nScore: $score%\n\nYour progress has been saved.")
+            .setPositiveButton("Continue") { dialog, _ ->
+                dialog.dismiss()
+
+                // Show achievement dialog if any achievements were unlocked
+                if (unlockedAchievements.isNotEmpty()) {
+                    AchievementUnlockDialog.showMultipleAchievements(
+                        this,
+                        unlockedAchievements
+                    )
+                } else {
+                    // Just finish the activity
+                    finish()
+                }
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    /**
+     * Show retry dialog when query is incorrect
+     */
+    private fun showRetryDialog(score: Int) {
+        val message = buildString {
+            append("❌ Not quite right. Try again!\n\n")
+            append("Your query doesn't match the expected results.\n\n")
+            append("Hint: Check your SELECT statement and WHERE conditions.")
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Try Again")
+            .setMessage(message)
+            .setPositiveButton("Retry") { dialog, _ ->
+                dialog.dismiss()
+                // Keep activity open for retry
+            }
+            .setNegativeButton("Exit") { dialog, _ ->
+                dialog.dismiss()
+                finish()
+            }
+            .setCancelable(false)
+            .show()
     }
 
     /**

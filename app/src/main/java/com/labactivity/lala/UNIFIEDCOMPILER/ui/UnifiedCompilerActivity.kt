@@ -29,7 +29,9 @@ import kotlinx.coroutines.tasks.await
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import androidx.appcompat.app.AlertDialog
 import com.google.firebase.firestore.FirebaseFirestore
+import com.labactivity.lala.GAMIFICATION.AchievementUnlockDialog
 
 /**
  * UNIVERSAL COMPILER ACTIVITY
@@ -760,7 +762,7 @@ for (i in 0..4) {
 
                 // Check if this is a challenge from technical_assessment
                 val challenge = currentChallenge
-                val result = if (challenge != null && challengeId != null) {
+                if (challenge != null && challengeId != null) {
                     // Execute using UnifiedAssessmentService for full logging
                     Log.d(TAG, "Using UnifiedAssessmentService for challenge execution")
                     val executionResult = assessmentService.executeChallenge(
@@ -769,23 +771,32 @@ for (i in 0..4) {
                         challenge = challenge
                     )
 
-                    // Save progress if passed
+                    showLoading(false)
+
+                    // Show appropriate dialog based on result
                     if (executionResult.passed) {
-                        assessmentService.saveProgress(
+                        // Save progress
+                        val (success, unlockedAchievements) = assessmentService.saveProgress(
                             challengeId = challengeId!!,
                             challenge = challenge,
                             userCode = code,
                             executionResult = executionResult
                         )
+
+                        // Show success dialog
+                        showSuccessDialog(executionResult.score, unlockedAchievements)
+                    } else {
+                        // Show retry dialog
+                        showRetryDialog(executionResult.score, executionResult.compilerResult)
                     }
 
-                    executionResult.compilerResult
-                } else {
-                    // Regular code execution without challenge validation
-                    Log.d(TAG, "Using direct compiler execution (no challenge)")
-                    val compiler = CompilerFactory.getCompiler(currentLanguage)
-                    compiler.compile(code, CompilerConfig())
+                    return@launch // Exit early, dialogs handle UI
                 }
+
+                // Regular code execution without challenge validation
+                Log.d(TAG, "Using direct compiler execution (no challenge)")
+                val compiler = CompilerFactory.getCompiler(currentLanguage)
+                val result = compiler.compile(code, CompilerConfig())
 
                 showLoading(false)
 
@@ -899,6 +910,62 @@ for (i in 0..4) {
             btnHint.isEnabled = !show
         }
         btnClear.isEnabled = !show
+    }
+
+    /**
+     * Show success dialog when challenge is passed
+     */
+    private fun showSuccessDialog(score: Int, unlockedAchievements: List<com.labactivity.lala.LEADERBOARDPAGE.Achievement>) {
+        AlertDialog.Builder(this)
+            .setTitle("🎉 Success!")
+            .setMessage("✅ Correct! Well done!\n\nScore: $score%\n\nYour progress has been saved.")
+            .setPositiveButton("Continue") { dialog, _ ->
+                dialog.dismiss()
+
+                // Show achievement dialog if any achievements were unlocked
+                if (unlockedAchievements.isNotEmpty()) {
+                    AchievementUnlockDialog.showMultipleAchievements(
+                        this,
+                        unlockedAchievements
+                    )
+                } else {
+                    // Just finish the activity
+                    finish()
+                }
+            }
+            .setCancelable(false)
+            .show()
+    }
+
+    /**
+     * Show retry dialog when challenge fails
+     */
+    private fun showRetryDialog(score: Int, compilerResult: com.labactivity.lala.UNIFIEDCOMPILER.models.CompilerResult) {
+        val message = buildString {
+            append("❌ Not quite right. Try again!\n\n")
+            append("Score: $score%\n")
+            append("Test Cases: ${compilerResult.testCasesPassed}/${compilerResult.totalTestCases} passed\n\n")
+
+            if (compilerResult.error != null) {
+                append("Error:\n${compilerResult.error}")
+            } else if (compilerResult.output.isNotEmpty()) {
+                append("Your Output:\n${compilerResult.output}")
+            }
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Try Again")
+            .setMessage(message)
+            .setPositiveButton("Retry") { dialog, _ ->
+                dialog.dismiss()
+                // Keep activity open for retry
+            }
+            .setNegativeButton("Exit") { dialog, _ ->
+                dialog.dismiss()
+                finish()
+            }
+            .setCancelable(false)
+            .show()
     }
 
     override fun onDestroy() {

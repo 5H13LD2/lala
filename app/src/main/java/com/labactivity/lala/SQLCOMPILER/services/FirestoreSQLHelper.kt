@@ -483,7 +483,7 @@ class FirestoreSQLHelper {
                 status = if (passed) "completed" else "in_progress",
                 attempts = (existingProgress?.attempts ?: 0) + 1,
                 bestScore = maxOf(score, existingProgress?.bestScore ?: 0),
-                lastAttemptDate = getCurrentTimestamp(),
+                lastAttemptDate = com.google.firebase.Timestamp.now(),  // Use Timestamp instead of String
                 timeTaken = timeTaken,
                 userQuery = userQuery,
                 passed = passed
@@ -529,8 +529,17 @@ class FirestoreSQLHelper {
                     .get()
                     .await()
 
-                val progressList = snapshot.toObjects(SQLChallengeProgress::class.java)
-                Log.d(TAG, "Found ${progressList.size} progress records")
+                // Manually parse documents to handle mixed data types (SQL vs Python/Java assessments)
+                val progressList = snapshot.documents.mapNotNull { doc ->
+                    try {
+                        doc.toObject(SQLChallengeProgress::class.java)
+                    } catch (e: Exception) {
+                        Log.w(TAG, "⚠️ Skipping document ${doc.id} due to parsing error: ${e.message}")
+                        null  // Skip problematic documents (e.g., Python/Java assessment progress)
+                    }
+                }
+
+                Log.d(TAG, "Found ${progressList.size} SQL progress records (skipped non-SQL progress)")
                 progressList
 
             } catch (e: Exception) {

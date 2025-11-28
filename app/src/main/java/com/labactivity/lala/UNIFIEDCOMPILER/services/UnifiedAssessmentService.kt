@@ -185,14 +185,15 @@ class UnifiedAssessmentService {
 
     /**
      * Save user progress after challenge attempt
+     * @return Pair of (success: Boolean, unlockedAchievements: List<Achievement>)
      */
     suspend fun saveProgress(
         challengeId: String,
         challenge: UnifiedChallenge,
         userCode: String,
         executionResult: ChallengeExecutionResult
-    ) {
-        val userId = auth.currentUser?.uid ?: return
+    ): Pair<Boolean, List<com.labactivity.lala.LEADERBOARDPAGE.Achievement>> {
+        val userId = auth.currentUser?.uid ?: return Pair(false, emptyList())
 
         try {
             // Step 1: Fetch existing progress
@@ -236,7 +237,7 @@ class UnifiedAssessmentService {
             Log.d(TAG, "Saving progress for challenge $challengeId and user $userId")
 
             val progressData = hashMapOf(
-                "challengeId" to challengeId,
+                // "challengeId" removed - it's the document ID, not a field (conflicts with @DocumentId)
                 "challengeTitle" to challenge.title,
                 "status" to status,
                 "attempts" to FieldValue.increment(1),
@@ -265,21 +266,25 @@ class UnifiedAssessmentService {
             Log.d(TAG, "Compiler type: ${challenge.compilerType}")
 
             // Step 5: Award XP if passed
+            var unlockedAchievements = emptyList<com.labactivity.lala.LEADERBOARDPAGE.Achievement>()
             if (passed) {
-                xpManager.awardTechnicalAssessmentXP(
+                val xpResult = xpManager.awardTechnicalAssessmentXP(
                     challengeTitle = challenge.title,
                     passed = true,
                     score = currentScore
                 )
+                unlockedAchievements = xpResult.unlockedAchievements
                 Log.d(TAG, "✅ Awarded XP for completing challenge: $challengeId")
             } else {
                 Log.d(TAG, "⚠ Challenge not passed - no XP awarded")
             }
 
             Log.d(TAG, "✅ Progress saved")
+            return Pair(true, unlockedAchievements)
 
         } catch (e: Exception) {
             Log.e(TAG, "❌ Error saving progress", e)
+            return Pair(false, emptyList())
         }
     }
 
@@ -297,8 +302,19 @@ class UnifiedAssessmentService {
                 .get()
                 .await()
 
-            doc.toObject(UnifiedChallengeProgress::class.java)
+            if (!doc.exists()) {
+                Log.d(TAG, "No progress found for challenge $challengeId")
+                return null
+            }
+
+            try {
+                doc.toObject(UnifiedChallengeProgress::class.java)
+            } catch (e: Exception) {
+                Log.w(TAG, "⚠️ Error parsing progress for $challengeId: ${e.message}")
+                null
+            }
         } catch (e: Exception) {
+            Log.e(TAG, "❌ Error fetching user progress for $challengeId: ${e.message}", e)
             null
         }
     }
@@ -316,12 +332,19 @@ class UnifiedAssessmentService {
                 .get()
                 .await()
 
+            // Manually parse documents to handle mixed data types and errors gracefully
             snapshot.documents.mapNotNull { doc ->
-                doc.toObject(UnifiedChallengeProgress::class.java)?.let { progress ->
-                    doc.id to progress
+                try {
+                    doc.toObject(UnifiedChallengeProgress::class.java)?.let { progress ->
+                        doc.id to progress
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "⚠️ Skipping document ${doc.id} due to parsing error: ${e.message}")
+                    null  // Skip problematic documents
                 }
             }.toMap()
         } catch (e: Exception) {
+            Log.e(TAG, "❌ Error fetching all user progress: ${e.message}", e)
             emptyMap()
         }
     }

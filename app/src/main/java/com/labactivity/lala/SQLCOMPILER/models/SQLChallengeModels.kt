@@ -268,7 +268,7 @@ data class SQLChallengeProgress(
     val bestScore: Int = 0,
 
     @PropertyName("lastAttemptDate")
-    val lastAttemptDate: String = "",
+    val lastAttemptDate: Timestamp? = null,  // Changed from String to Timestamp to match TechnicalAssessmentProgress
 
     @PropertyName("timeTaken")
     val timeTaken: Long = 0,  // in seconds
@@ -305,6 +305,15 @@ data class SQLChallengeProgress(
             } else {
                 "${seconds}s"
             }
+        }
+
+    /**
+     * Returns formatted last attempt date
+     */
+    @get:Exclude
+    val formattedLastAttemptDate: String
+        get() {
+            return lastAttemptDate?.toDate()?.toString() ?: "Never"
         }
 }
 
