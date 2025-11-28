@@ -58,10 +58,11 @@ class TechnicalAssessmentAdapter(
                 holder.codePreviewTextView.visibility = View.GONE
             }
 
-            val difficultyColor = when (challenge.difficulty) {
-                "Easy" -> ContextCompat.getColor(context, android.R.color.white)
-                "Medium" -> ContextCompat.getColor(context, android.R.color.white)
-                else -> ContextCompat.getColor(context, android.R.color.holo_red_dark)
+            val difficultyColor = when (challenge.difficulty.lowercase()) {
+                "easy" -> ContextCompat.getColor(context, R.color.modern_success)
+                "medium" -> ContextCompat.getColor(context, R.color.modern_warning)
+                "hard" -> ContextCompat.getColor(context, R.color.error_red)
+                else -> ContextCompat.getColor(context, R.color.modern_text_primary)
             }
             holder.difficultyTextView.setTextColor(difficultyColor)
 
