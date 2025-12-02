@@ -89,26 +89,38 @@ class TechnicalAssessmentService {
                 }
 
                 snapshot.documents.forEach { doc ->
-                    val title = doc.getString("title")
-                    Log.d(TAG, "🧩 Challenge found in Firestore: ${doc.id}")
-                    Log.d(TAG, "📝 Title field: '$title'")
-                    Log.d(TAG, "📝 All fields: ${doc.data}")
+                    try {
+                        val title = doc.getString("title")
+                        Log.d(TAG, "🧩 Challenge found in Firestore: ${doc.id}")
+                        Log.d(TAG, "📝 Title field: '$title'")
 
-                    val challenge = Challenge(
-                        id = doc.id,
-                        title = title ?: "Untitled Challenge",
-                        difficulty = doc.getString("difficulty") ?: "Unknown",
-                        courseId = doc.getString("courseId") ?: "",
-                        compilerType = doc.getString("compilerType") ?: "python", // Default to python if not specified
-                        brokenCode = doc.getString("brokenCode") ?: "",
-                        correctOutput = doc.getString("correctOutput") ?: "",
-                        hint = doc.getString("hint") ?: "",
-                        category = doc.getString("category") ?: "",
-                        status = doc.getString("status") ?: "available",
-                        createdAt = doc.getTimestamp("createdAt")
-                    )
-                    Log.d(TAG, "✅ Created challenge: ${challenge.title}")
-                    allChallenges.add(challenge)
+                        // Safely get createdAt timestamp
+                        val createdAt = try {
+                            doc.getTimestamp("createdAt")
+                        } catch (e: Exception) {
+                            Log.w(TAG, "⚠️ createdAt field is not a Timestamp for ${doc.id}, using null")
+                            null
+                        }
+
+                        val challenge = Challenge(
+                            id = doc.id,
+                            title = title ?: "Untitled Challenge",
+                            difficulty = doc.getString("difficulty") ?: "Unknown",
+                            courseId = doc.getString("courseId") ?: "",
+                            compilerType = doc.getString("compilerType") ?: "python", // Default to python if not specified
+                            brokenCode = doc.getString("brokenCode") ?: "",
+                            correctOutput = doc.getString("correctOutput") ?: "",
+                            hint = doc.getString("hint") ?: "",
+                            category = doc.getString("category") ?: "",
+                            status = doc.getString("status") ?: "available",
+                            createdAt = createdAt
+                        )
+                        Log.d(TAG, "✅ Created challenge: ${challenge.title}")
+                        allChallenges.add(challenge)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "❌ Error parsing challenge ${doc.id}: ${e.message}", e)
+                        // Skip this challenge and continue with others
+                    }
                 }
             }
 
