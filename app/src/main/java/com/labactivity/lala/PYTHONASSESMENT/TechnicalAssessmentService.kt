@@ -38,8 +38,14 @@ class TechnicalAssessmentService {
                 return emptyList()
             }
 
-            val challenges = fetchChallengesByCourseIds(enrolledCourseIds)
-            Log.d(TAG, "✅ Found ${challenges.size} challenges for enrolled courses")
+            val allChallenges = fetchChallengesByCourseIds(enrolledCourseIds)
+            Log.d(TAG, "✅ Found ${allChallenges.size} total challenges for enrolled courses")
+
+            // Filter to only include Java and Python challenges
+            val challenges = allChallenges.filter { challenge ->
+                challenge.compilerType.lowercase() in listOf("java", "python")
+            }
+            Log.d(TAG, "✅ Filtered to ${challenges.size} Java/Python challenges (excluded ${allChallenges.size - challenges.size} other types)")
 
             // Calculate which challenges should be unlocked
             val challengesWithUnlockStatus = applyUnlockLogic(challenges)
